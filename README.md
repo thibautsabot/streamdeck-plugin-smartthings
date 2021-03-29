@@ -2,6 +2,10 @@
 
 A StreamDeck plugin to control your smartthings devices and scenes.
 
+Donwload the release from https://github.com/thibautsabot/streamdeck-plugin-smartthings/releases
+
+Open `com.thibautsabot.streamdeck.smartthings.streamDeckPlugin` and install the plugin !
+
 Chose what you need from the list :
 
 <img width="264" alt="Screenshot 2021-03-29 at 11 10 38" src="https://user-images.githubusercontent.com/9283289/112819301-bd3e6d80-9084-11eb-86bd-a6e015268c9f.png">
