@@ -18,30 +18,48 @@ export class DeviceAction extends StreamDeckAction<Smartthings, DeviceAction> {
       const token = globalSettings.accessToken
       const deviceId = payload.settings.deviceId
 
-      const lightStatus = await fetchApi<DeviceStatus>({
+      const deviceStatus = await fetchApi<DeviceStatus>({
         endpoint: `/devices/${deviceId}/status`,
         method: 'GET',
         accessToken: token,
       })
 
-      if (lightStatus.components?.main.switch === undefined) {
-        console.warn('Only switch devices are supported at the moment !')
+      if (
+          deviceStatus.components?.main.switch === undefined &&
+          deviceStatus.components?.main.doorControl === undefined
+    ) {
+        console.warn('Only switch devices and Garage Doors are supported at the moment !')
         return
       }
 
-      const isOn = lightStatus.components.main.switch.switch.value === 'on'
-
-      await fetchApi({
-        endpoint: `/devices/${deviceId}/commands`,
-        method: 'POST',
-        accessToken: token,
-        body: JSON.stringify([
-          {
-            capability: 'switch',
-            command: isOn ? 'off' : 'on',
-          },
-        ]),
-      })
+      if ('switch' in deviceStatus.components.main) {
+        const isActive = deviceStatus.components.main.switch.switch.value === 'on'
+        await fetchApi({
+          endpoint: `/devices/${deviceId}/commands`,
+          method: 'POST',
+          accessToken: token,
+          body: JSON.stringify([
+            {
+              capability: 'switch',
+              command: isActive ? 'off' : 'on',
+            },
+          ]),
+        })
+      }
+      if ('doorControl' in deviceStatus.components?.main) {
+        const isActive = deviceStatus.components.main.doorControl.door.value === 'open'
+        await fetchApi({
+          endpoint: `/devices/${deviceId}/commands`,
+          method: 'POST',
+          accessToken: token,
+          body: JSON.stringify([
+            {
+              capability: 'doorControl',
+              command: isActive ? 'close' : 'open',
+            },
+          ]),
+        })
+      }
     }
   }
 }
