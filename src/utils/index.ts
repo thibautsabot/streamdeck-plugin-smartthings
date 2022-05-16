@@ -1,4 +1,8 @@
-import { DeviceSettingsInterface, GlobalSettingsInterface, SceneSettingsInterface } from './interface'
+import {
+  DeviceSettingsInterface,
+  GlobalSettingsInterface,
+  SceneSettingsInterface,
+} from './interface'
 
 export function isGlobalSettingsSet(
   settings: GlobalSettingsInterface | unknown
@@ -6,13 +10,13 @@ export function isGlobalSettingsSet(
   return (settings as GlobalSettingsInterface).accessToken !== undefined
 }
 
-export function isDeviceSetting (
+export function isDeviceSetting(
   settings: DeviceSettingsInterface | unknown
 ): settings is DeviceSettingsInterface {
   return (settings as DeviceSettingsInterface).deviceId !== undefined
 }
 
-export function isSceneSetting (
+export function isSceneSetting(
   settings: SceneSettingsInterface | unknown
 ): settings is SceneSettingsInterface {
   return (settings as SceneSettingsInterface).sceneId !== undefined
@@ -38,15 +42,15 @@ export async function fetchApi<T>({ body, endpoint, method, accessToken }: Fetch
 }
 
 export interface SelectElement {
-    id?: string
-    name?: string
+  id?: string
+  name?: string
 }
 interface AddSelectOption {
   select: HTMLSelectElement
   element: SelectElement
 }
 
-export const addSelectOption = ({select, element}: AddSelectOption): void => {
+export const addSelectOption = ({ select, element }: AddSelectOption): void => {
   if (element.id && element.name) {
     const option = document.createElement('option')
     option.value = element.id

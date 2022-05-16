@@ -36,7 +36,7 @@ mark {
 }
 
 .hidden {
-    display: none;
+    display: none!important;
 }
 
 hr, hr2 {
@@ -627,7 +627,6 @@ details a {
 }
 input:not([type="range"]),
 textarea {
-    -webkit-appearance: none;
     background: var(--sdpi-background);
     color: var(--sdpi-color);
     font-weight: normal;
@@ -640,10 +639,6 @@ textarea {
 textarea + label {
     display: flex;
     justify-content: flex-end
-}
-input[type="radio"],
-input[type="checkbox"] {
-    display: none;
 }
 input[type="radio"] + label,
 input[type="checkbox"] + label {
@@ -741,9 +736,6 @@ details > h4 {
     border-bottom: 1px solid var(--sdpi-bordercolor);
 }
 
-legend {
-    display: none;
-}
 .sdpi-item-value > textarea {
     padding: 0px;
     width: 227px;

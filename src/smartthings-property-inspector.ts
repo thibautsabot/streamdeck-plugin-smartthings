@@ -25,6 +25,9 @@ class SmartthingsPI extends StreamDeckPropertyInspectorHandler {
   private selectLabel: HTMLSelectElement
   private select: HTMLSelectElement
   private selectOptions?: SelectElement[]
+  private behaviour: HTMLDivElement
+  private selectedBehaviour: any
+  private selectedOption: any
 
   constructor() {
     super()
@@ -35,15 +38,18 @@ class SmartthingsPI extends StreamDeckPropertyInspectorHandler {
     this.validateButton = document.getElementById('validate_button') as HTMLButtonElement
     this.selectLabel = document.getElementById('select_label') as HTMLSelectElement
     this.select = document.getElementById('select_value') as HTMLSelectElement
+    this.behaviour = document.getElementById('behaviour') as HTMLDivElement
 
     this.validateButton?.addEventListener('click', this.onValidateButtonPressed.bind(this))
-    this.select?.addEventListener('change', this.onElementChanged.bind(this))
+    this.select?.addEventListener('change', this.onSelectChanged.bind(this))
+    this.behaviour?.addEventListener('change', this.onRadioChanged.bind(this))
 
     switch (this.actionInfo.action) {
       case pluginName + '.device': {
         this.selectLabel.textContent = 'Devices'
         this.validateButton.textContent = 'Fetch devices list'
         addSelectOption({ select: this.select, element: { id: 'none', name: 'No device' } })
+        this.behaviour.className = 'sdpi-item' // Display radio selection
         break
       }
       case pluginName + '.scene': {
@@ -94,9 +100,9 @@ class SmartthingsPI extends StreamDeckPropertyInspectorHandler {
     this.requestSettings() // requestSettings will add the options to the select element
   }
 
-  public onElementChanged(e: Event) {
+  public onSelectChanged(e: Event) {
     const newSelection = (e.target as HTMLSelectElement).value
-
+    this.selectedOption = newSelection
     switch (this.actionInfo.action) {
       case pluginName + '.scene': {
         this.setSettings<SceneSettingsInterface>({
@@ -109,6 +115,29 @@ class SmartthingsPI extends StreamDeckPropertyInspectorHandler {
         this.setSettings<DeviceSettingsInterface>({
           selectOptions: this.selectOptions,
           deviceId: newSelection,
+          behaviour: this.selectedBehaviour
+        })
+        break
+      }
+    }
+  }
+
+  public onRadioChanged(e: Event) {
+    const newSelection = (e.target as HTMLSelectElement).value
+
+    switch (this.actionInfo.action) {
+      case pluginName + '.scene': {
+        this.setSettings<SceneSettingsInterface>({
+          selectOptions: this.selectOptions,
+          sceneId: this.selectedOption,
+        })
+        break
+      }
+      case pluginName + '.device': {
+        this.setSettings<DeviceSettingsInterface>({
+          selectOptions: this.selectOptions,
+          deviceId: this.selectedOption,
+          behaviour: newSelection
         })
         break
       }

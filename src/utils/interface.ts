@@ -13,4 +13,5 @@ export interface SceneSettingsInterface extends CommonSettingsInterface {
 
 export interface DeviceSettingsInterface extends CommonSettingsInterface {
   deviceId: string
+  behaviour: string
 }
