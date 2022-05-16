@@ -140,11 +140,18 @@ class SmartthingsPI extends StreamDeckPropertyInspectorHandler {
     let activeIndex: number | undefined
     if (isDeviceSetting(payload.settings)) {
       const deviceId = payload.settings.deviceId
+      this.selectedOptionId = deviceId
+
+      this.selectedBehaviour = payload.settings.behaviour;
+      (document.getElementById(this.selectedBehaviour) as HTMLInputElement).checked = true
+
       activeIndex = this.selectOptions?.findIndex((element) => element.id === deviceId) || 0
     }
     if (isSceneSetting(payload.settings)) {
       const sceneId = payload.settings.sceneId
       activeIndex = this.selectOptions?.findIndex((element) => element.id === sceneId) || 0
+
+      this.selectedOptionId = sceneId
     }
     this.select.selectedIndex = activeIndex !== undefined ? activeIndex + 1 : 0 // + 1 because of the "No element" first option
   }
