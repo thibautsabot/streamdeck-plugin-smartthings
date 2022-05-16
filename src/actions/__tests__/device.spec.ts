@@ -35,10 +35,12 @@ describe('Test device action', () => {
       const warn = jest.spyOn(console, 'warn').mockImplementation()
 
       await deviceAction.onKeyUp(
-        fakeKeyUpEvent<DeviceSettingsInterface>({ deviceId: '42' })
+        fakeKeyUpEvent<DeviceSettingsInterface>({ deviceId: '42', behaviour: 'toggle' })
       )
 
-      expect(warn).toBeCalledWith('Only switch devices and Garage Doors are supported at the moment !')
+      expect(warn).toBeCalledWith(
+        'Only switch devices and Garage Doors are supported at the moment !'
+      )
       warn.mockReset()
     })
 
@@ -67,7 +69,7 @@ describe('Test device action', () => {
       jest.spyOn(window, 'fetch')
 
       await deviceAction.onKeyUp(
-        fakeKeyUpEvent<DeviceSettingsInterface>({ deviceId: '42' })
+        fakeKeyUpEvent<DeviceSettingsInterface>({ deviceId: '42', behaviour: 'toggle' })
       )
 
       expect(window.fetch).toHaveBeenLastCalledWith(
@@ -110,7 +112,7 @@ describe('Test device action', () => {
       jest.spyOn(window, 'fetch')
 
       await deviceAction.onKeyUp(
-        fakeKeyUpEvent<DeviceSettingsInterface>({ deviceId: '42' })
+        fakeKeyUpEvent<DeviceSettingsInterface>({ deviceId: '42', behaviour: 'toggle' })
       )
 
       expect(window.fetch).toHaveBeenLastCalledWith(
@@ -120,6 +122,104 @@ describe('Test device action', () => {
             {
               capability: 'switch',
               command: 'off',
+            },
+          ]),
+          method: 'POST',
+          headers: expect.anything(),
+        }
+      )
+    })
+
+    it('should make a light brighter', async () => {
+      server.use(
+        rest.get('https://api.smartthings.com/v1/devices/42/status', (req, res, ctx) => {
+          return res(
+            ctx.json({
+              components: {
+                main: {
+                  switch: {
+                    switch: {
+                      value: 'on',
+                    },
+                  },
+                  switchLevel: {
+                    level: {
+                      value: 70,
+                    },
+                  },
+                },
+              },
+            })
+          )
+        }),
+        rest.post('https://api.smartthings.com/v1/devices/42/commands', (req, res, ctx) => {
+          return res(ctx.json({}))
+        })
+      )
+
+      jest.spyOn(window, 'fetch')
+
+      await deviceAction.onKeyUp(
+        fakeKeyUpEvent<DeviceSettingsInterface>({ deviceId: '42', behaviour: 'more' })
+      )
+
+      expect(window.fetch).toHaveBeenLastCalledWith(
+        'https://api.smartthings.com/v1/devices/42/commands',
+        {
+          body: JSON.stringify([
+            {
+              capability: 'switchLevel',
+              command: 'setLevel',
+              arguments: [80],
+            },
+          ]),
+          method: 'POST',
+          headers: expect.anything(),
+        }
+      )
+    })
+
+    it('should make a light darker', async () => {
+      server.use(
+        rest.get('https://api.smartthings.com/v1/devices/42/status', (req, res, ctx) => {
+          return res(
+            ctx.json({
+              components: {
+                main: {
+                  switch: {
+                    switch: {
+                      value: 'on',
+                    },
+                  },
+                  switchLevel: {
+                    level: {
+                      value: 70,
+                    },
+                  },
+                },
+              },
+            })
+          )
+        }),
+        rest.post('https://api.smartthings.com/v1/devices/42/commands', (req, res, ctx) => {
+          return res(ctx.json({}))
+        })
+      )
+
+      jest.spyOn(window, 'fetch')
+
+      await deviceAction.onKeyUp(
+        fakeKeyUpEvent<DeviceSettingsInterface>({ deviceId: '42', behaviour: 'less' })
+      )
+
+      expect(window.fetch).toHaveBeenLastCalledWith(
+        'https://api.smartthings.com/v1/devices/42/commands',
+        {
+          body: JSON.stringify([
+            {
+              capability: 'switchLevel',
+              command: 'setLevel',
+              arguments: [60],
             },
           ]),
           method: 'POST',
@@ -153,7 +253,7 @@ describe('Test device action', () => {
       jest.spyOn(window, 'fetch')
 
       await deviceAction.onKeyUp(
-        fakeKeyUpEvent<DeviceSettingsInterface>({ deviceId: '42' })
+        fakeKeyUpEvent<DeviceSettingsInterface>({ deviceId: '42', behaviour: 'toggle' })
       )
 
       expect(window.fetch).toHaveBeenLastCalledWith(
@@ -177,7 +277,7 @@ describe('Test device action', () => {
       jest.spyOn(window, 'fetch')
 
       await deviceAction.onKeyUp(
-        fakeKeyUpEvent<DeviceSettingsInterface>({ deviceId: '42' })
+        fakeKeyUpEvent<DeviceSettingsInterface>({ deviceId: '42', behaviour: 'toggle' })
       )
 
       expect(window.fetch).not.toHaveBeenCalled()
