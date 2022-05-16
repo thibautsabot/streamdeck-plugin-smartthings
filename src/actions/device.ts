@@ -13,6 +13,7 @@ export class DeviceAction extends StreamDeckAction<Smartthings, DeviceAction> {
   @SDOnActionEvent('keyUp')
   public async onKeyUp({ payload }: KeyUpEvent<DeviceSettingsInterface>): Promise<void> {
     const globalSettings = this.plugin.settingsManager.getGlobalSettings<GlobalSettingsInterface>()
+
     if (isGlobalSettingsSet(globalSettings)) {
       const token = globalSettings.accessToken
       const deviceId = payload.settings.deviceId
@@ -48,7 +49,8 @@ export class DeviceAction extends StreamDeckAction<Smartthings, DeviceAction> {
             })
             break
           case 'more':
-            const nextLevel = (deviceStatus.components.main.switchLevel.level.value as number) += 10
+            const nextLevel = ((deviceStatus.components.main.switchLevel.level
+              .value as number) += 10)
             await fetchApi({
               endpoint: `/devices/${deviceId}/commands`,
               method: 'POST',
@@ -57,15 +59,14 @@ export class DeviceAction extends StreamDeckAction<Smartthings, DeviceAction> {
                 {
                   capability: 'switchLevel',
                   command: 'setLevel',
-                  arguments: [
-                    nextLevel > 100 ? 100 : nextLevel,
-                  ],
+                  arguments: [nextLevel > 100 ? 100 : nextLevel],
                 },
               ]),
             })
             break
           case 'less':
-            const prevLevel = (deviceStatus.components.main.switchLevel.level.value as number) -= 10
+            const prevLevel = ((deviceStatus.components.main.switchLevel.level
+              .value as number) -= 10)
             await fetchApi({
               endpoint: `/devices/${deviceId}/commands`,
               method: 'POST',
@@ -74,9 +75,7 @@ export class DeviceAction extends StreamDeckAction<Smartthings, DeviceAction> {
                 {
                   capability: 'switchLevel',
                   command: 'setLevel',
-                  arguments: [
-                    prevLevel < 0 ? 0 : prevLevel,
-                  ],
+                  arguments: [prevLevel < 0 ? 0 : prevLevel],
                 },
               ]),
             })

@@ -123,13 +123,6 @@ class SmartthingsPI extends StreamDeckPropertyInspectorHandler {
     const newSelection = (e.target as HTMLSelectElement).value
 
     switch (this.actionInfo.action) {
-      case pluginName + '.scene': {
-        this.setSettings<SceneSettingsInterface>({
-          selectOptions: this.selectOptions,
-          sceneId: this.selectedOptionId,
-        })
-        break
-      }
       case pluginName + '.device': {
         this.setSettings<DeviceSettingsInterface>({
           selectOptions: this.selectOptions,
