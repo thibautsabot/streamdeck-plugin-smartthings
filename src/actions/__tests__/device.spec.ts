@@ -38,7 +38,7 @@ describe('Test device action', () => {
         fakeKeyUpEvent<DeviceSettingsInterface>({ deviceId: '42' })
       )
 
-      expect(warn).toBeCalledWith('Only switch devices are supported at the moment !')
+      expect(warn).toBeCalledWith('Only switch devices and Garage Doors are supported at the moment !')
       warn.mockReset()
     })
 
@@ -120,6 +120,49 @@ describe('Test device action', () => {
             {
               capability: 'switch',
               command: 'off',
+            },
+          ]),
+          method: 'POST',
+          headers: expect.anything(),
+        }
+      )
+    })
+
+    it('should open a garage door', async () => {
+      server.use(
+        rest.get('https://api.smartthings.com/v1/devices/42/status', (req, res, ctx) => {
+          return res(
+            ctx.json({
+              components: {
+                main: {
+                  doorControl: {
+                    door: {
+                      value: 'close',
+                    },
+                  },
+                },
+              },
+            })
+          )
+        }),
+        rest.post('https://api.smartthings.com/v1/devices/42/commands', (req, res, ctx) => {
+          return res(ctx.json({}))
+        })
+      )
+
+      jest.spyOn(window, 'fetch')
+
+      await deviceAction.onKeyUp(
+        fakeKeyUpEvent<DeviceSettingsInterface>({ deviceId: '42' })
+      )
+
+      expect(window.fetch).toHaveBeenLastCalledWith(
+        'https://api.smartthings.com/v1/devices/42/commands',
+        {
+          body: JSON.stringify([
+            {
+              capability: 'doorControl',
+              command: 'open',
             },
           ]),
           method: 'POST',
