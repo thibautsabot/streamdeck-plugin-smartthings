@@ -21,13 +21,9 @@ import { PagedResult, SceneSummary, DeviceList } from '@smartthings/core-sdk'
 const pluginName = 'com.thibautsabot.streamdeck'
 
 class SmartthingsPI extends StreamDeckPropertyInspectorHandler {
-  private validateButton: HTMLButtonElement
-  private selectLabel: HTMLSelectElement
-  private select: HTMLSelectElement
   private selectOptions?: SelectElement[]
-  private behaviour: HTMLDivElement
-  private selectedBehaviour: any
-  private selectedOption: any
+  private selectedBehaviour = 'toggle'
+  private selectedOptionId: string
 
   constructor() {
     super()
@@ -35,27 +31,27 @@ class SmartthingsPI extends StreamDeckPropertyInspectorHandler {
 
   @SDOnPiEvent('documentLoaded')
   onDocumentLoaded(): void {
-    this.validateButton = document.getElementById('validate_button') as HTMLButtonElement
-    this.selectLabel = document.getElementById('select_label') as HTMLSelectElement
-    this.select = document.getElementById('select_value') as HTMLSelectElement
-    this.behaviour = document.getElementById('behaviour') as HTMLDivElement
+    const validateButton = document.getElementById('validate_button') as HTMLButtonElement
+    const selectLabel = document.getElementById('select_label') as HTMLSelectElement
+    const select = document.getElementById('select_value') as HTMLSelectElement
+    const behaviour = document.getElementById('behaviour') as HTMLDivElement
 
-    this.validateButton?.addEventListener('click', this.onValidateButtonPressed.bind(this))
-    this.select?.addEventListener('change', this.onSelectChanged.bind(this))
-    this.behaviour?.addEventListener('change', this.onRadioChanged.bind(this))
+    validateButton?.addEventListener('click', this.onValidateButtonPressed.bind(this))
+    select?.addEventListener('change', this.onSelectChanged.bind(this))
+    behaviour?.addEventListener('change', this.onRadioChanged.bind(this))
 
     switch (this.actionInfo.action) {
       case pluginName + '.device': {
-        this.selectLabel.textContent = 'Devices'
-        this.validateButton.textContent = 'Fetch devices list'
-        addSelectOption({ select: this.select, element: { id: 'none', name: 'No device' } })
-        this.behaviour.className = 'sdpi-item' // Display radio selection
+        selectLabel.textContent = 'Devices'
+        validateButton.textContent = 'Fetch devices list'
+        addSelectOption({ select: select, element: { id: 'none', name: 'No device' } })
+        behaviour.className = 'sdpi-item' // Remove hidden class and display radio selection
         break
       }
       case pluginName + '.scene': {
-        this.validateButton.textContent = 'Fetch scenes list'
-        this.selectLabel.textContent = 'Scenes'
-        addSelectOption({ select: this.select, element: { id: 'none', name: 'No scene' } })
+        validateButton.textContent = 'Fetch scenes list'
+        selectLabel.textContent = 'Scenes'
+        addSelectOption({ select: select, element: { id: 'none', name: 'No scene' } })
         break
       }
     }
@@ -96,13 +92,14 @@ class SmartthingsPI extends StreamDeckPropertyInspectorHandler {
 
     this.setSettings({
       selectOptions: elements,
+      behaviour: this.selectedBehaviour,
     })
     this.requestSettings() // requestSettings will add the options to the select element
   }
 
   public onSelectChanged(e: Event) {
     const newSelection = (e.target as HTMLSelectElement).value
-    this.selectedOption = newSelection
+    this.selectedOptionId = newSelection
     switch (this.actionInfo.action) {
       case pluginName + '.scene': {
         this.setSettings<SceneSettingsInterface>({
@@ -129,14 +126,14 @@ class SmartthingsPI extends StreamDeckPropertyInspectorHandler {
       case pluginName + '.scene': {
         this.setSettings<SceneSettingsInterface>({
           selectOptions: this.selectOptions,
-          sceneId: this.selectedOption,
+          sceneId: this.selectedOptionId,
         })
         break
       }
       case pluginName + '.device': {
         this.setSettings<DeviceSettingsInterface>({
           selectOptions: this.selectOptions,
-          deviceId: this.selectedOption,
+          deviceId: this.selectedOptionId,
           behaviour: newSelection
         })
         break
@@ -158,13 +155,15 @@ class SmartthingsPI extends StreamDeckPropertyInspectorHandler {
     }
   }
 
+  // Get the devices list from cache
   @SDOnPiEvent('didReceiveSettings')
   onReceiveSettings({
     payload,
   }: DidReceiveSettingsEvent<DeviceSettingsInterface | SceneSettingsInterface>): void {
+    const select = document.getElementById('select_value') as HTMLSelectElement
     this.selectOptions = payload.settings.selectOptions
-    this.select.length = 1 // Only keep the "No element" option
-    this.selectOptions?.forEach((element) => addSelectOption({ select: this.select, element }))
+    select.length = 1 // Only keep the "No element" option
+    this.selectOptions?.forEach((element) => addSelectOption({ select, element }))
 
     let activeIndex: number | undefined
     if (isDeviceSetting(payload.settings)) {
@@ -175,7 +174,7 @@ class SmartthingsPI extends StreamDeckPropertyInspectorHandler {
       const sceneId = payload.settings.sceneId
       activeIndex = this.selectOptions?.findIndex((element) => element.id === sceneId) || 0
     }
-    this.select.selectedIndex = activeIndex !== undefined ? activeIndex + 1 : 0 // + 1 because of the "No element" first option
+    select.selectedIndex = activeIndex !== undefined ? activeIndex + 1 : 0 // + 1 because of the "No element" first option
   }
 }
 
