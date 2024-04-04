@@ -46,6 +46,6 @@ echo "Done installing ${pluginName}"
 if [[ "$OSTYPE" == "msys" ]]; then
   "C:\Program Files\Elgato\StreamDeck\StreamDeck.exe" &
 else
-  open /Applications/Stream\ Deck.app &
+  open /Applications/Elgato\ Stream\ Deck.app &
 fi
 exit
