@@ -16,7 +16,16 @@
       "Name": "Device",
       "States": [
         {
-          "Image": "icons/device_action"
+          "Image": "icons/device_action",
+          "Name": "Default"
+        },
+        {
+          "Image": "icons/garage_door_closed",
+          "Name": "Closed"
+        },
+        {
+          "Image": "icons/garage_door_open",
+          "Name": "Open"
         }
       ],
       "Tooltip": "Devices",

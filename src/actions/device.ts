@@ -1,17 +1,82 @@
 import { DeviceSettingsInterface, GlobalSettingsInterface } from '../utils/interface'
-import { KeyUpEvent, SDOnActionEvent, StreamDeckAction } from 'streamdeck-typescript'
+import { KeyUpEvent, SDOnActionEvent, StreamDeckAction, WillAppearEvent, WillDisappearEvent } from 'streamdeck-typescript'
 import { fetchApi, isGlobalSettingsSet } from '../utils/index'
 
 import { DeviceStatus } from '@smartthings/core-sdk'
 import { Smartthings } from '../smartthings-plugin'
 
 export class DeviceAction extends StreamDeckAction<Smartthings, DeviceAction> {
+  private pollingIntervals: Map<string, NodeJS.Timeout> = new Map()
+  private readonly POLL_INTERVAL_MS = 5000 // Poll every 5 seconds
+
   constructor(public plugin: Smartthings, private actionName: string) {
     super(plugin, actionName)
   }
 
+  @SDOnActionEvent('willAppear')
+  public async onWillAppear({ context, payload }: WillAppearEvent<DeviceSettingsInterface>): Promise<void> {
+    // Start polling for this device when button appears
+    await this.updateDeviceState(context, payload.settings)
+    this.startPolling(context, payload.settings)
+  }
+
+  @SDOnActionEvent('willDisappear')
+  public onWillDisappear({ context }: WillDisappearEvent<DeviceSettingsInterface>): void {
+    // Stop polling when button disappears
+    this.stopPolling(context)
+  }
+
+  private startPolling(context: string, settings: DeviceSettingsInterface): void {
+    // Clear any existing interval for this context
+    this.stopPolling(context)
+
+    // Set up new polling interval
+    const interval = setInterval(async () => {
+      await this.updateDeviceState(context, settings)
+    }, this.POLL_INTERVAL_MS)
+
+    this.pollingIntervals.set(context, interval)
+  }
+
+  private stopPolling(context: string): void {
+    const interval = this.pollingIntervals.get(context)
+    if (interval) {
+      clearInterval(interval)
+      this.pollingIntervals.delete(context)
+    }
+  }
+
+  private async updateDeviceState(context: string, settings: DeviceSettingsInterface): Promise<void> {
+    const globalSettings = this.plugin.settingsManager.getGlobalSettings<GlobalSettingsInterface>()
+
+    if (!isGlobalSettingsSet(globalSettings) || !settings.deviceId) {
+      return
+    }
+
+    try {
+      const token = globalSettings.accessToken
+      const deviceId = settings.deviceId
+
+      const deviceStatus = await fetchApi<DeviceStatus>({
+        endpoint: `/devices/${deviceId}/status`,
+        method: 'GET',
+        accessToken: token,
+      })
+
+      // Update state for garage doors
+      if ('doorControl' in (deviceStatus.components?.main || {})) {
+        const doorValue = deviceStatus.components?.main?.doorControl?.door?.value
+        // State 1 = Closed (green icon), State 2 = Open (red icon)
+        const state = doorValue === 'closed' ? 1 : 2
+        this.plugin.setState(state, context)
+      }
+    } catch (error) {
+      console.error('Error updating device state:', error)
+    }
+  }
+
   @SDOnActionEvent('keyUp')
-  public async onKeyUp({ payload }: KeyUpEvent<DeviceSettingsInterface>): Promise<void> {
+  public async onKeyUp({ context, payload }: KeyUpEvent<DeviceSettingsInterface>): Promise<void> {
     const globalSettings = this.plugin.settingsManager.getGlobalSettings<GlobalSettingsInterface>()
 
     if (isGlobalSettingsSet(globalSettings)) {
@@ -95,6 +160,11 @@ export class DeviceAction extends StreamDeckAction<Smartthings, DeviceAction> {
             },
           ]),
         })
+
+        // Update state immediately after command (will be confirmed by polling)
+        // State 1 = Closed, State 2 = Open
+        const newState = isActive ? 1 : 2
+        this.plugin.setState(newState, context)
       }
     }
   }
