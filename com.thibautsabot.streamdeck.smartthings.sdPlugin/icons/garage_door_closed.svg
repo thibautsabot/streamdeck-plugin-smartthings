@@ -1,27 +1,20 @@
 <svg width="144" height="144" viewBox="0 0 144 144" xmlns="http://www.w3.org/2000/svg">
   <!-- Background -->
   <rect width="144" height="144" fill="#1a1a1a"/>
-  
-  <!-- Garage door frame -->
-  <rect x="20" y="30" width="104" height="94" fill="#4a4a4a" stroke="#666" stroke-width="2"/>
-  
-  <!-- Garage door panels (closed) -->
-  <rect x="24" y="34" width="96" height="18" fill="#5a5a5a" stroke="#333" stroke-width="1"/>
-  <rect x="24" y="54" width="96" height="18" fill="#5a5a5a" stroke="#333" stroke-width="1"/>
-  <rect x="24" y="74" width="96" height="18" fill="#5a5a5a" stroke="#333" stroke-width="1"/>
-  <rect x="24" y="94" width="96" height="18" fill="#5a5a5a" stroke="#333" stroke-width="1"/>
-  <rect x="24" y="114" width="96" height="6" fill="#5a5a5a" stroke="#333" stroke-width="1"/>
-  
-  <!-- Door handle -->
-  <circle cx="72" cy="103" r="4" fill="#888"/>
-  
-  <!-- Panel details (horizontal lines) -->
-  <line x1="24" y1="43" x2="120" y2="43" stroke="#444" stroke-width="1"/>
-  <line x1="24" y1="63" x2="120" y2="63" stroke="#444" stroke-width="1"/>
-  <line x1="24" y1="83" x2="120" y2="83" stroke="#444" stroke-width="1"/>
-  <line x1="24" y1="103" x2="120" y2="103" stroke="#444" stroke-width="1"/>
-  
-  <!-- Status indicator (green = closed) -->
-  <circle cx="130" cy="20" r="8" fill="#00ff00" opacity="0.8"/>
+
+  <!-- Garage door frame (bright blue) -->
+  <rect x="20" y="30" width="104" height="94" fill="none" stroke="#00BFFF" stroke-width="6" rx="4"/>
+
+  <!-- Garage door panels (bright green with yellow borders) - CLOSED -->
+  <rect x="26" y="36" width="92" height="18" fill="#00FF00" stroke="#FFD700" stroke-width="3" rx="2"/>
+  <rect x="26" y="56" width="92" height="18" fill="#00FF00" stroke="#FFD700" stroke-width="3" rx="2"/>
+  <rect x="26" y="76" width="92" height="18" fill="#00FF00" stroke="#FFD700" stroke-width="3" rx="2"/>
+  <rect x="26" y="96" width="92" height="18" fill="#00FF00" stroke="#FFD700" stroke-width="3" rx="2"/>
+
+  <!-- Door handle (bright gold) -->
+  <circle cx="72" cy="105" r="7" fill="#FFD700" stroke="#FFA500" stroke-width="2"/>
+
+  <!-- Checkmark to indicate CLOSED/SAFE -->
+  <path d="M 60 130 L 68 138 L 84 122" stroke="#00FF00" stroke-width="6" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
 </svg>
 

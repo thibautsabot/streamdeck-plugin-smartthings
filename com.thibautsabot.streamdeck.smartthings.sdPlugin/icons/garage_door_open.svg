@@ -1,38 +1,22 @@
 <svg width="144" height="144" viewBox="0 0 144 144" xmlns="http://www.w3.org/2000/svg">
   <!-- Background -->
   <rect width="144" height="144" fill="#1a1a1a"/>
-  
-  <!-- Garage door frame -->
-  <rect x="20" y="30" width="104" height="94" fill="#2a2a2a" stroke="#666" stroke-width="2"/>
-  
-  <!-- Open garage interior (darker) -->
-  <rect x="24" y="34" width="96" height="86" fill="#1a1a1a"/>
-  
-  <!-- Garage door panels (rolled up at top) -->
-  <rect x="24" y="30" width="96" height="6" fill="#5a5a5a" stroke="#333" stroke-width="1"/>
-  <rect x="24" y="37" width="96" height="5" fill="#4a4a4a" stroke="#333" stroke-width="0.5"/>
-  <rect x="24" y="43" width="96" height="4" fill="#3a3a3a" stroke="#333" stroke-width="0.5"/>
-  
-  <!-- Rolled door detail lines -->
-  <line x1="24" y1="33" x2="120" y2="33" stroke="#444" stroke-width="0.5"/>
-  <line x1="24" y1="40" x2="120" y2="40" stroke="#444" stroke-width="0.5"/>
-  <line x1="24" y1="46" x2="120" y2="46" stroke="#444" stroke-width="0.5"/>
-  
-  <!-- Interior shadow/depth -->
-  <rect x="24" y="50" width="96" height="70" fill="url(#openGradient)"/>
-  
-  <!-- Gradient for depth -->
-  <defs>
-    <linearGradient id="openGradient" x1="0%" y1="0%" x2="0%" y2="100%">
-      <stop offset="0%" style="stop-color:#000000;stop-opacity:0.3" />
-      <stop offset="100%" style="stop-color:#000000;stop-opacity:0.1" />
-    </linearGradient>
-  </defs>
-  
-  <!-- Car silhouette inside (optional detail) -->
-  <ellipse cx="72" cy="100" rx="30" ry="15" fill="#333" opacity="0.5"/>
-  
-  <!-- Status indicator (red = open) -->
-  <circle cx="130" cy="20" r="8" fill="#ff0000" opacity="0.8"/>
+
+  <!-- Garage door frame (bright orange/yellow) -->
+  <rect x="20" y="30" width="104" height="94" fill="none" stroke="#FFA500" stroke-width="6" rx="4"/>
+
+  <!-- Open garage interior (bright yellow glow) -->
+  <rect x="26" y="50" width="92" height="68" fill="#FFD700" opacity="0.3"/>
+  <rect x="26" y="50" width="92" height="68" fill="#404040"/>
+
+  <!-- Garage door panels (rolled up at top - bright orange/red) -->
+  <rect x="26" y="32" width="92" height="12" fill="#FF6600" stroke="#FF4500" stroke-width="3" rx="2"/>
+
+  <!-- Big UP arrow (indicating door is OPEN) -->
+  <path d="M 72 65 L 55 85 L 65 85 L 65 105 L 79 105 L 79 85 L 89 85 Z" fill="#FF6600" stroke="#FFD700" stroke-width="2"/>
+
+  <!-- Warning indicator - exclamation mark (door is open!) -->
+  <circle cx="72" cy="130" r="12" fill="#FF0000" stroke="#FFD700" stroke-width="3"/>
+  <text x="72" y="138" font-family="Arial, sans-serif" font-size="20" fill="white" text-anchor="middle" font-weight="bold">!</text>
 </svg>
 

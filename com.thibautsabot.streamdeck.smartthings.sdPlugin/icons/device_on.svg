@@ -1,0 +1,15 @@
+<svg width="144" height="144" viewBox="0 0 144 144" xmlns="http://www.w3.org/2000/svg">
+  <!-- Background -->
+  <rect width="144" height="144" fill="#1a1a1a"/>
+
+  <!-- Power symbol circle (bright green with glow) -->
+  <circle cx="72" cy="65" r="38" fill="none" stroke="#00FF00" stroke-width="8" opacity="0.5"/>
+  <circle cx="72" cy="65" r="38" fill="none" stroke="#00FF00" stroke-width="6"/>
+
+  <!-- Power symbol line (bright green) -->
+  <line x1="72" y1="35" x2="72" y2="65" stroke="#00FF00" stroke-width="8" stroke-linecap="round"/>
+
+  <!-- ON indicator (bright green glow) -->
+  <circle cx="72" cy="115" r="10" fill="#00FF00" stroke="#FFD700" stroke-width="2"/>
+</svg>
+
