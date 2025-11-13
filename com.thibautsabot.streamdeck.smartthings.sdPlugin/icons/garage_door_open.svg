@@ -1,0 +1,22 @@
+<svg width="144" height="144" viewBox="0 0 144 144" xmlns="http://www.w3.org/2000/svg">
+  <!-- Background -->
+  <rect width="144" height="144" fill="#1a1a1a"/>
+
+  <!-- Garage door frame (bright orange/yellow) -->
+  <rect x="20" y="30" width="104" height="94" fill="none" stroke="#FFA500" stroke-width="6" rx="4"/>
+
+  <!-- Open garage interior (bright yellow glow) -->
+  <rect x="26" y="50" width="92" height="68" fill="#FFD700" opacity="0.3"/>
+  <rect x="26" y="50" width="92" height="68" fill="#404040"/>
+
+  <!-- Garage door panels (rolled up at top - bright orange/red) -->
+  <rect x="26" y="32" width="92" height="12" fill="#FF6600" stroke="#FF4500" stroke-width="3" rx="2"/>
+
+  <!-- Big UP arrow (indicating door is OPEN) -->
+  <path d="M 72 65 L 55 85 L 65 85 L 65 105 L 79 105 L 79 85 L 89 85 Z" fill="#FF6600" stroke="#FFD700" stroke-width="2"/>
+
+  <!-- Warning indicator - exclamation mark (door is open!) -->
+  <circle cx="72" cy="130" r="12" fill="#FF0000" stroke="#FFD700" stroke-width="3"/>
+  <text x="72" y="138" font-family="Arial, sans-serif" font-size="20" fill="white" text-anchor="middle" font-weight="bold">!</text>
+</svg>
+

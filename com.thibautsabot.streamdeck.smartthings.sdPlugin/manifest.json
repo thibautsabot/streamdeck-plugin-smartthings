@@ -16,11 +16,88 @@
       "Name": "Device",
       "States": [
         {
-          "Image": "icons/device_action"
+          "Image": "icons/device_off",
+          "Name": "Off",
+          "TitleAlignment": "bottom",
+          "FontSize": "12"
+        },
+        {
+          "Image": "icons/device_on",
+          "Name": "On",
+          "TitleAlignment": "bottom",
+          "FontSize": "12"
         }
       ],
-      "Tooltip": "Devices",
-      "UUID": "com.thibautsabot.streamdeck.device"
+      "Tooltip": "SmartThings Device",
+      "UUID": "com.thibautsabot.streamdeck.device",
+      "Controllers": ["Keypad"],
+      "UserTitleEnabled": true
+    },
+    {
+      "Icon": "icons/device",
+      "Name": "Light",
+      "States": [
+        {
+          "Image": "icons/device_off",
+          "Name": "Off",
+          "TitleAlignment": "bottom",
+          "FontSize": "12"
+        },
+        {
+          "Image": "icons/device_on",
+          "Name": "On",
+          "TitleAlignment": "bottom",
+          "FontSize": "12"
+        }
+      ],
+      "Tooltip": "SmartThings Light",
+      "UUID": "com.thibautsabot.streamdeck.light",
+      "Controllers": ["Keypad"],
+      "UserTitleEnabled": true
+    },
+    {
+      "Icon": "icons/device",
+      "Name": "Switch",
+      "States": [
+        {
+          "Image": "icons/device_off",
+          "Name": "Off",
+          "TitleAlignment": "bottom",
+          "FontSize": "12"
+        },
+        {
+          "Image": "icons/device_on",
+          "Name": "On",
+          "TitleAlignment": "bottom",
+          "FontSize": "12"
+        }
+      ],
+      "Tooltip": "SmartThings Switch",
+      "UUID": "com.thibautsabot.streamdeck.switch",
+      "Controllers": ["Keypad"],
+      "UserTitleEnabled": true
+    },
+    {
+      "Icon": "icons/garage_door_closed",
+      "Name": "Garage Door",
+      "States": [
+        {
+          "Image": "icons/garage_door_closed",
+          "Name": "Closed",
+          "TitleAlignment": "bottom",
+          "FontSize": "12"
+        },
+        {
+          "Image": "icons/garage_door_open",
+          "Name": "Open",
+          "TitleAlignment": "bottom",
+          "FontSize": "12"
+        }
+      ],
+      "Tooltip": "SmartThings Garage Door",
+      "UUID": "com.thibautsabot.streamdeck.garagedoor",
+      "Controllers": ["Keypad"],
+      "UserTitleEnabled": true
     }
   ],
   "SDKVersion": 2,

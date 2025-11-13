@@ -30,15 +30,22 @@ interface FetchAPI {
 }
 
 export async function fetchApi<T>({ body, endpoint, method, accessToken }: FetchAPI): Promise<T> {
-  return await (
-    await fetch(`https://api.smartthings.com/v1${endpoint}`, {
-      method,
-      headers: {
-        Authorization: `Bearer ${accessToken}`,
-      },
-      body,
-    })
-  ).json()
+  const response = await fetch(`https://api.smartthings.com/v1${endpoint}`, {
+    method,
+    headers: {
+      Authorization: `Bearer ${accessToken}`,
+    },
+    body,
+  })
+
+  if (!response.ok) {
+    const error: any = new Error(`HTTP ${response.status}: ${response.statusText}`)
+    error.status = response.status
+    error.statusText = response.statusText
+    throw error
+  }
+
+  return await response.json()
 }
 
 export interface SelectElement {
