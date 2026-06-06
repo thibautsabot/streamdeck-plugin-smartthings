@@ -16,7 +16,11 @@
     "noImplicitReturns": true,
     "lib": [
       "dom",
-      "ESNext"
+      "ESNext",
+    ],
+    "types": [
+      "node",
+      "jest",
     ]
   },
   "include": [
