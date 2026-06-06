@@ -22,6 +22,11 @@ export function isSceneSetting(
   return (settings as SceneSettingsInterface).sceneId !== undefined
 }
 
+export interface ApiError extends Error {
+  status: number
+  statusText: string
+}
+
 interface FetchAPI {
   body?: BodyInit
   endpoint: string
@@ -39,7 +44,7 @@ export async function fetchApi<T>({ body, endpoint, method, accessToken }: Fetch
   })
 
   if (!response.ok) {
-    const error: any = new Error(`HTTP ${response.status}: ${response.statusText}`)
+    const error = new Error(`HTTP ${response.status}: ${response.statusText}`) as ApiError
     error.status = response.status
     error.statusText = response.statusText
     throw error

@@ -13,28 +13,6 @@
     },
     {
       "Icon": "icons/device",
-      "Name": "Device",
-      "States": [
-        {
-          "Image": "icons/device_off",
-          "Name": "Off",
-          "TitleAlignment": "bottom",
-          "FontSize": "12"
-        },
-        {
-          "Image": "icons/device_on",
-          "Name": "On",
-          "TitleAlignment": "bottom",
-          "FontSize": "12"
-        }
-      ],
-      "Tooltip": "SmartThings Device",
-      "UUID": "com.thibautsabot.streamdeck.device",
-      "Controllers": ["Keypad"],
-      "UserTitleEnabled": true
-    },
-    {
-      "Icon": "icons/device",
       "Name": "Light",
       "States": [
         {
@@ -78,17 +56,17 @@
       "UserTitleEnabled": true
     },
     {
-      "Icon": "icons/garage_door_closed",
+      "Icon": "icons/doorControl_closed",
       "Name": "Garage Door",
       "States": [
         {
-          "Image": "icons/garage_door_closed",
+          "Image": "icons/doorControl_closed",
           "Name": "Closed",
           "TitleAlignment": "bottom",
           "FontSize": "12"
         },
         {
-          "Image": "icons/garage_door_open",
+          "Image": "icons/doorControl_open",
           "Name": "Open",
           "TitleAlignment": "bottom",
           "FontSize": "12"
