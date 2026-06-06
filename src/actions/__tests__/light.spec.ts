@@ -151,7 +151,7 @@ describe('LightAction', () => {
       jest.spyOn(window, 'fetch')
 
       await lightAction.onKeyUp(
-        fakeKeyUpEvent<DeviceSettingsInterface>({ deviceId: '42', behaviour: 'more' })
+        fakeKeyUpEvent<DeviceSettingsInterface>({ deviceId: '42', behaviour: LightBehavior.MORE })
       )
 
       expect(window.fetch).toHaveBeenLastCalledWith(
@@ -200,7 +200,7 @@ describe('LightAction', () => {
       jest.spyOn(window, 'fetch')
 
       await lightAction.onKeyUp(
-        fakeKeyUpEvent<DeviceSettingsInterface>({ deviceId: '42', behaviour: 'less' })
+        fakeKeyUpEvent<DeviceSettingsInterface>({ deviceId: '42', behaviour: LightBehavior.LESS })
       )
 
       expect(window.fetch).toHaveBeenLastCalledWith(
@@ -249,7 +249,7 @@ describe('LightAction', () => {
       jest.spyOn(window, 'fetch')
 
       await lightAction.onKeyUp(
-        fakeKeyUpEvent<DeviceSettingsInterface>({ deviceId: '42', behaviour: 'more' })
+        fakeKeyUpEvent<DeviceSettingsInterface>({ deviceId: '42', behaviour: LightBehavior.MORE })
       )
 
       expect(window.fetch).toHaveBeenLastCalledWith(
@@ -298,7 +298,7 @@ describe('LightAction', () => {
       jest.spyOn(window, 'fetch')
 
       await lightAction.onKeyUp(
-        fakeKeyUpEvent<DeviceSettingsInterface>({ deviceId: '42', behaviour: 'less' })
+        fakeKeyUpEvent<DeviceSettingsInterface>({ deviceId: '42', behaviour: LightBehavior.LESS })
       )
 
       expect(window.fetch).toHaveBeenLastCalledWith(

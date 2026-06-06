@@ -50,7 +50,7 @@ describe('SwitchAction', () => {
       jest.spyOn(window, 'fetch')
 
       await switchAction.onKeyUp(
-        fakeKeyUpEvent<DeviceSettingsInterface>({ deviceId: '42', behaviour: 'toggle' })
+        fakeKeyUpEvent<DeviceSettingsInterface>({ deviceId: '42' })
       )
 
       expect(window.fetch).toHaveBeenLastCalledWith(
@@ -93,7 +93,7 @@ describe('SwitchAction', () => {
       jest.spyOn(window, 'fetch')
 
       await switchAction.onKeyUp(
-        fakeKeyUpEvent<DeviceSettingsInterface>({ deviceId: '42', behaviour: 'toggle' })
+        fakeKeyUpEvent<DeviceSettingsInterface>({ deviceId: '42' })
       )
 
       expect(window.fetch).toHaveBeenLastCalledWith(
@@ -117,7 +117,7 @@ describe('SwitchAction', () => {
       jest.spyOn(window, 'fetch')
 
       await switchAction.onKeyUp(
-        fakeKeyUpEvent<DeviceSettingsInterface>({ deviceId: '42', behaviour: 'toggle' })
+        fakeKeyUpEvent<DeviceSettingsInterface>({ deviceId: '42' })
       )
 
       expect(window.fetch).not.toHaveBeenCalled()
@@ -142,7 +142,7 @@ describe('SwitchAction', () => {
       const warn = jest.spyOn(console, 'warn').mockImplementation()
 
       await switchAction.onKeyUp(
-        fakeKeyUpEvent<DeviceSettingsInterface>({ deviceId: '42', behaviour: 'toggle' })
+        fakeKeyUpEvent<DeviceSettingsInterface>({ deviceId: '42' })
       )
 
       expect(showAlert).toHaveBeenCalled()

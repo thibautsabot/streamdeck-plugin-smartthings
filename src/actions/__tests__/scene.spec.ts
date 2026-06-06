@@ -50,6 +50,7 @@ describe('Test scene action', () => {
     it('should not do anything without a token', async () => {
       sceneAction.plugin.settingsManager.getGlobalSettings = () => ({ accessToken: undefined })
 
+      const showAlert = jest.spyOn(sceneAction.plugin, 'showAlert').mockImplementation()
       jest.spyOn(window, 'fetch')
 
       await sceneAction.onKeyUp(
@@ -57,6 +58,59 @@ describe('Test scene action', () => {
       )
 
       expect(window.fetch).not.toHaveBeenCalled()
+      expect(showAlert).toHaveBeenCalled()
+
+      showAlert.mockRestore()
+    })
+
+    it('should show alert when sceneId is missing', async () => {
+      const showAlert = jest.spyOn(sceneAction.plugin, 'showAlert').mockImplementation()
+      jest.spyOn(window, 'fetch')
+
+      await sceneAction.onKeyUp(
+        fakeKeyUpEvent<SceneSettingsInterface>({ sceneId: '' })
+      )
+
+      expect(window.fetch).not.toHaveBeenCalled()
+      expect(showAlert).toHaveBeenCalled()
+
+      showAlert.mockRestore()
+    })
+
+    it('should show success feedback when scene executes successfully', async () => {
+      server.use(
+        rest.post('https://api.smartthings.com/v1/scenes/42/execute', (req, res, ctx) => {
+          return res(ctx.json({}))
+        }),
+      )
+
+      const showOk = jest.spyOn(sceneAction.plugin, 'showOk').mockImplementation()
+
+      await sceneAction.onKeyUp(
+        fakeKeyUpEvent<SceneSettingsInterface>({ sceneId: '42' })
+      )
+
+      expect(showOk).toHaveBeenCalled()
+
+      showOk.mockRestore()
+    })
+
+    it('should handle errors when scene execution fails', async () => {
+      server.use(
+        rest.post('https://api.smartthings.com/v1/scenes/42/execute', (req, res, ctx) => {
+          return res(ctx.status(500), ctx.json({ error: 'Internal Server Error' }))
+        }),
+      )
+
+      const showAlert = jest.spyOn(sceneAction.plugin, 'showAlert').mockImplementation()
+
+      await sceneAction.onKeyUp(
+        fakeKeyUpEvent<SceneSettingsInterface>({ sceneId: '42' })
+      )
+
+      expect(showAlert).toHaveBeenCalled()
+
+      showAlert.mockRestore()
     })
   })
 })

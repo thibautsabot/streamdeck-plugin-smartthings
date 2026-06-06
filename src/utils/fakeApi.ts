@@ -1,4 +1,4 @@
-import { KeyUpEvent, StateType, TargetType } from 'streamdeck-typescript'
+import { KeyUpEvent, WillAppearEvent, StateType, TargetType } from 'streamdeck-typescript'
 import { PossibleEventsToSend, StreamDeckPluginHandler } from 'streamdeck-typescript'
 
 /* eslint-disable @typescript-eslint/ban-types */
@@ -86,6 +86,32 @@ export function fakeKeyUpEvent<T>(settings : T): KeyUpEvent<T> {
       coordinates,
       state,
       userDesiredState,
+      isInMultiAction,
+    },
+    action,
+    context,
+    device,
+    event,
+  }
+}
+
+export function fakeWillAppearEvent<T>(settings: T): WillAppearEvent<T> {
+  const coordinates = {
+    column: 0,
+    row: 0,
+  }
+  const state = StateType.ON
+  const isInMultiAction = false
+  const action = ''
+  const context = ''
+  const device = ''
+  const event = 'willAppear'
+
+  return {
+    payload: {
+      settings,
+      coordinates,
+      state,
       isInMultiAction,
     },
     action,

@@ -1,28 +1,47 @@
-import { GlobalSettingsInterface, SceneSettingsInterface } from '../utils/interface'
-import { KeyUpEvent, SDOnActionEvent, StreamDeckAction } from 'streamdeck-typescript'
-import { fetchApi, isGlobalSettingsSet } from '../utils/index'
+import { SceneSettingsInterface } from '../utils/interface'
+import { KeyUpEvent, SDOnActionEvent } from 'streamdeck-typescript'
+import { fetchApi } from '../utils/index'
 
 import { Smartthings } from '../smartthings-plugin'
 import { Status } from '@smartthings/core-sdk'
+import { BaseAction } from './base-action'
 
-export class SceneAction extends StreamDeckAction<Smartthings, SceneAction> {
+export class SceneAction extends BaseAction<SceneAction> {
   constructor(public plugin: Smartthings, private actionName: string) {
     super(plugin, actionName)
   }
 
   @SDOnActionEvent('keyUp')
-  public async onKeyUp({ payload }: KeyUpEvent<SceneSettingsInterface>): Promise<void> {
-    const globalSettings = this.plugin.settingsManager.getGlobalSettings<GlobalSettingsInterface>()
+  public async onKeyUp({ context, payload }: KeyUpEvent<SceneSettingsInterface>): Promise<void> {
+    const globalSettings = this.getGlobalSettings()
 
-    if (isGlobalSettingsSet(globalSettings)) {
-      const token = globalSettings.accessToken
-      const sceneId = payload.settings.sceneId
+    // Validate global settings
+    if (!globalSettings) {
+      console.warn('[Scene] No access token configured')
+      await this.plugin.showAlert(context)
+      return
+    }
 
+    // Validate scene ID
+    if (!payload.settings.sceneId) {
+      console.warn('[Scene] No sceneId configured')
+      await this.plugin.showAlert(context)
+      return
+    }
+
+    const sceneId = payload.settings.sceneId
+
+    try {
       await fetchApi<Status>({
         endpoint: `/scenes/${sceneId}/execute`,
-        accessToken: token,
+        accessToken: globalSettings.accessToken,
         method: 'POST',
       })
+
+      // Show success feedback
+      await this.plugin.showOk(context)
+    } catch (error) {
+      await this.handleError(context, error, sceneId, 'scene')
     }
   }
 }

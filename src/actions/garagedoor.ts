@@ -2,6 +2,7 @@ import { DeviceSettingsInterface } from '../utils/interface'
 import { KeyUpEvent, SDOnActionEvent } from 'streamdeck-typescript'
 import { Smartthings } from '../smartthings-plugin'
 import { BaseDeviceAction } from './base-device'
+import { DeviceCapabilities, DoorValue } from '../utils/smartthings-types'
 
 export class GarageDoorAction extends BaseDeviceAction<GarageDoorAction> {
   constructor(plugin: Smartthings, actionName: string) {
@@ -17,16 +18,43 @@ export class GarageDoorAction extends BaseDeviceAction<GarageDoorAction> {
 
     try {
       const deviceStatus = await this.fetchStatus(settings.deviceId, globalSettings.accessToken)
-      const doorValue = deviceStatus.components?.main?.doorControl?.door?.value
+      const doorValue = DeviceCapabilities.getDoorValue(deviceStatus)
 
-      if (!doorValue) {
+      if (doorValue === null) {
         console.warn(`[GarageDoor] Device ${settings.deviceId} missing doorControl capability`)
         return
       }
 
-      const state = doorValue === 'open' ? 1 : 0
+      // Map door states to button states and set titles for intermediate states
+      let state: number
+      let title = ''
+
+      switch (doorValue) {
+        case DoorValue.OPEN:
+          state = 1
+          break
+        case DoorValue.OPENING:
+          state = 1
+          title = '⬆️ OPENING'
+          break
+        case DoorValue.CLOSED:
+          state = 0
+          break
+        case DoorValue.CLOSING:
+          state = 0
+          title = '⬇️ CLOSING'
+          break
+        case DoorValue.UNKNOWN:
+          state = 0
+          title = '❓ UNKNOWN'
+          break
+        default:
+          state = 0
+          break
+      }
+
       this.plugin.setState(state, context)
-      await this.clearErrorTitle(context)
+      await this.plugin.setTitle(title, context)
     } catch (error) {
       await this.handleError(context, error, settings.deviceId)
     }
@@ -43,8 +71,8 @@ export class GarageDoorAction extends BaseDeviceAction<GarageDoorAction> {
         globalSettings.accessToken
       )
 
-      const doorValue = deviceStatus.components?.main?.doorControl?.door?.value
-      if (!doorValue) {
+      const doorValue = DeviceCapabilities.getDoorValue(deviceStatus)
+      if (doorValue === null) {
         console.warn(
           `[GarageDoor] Device ${payload.settings.deviceId} missing doorControl capability`
         )
@@ -52,7 +80,7 @@ export class GarageDoorAction extends BaseDeviceAction<GarageDoorAction> {
         return
       }
 
-      const isOpen = doorValue === 'open'
+      const isOpen = doorValue === DoorValue.OPEN
 
       await this.sendCommand(
         payload.settings.deviceId,
@@ -64,9 +92,7 @@ export class GarageDoorAction extends BaseDeviceAction<GarageDoorAction> {
       this.plugin.setState(isOpen ? 0 : 1, context)
       this.startAggressivePolling(context, payload.settings)
     } catch (error) {
-      await this.plugin.showAlert(context)
       await this.handleError(context, error, payload.settings.deviceId)
     }
   }
 }
-

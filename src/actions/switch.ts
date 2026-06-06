@@ -2,6 +2,7 @@ import { DeviceSettingsInterface } from '../utils/interface'
 import { KeyUpEvent, SDOnActionEvent } from 'streamdeck-typescript'
 import { Smartthings } from '../smartthings-plugin'
 import { BaseDeviceAction } from './base-device'
+import { DeviceCapabilities, SwitchValue } from '../utils/smartthings-types'
 
 export class SwitchAction extends BaseDeviceAction<SwitchAction> {
   constructor(plugin: Smartthings, actionName: string) {
@@ -17,14 +18,14 @@ export class SwitchAction extends BaseDeviceAction<SwitchAction> {
 
     try {
       const deviceStatus = await this.fetchStatus(settings.deviceId, globalSettings.accessToken)
-      const switchValue = deviceStatus.components?.main?.switch?.switch?.value
+      const switchValue = DeviceCapabilities.getSwitchValue(deviceStatus)
 
-      if (!switchValue) {
+      if (switchValue === null) {
         console.warn(`[Switch] Device ${settings.deviceId} missing switch capability`)
         return
       }
 
-      const state = switchValue === 'on' ? 1 : 0
+      const state = switchValue === SwitchValue.ON ? 1 : 0
       this.plugin.setState(state, context)
       await this.clearErrorTitle(context)
     } catch (error) {
@@ -43,26 +44,26 @@ export class SwitchAction extends BaseDeviceAction<SwitchAction> {
         globalSettings.accessToken
       )
 
-      const switchValue = deviceStatus.components?.main?.switch?.switch?.value
-      if (!switchValue) {
+      const switchValue = DeviceCapabilities.getSwitchValue(deviceStatus)
+      if (switchValue === null) {
         console.warn(`[Switch] Device ${payload.settings.deviceId} missing switch capability`)
         await this.plugin.showAlert(context)
         return
       }
 
-      const isOn = switchValue === 'on'
+      const isOn = switchValue === SwitchValue.ON
+      const newCommand = isOn ? SwitchValue.OFF : SwitchValue.ON
 
       await this.sendCommand(
         payload.settings.deviceId,
         globalSettings.accessToken,
         'switch',
-        isOn ? 'off' : 'on'
+        newCommand
       )
 
       this.plugin.setState(isOn ? 0 : 1, context)
       this.startAggressivePolling(context, payload.settings)
     } catch (error) {
-      await this.plugin.showAlert(context)
       await this.handleError(context, error, payload.settings.deviceId)
     }
   }

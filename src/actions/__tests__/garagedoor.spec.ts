@@ -1,6 +1,10 @@
 import 'isomorphic-fetch'
 
-import { FakeStreamdeckApi, fakeKeyUpEvent } from '../../utils/fakeApi'
+import {
+  FakeStreamdeckApi,
+  fakeKeyUpEvent,
+  fakeWillAppearEvent,
+} from '../../utils/fakeApi'
 
 import { GarageDoorAction } from '../garagedoor'
 import { DeviceSettingsInterface } from '../../utils/interface'
@@ -52,7 +56,7 @@ describe('GarageDoorAction', () => {
       jest.spyOn(window, 'fetch')
 
       await garageDoorAction.onKeyUp(
-        fakeKeyUpEvent<DeviceSettingsInterface>({ deviceId: '42', behaviour: 'toggle' })
+        fakeKeyUpEvent<DeviceSettingsInterface>({ deviceId: '42' })
       )
 
       expect(window.fetch).toHaveBeenLastCalledWith(
@@ -95,7 +99,7 @@ describe('GarageDoorAction', () => {
       jest.spyOn(window, 'fetch')
 
       await garageDoorAction.onKeyUp(
-        fakeKeyUpEvent<DeviceSettingsInterface>({ deviceId: '42', behaviour: 'toggle' })
+        fakeKeyUpEvent<DeviceSettingsInterface>({ deviceId: '42' })
       )
 
       expect(window.fetch).toHaveBeenLastCalledWith(
@@ -121,7 +125,7 @@ describe('GarageDoorAction', () => {
       jest.spyOn(window, 'fetch')
 
       await garageDoorAction.onKeyUp(
-        fakeKeyUpEvent<DeviceSettingsInterface>({ deviceId: '42', behaviour: 'toggle' })
+        fakeKeyUpEvent<DeviceSettingsInterface>({ deviceId: '42' })
       )
 
       expect(window.fetch).not.toHaveBeenCalled()
@@ -146,7 +150,7 @@ describe('GarageDoorAction', () => {
       const warn = jest.spyOn(console, 'warn').mockImplementation()
 
       await garageDoorAction.onKeyUp(
-        fakeKeyUpEvent<DeviceSettingsInterface>({ deviceId: '42', behaviour: 'toggle' })
+        fakeKeyUpEvent<DeviceSettingsInterface>({ deviceId: '42' })
       )
 
       expect(showAlert).toHaveBeenCalled()
@@ -156,6 +160,147 @@ describe('GarageDoorAction', () => {
 
       showAlert.mockRestore()
       warn.mockRestore()
+    })
+  })
+
+  describe('updateDeviceState - intermediate states', () => {
+    beforeEach(() => {
+      jest.clearAllMocks()
+      garageDoorAction.plugin.settingsManager.getGlobalSettings = () => ({
+        accessToken: 'fakeToken',
+      })
+    })
+
+    it('should display OPENING state with title', async () => {
+      server.use(
+        rest.get('https://api.smartthings.com/v1/devices/42/status', (req, res, ctx) => {
+          return res(
+            ctx.json({
+              components: {
+                main: {
+                  doorControl: {
+                    door: {
+                      value: 'opening',
+                    },
+                  },
+                },
+              },
+            })
+          )
+        })
+      )
+
+      const setState = jest.spyOn(garageDoorAction.plugin, 'setState').mockImplementation()
+      const setTitle = jest.spyOn(garageDoorAction.plugin, 'setTitle').mockImplementation()
+
+      await garageDoorAction.onWillAppear(
+        fakeWillAppearEvent<DeviceSettingsInterface>({ deviceId: '42' })
+      )
+
+      expect(setState).toHaveBeenCalledWith(1, expect.anything())
+      expect(setTitle).toHaveBeenCalledWith('⬆️ OPENING', expect.anything())
+
+      setState.mockRestore()
+      setTitle.mockRestore()
+    })
+
+    it('should display CLOSING state with title', async () => {
+      server.use(
+        rest.get('https://api.smartthings.com/v1/devices/42/status', (req, res, ctx) => {
+          return res(
+            ctx.json({
+              components: {
+                main: {
+                  doorControl: {
+                    door: {
+                      value: 'closing',
+                    },
+                  },
+                },
+              },
+            })
+          )
+        })
+      )
+
+      const setState = jest.spyOn(garageDoorAction.plugin, 'setState').mockImplementation()
+      const setTitle = jest.spyOn(garageDoorAction.plugin, 'setTitle').mockImplementation()
+
+      await garageDoorAction.onWillAppear(
+        fakeWillAppearEvent<DeviceSettingsInterface>({ deviceId: '42' })
+      )
+
+      expect(setState).toHaveBeenCalledWith(0, expect.anything())
+      expect(setTitle).toHaveBeenCalledWith('⬇️ CLOSING', expect.anything())
+
+      setState.mockRestore()
+      setTitle.mockRestore()
+    })
+
+    it('should display UNKNOWN state with title', async () => {
+      server.use(
+        rest.get('https://api.smartthings.com/v1/devices/42/status', (req, res, ctx) => {
+          return res(
+            ctx.json({
+              components: {
+                main: {
+                  doorControl: {
+                    door: {
+                      value: 'unknown',
+                    },
+                  },
+                },
+              },
+            })
+          )
+        })
+      )
+
+      const setState = jest.spyOn(garageDoorAction.plugin, 'setState').mockImplementation()
+      const setTitle = jest.spyOn(garageDoorAction.plugin, 'setTitle').mockImplementation()
+
+      await garageDoorAction.onWillAppear(
+        fakeWillAppearEvent<DeviceSettingsInterface>({ deviceId: '42' })
+      )
+
+      expect(setState).toHaveBeenCalledWith(0, expect.anything())
+      expect(setTitle).toHaveBeenCalledWith('❓ UNKNOWN', expect.anything())
+
+      setState.mockRestore()
+      setTitle.mockRestore()
+    })
+
+    it('should clear title for stable states (OPEN/CLOSED)', async () => {
+      server.use(
+        rest.get('https://api.smartthings.com/v1/devices/42/status', (req, res, ctx) => {
+          return res(
+            ctx.json({
+              components: {
+                main: {
+                  doorControl: {
+                    door: {
+                      value: 'open',
+                    },
+                  },
+                },
+              },
+            })
+          )
+        })
+      )
+
+      const setState = jest.spyOn(garageDoorAction.plugin, 'setState').mockImplementation()
+      const setTitle = jest.spyOn(garageDoorAction.plugin, 'setTitle').mockImplementation()
+
+      await garageDoorAction.onWillAppear(
+        fakeWillAppearEvent<DeviceSettingsInterface>({ deviceId: '42' })
+      )
+
+      expect(setState).toHaveBeenCalledWith(1, expect.anything())
+      expect(setTitle).toHaveBeenCalledWith('', expect.anything())
+
+      setState.mockRestore()
+      setTitle.mockRestore()
     })
   })
 })

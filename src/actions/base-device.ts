@@ -1,24 +1,22 @@
-import { DeviceSettingsInterface, GlobalSettingsInterface } from '../utils/interface'
+import { DeviceSettingsInterface } from '../utils/interface'
 import {
   SDOnActionEvent,
-  StreamDeckAction,
   WillAppearEvent,
   WillDisappearEvent,
   DidReceiveSettingsEvent,
 } from 'streamdeck-typescript'
-import { isGlobalSettingsSet, fetchApi, ApiError } from '../utils/index'
+import { fetchApi } from '../utils/index'
 import { DeviceStatus } from '@smartthings/core-sdk'
 import { Smartthings } from '../smartthings-plugin'
+import { BaseAction } from './base-action'
 
 /**
  * Base class for all device actions with shared polling logic
  */
-export abstract class BaseDeviceAction<T extends BaseDeviceAction<T>> extends StreamDeckAction<
-  Smartthings,
-  T
-> {
+export abstract class BaseDeviceAction<T extends BaseDeviceAction<T>> extends BaseAction<T> {
   private pollingIntervals: Map<string, NodeJS.Timeout> = new Map()
   private aggressivePollingTimeouts: Map<string, NodeJS.Timeout> = new Map()
+
   protected readonly POLL_INTERVAL_MS = 5000 // Normal polling: every 5 seconds
   protected readonly AGGRESSIVE_POLL_INTERVAL_MS = 500 // Aggressive polling: every 0.5 seconds
   protected readonly AGGRESSIVE_POLL_DURATION_MS = 10000 // Poll aggressively for 10 seconds after button press
@@ -98,11 +96,6 @@ export abstract class BaseDeviceAction<T extends BaseDeviceAction<T>> extends St
     }
   }
 
-  protected getGlobalSettings(): GlobalSettingsInterface | null {
-    const globalSettings = this.plugin.settingsManager.getGlobalSettings<GlobalSettingsInterface>()
-    return isGlobalSettingsSet(globalSettings) ? globalSettings : null
-  }
-
   /**
    * Helper for fetching device status from SmartThings API.
    * For custom endpoints or special cases, use fetchApi() directly.
@@ -138,25 +131,6 @@ export abstract class BaseDeviceAction<T extends BaseDeviceAction<T>> extends St
         },
       ]),
     })
-  }
-
-  /**
-   * Helper for handling API errors, especially offline device detection.
-   */
-  protected async handleError(context: string, error: unknown, deviceId: string): Promise<void> {
-    const apiError = error as ApiError
-    console.error(`[${this.constructor.name}] Error for ${deviceId}:`, apiError)
-    if (apiError.status === 424 || apiError.status === 503 || apiError.status === 504) {
-      await this.plugin.setTitle('⚠️ OFFLINE', context)
-    }
-  }
-
-  /**
-   * Helper to clear any error titles (e.g., OFFLINE messages).
-   * Call this when device successfully responds.
-   */
-  protected async clearErrorTitle(context: string): Promise<void> {
-    await this.plugin.setTitle('', context)
   }
 
   /**

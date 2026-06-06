@@ -1,6 +1,7 @@
 import {
   DeviceSettingsInterface,
   GlobalSettingsInterface,
+  LightSettingsInterface,
   SceneSettingsInterface,
 } from './interface'
 

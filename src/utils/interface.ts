@@ -1,17 +1,17 @@
-import { SelectElement } from './index'
+import { LightBehavior } from './smartthings-types'
 
 export interface GlobalSettingsInterface {
   accessToken: string
 }
 
-export interface CommonSettingsInterface {
-  selectOptions?: SelectElement[]
-}
-export interface SceneSettingsInterface extends CommonSettingsInterface {
+export interface SceneSettingsInterface {
   sceneId: string
 }
 
-export interface DeviceSettingsInterface extends CommonSettingsInterface {
+export interface DeviceSettingsInterface {
   deviceId: string
-  behaviour: string
+}
+
+export interface LightSettingsInterface extends DeviceSettingsInterface {
+  behaviour?: LightBehavior
 }
