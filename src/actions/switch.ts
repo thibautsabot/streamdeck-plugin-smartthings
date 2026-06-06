@@ -26,7 +26,7 @@ export class SwitchAction extends BaseDeviceAction<SwitchAction> {
 
       const state = switchValue === 'on' ? 1 : 0
       this.plugin.setState(state, context)
-      await this.plugin.setTitle('', context)
+      await this.clearErrorTitle(context)
     } catch (error) {
       await this.handleError(context, error, settings.deviceId)
     }
@@ -42,7 +42,15 @@ export class SwitchAction extends BaseDeviceAction<SwitchAction> {
         payload.settings.deviceId,
         globalSettings.accessToken
       )
-      const isOn = deviceStatus.components?.main?.switch?.switch?.value === 'on'
+
+      const switchValue = deviceStatus.components?.main?.switch?.switch?.value
+      if (!switchValue) {
+        console.warn(`[Switch] Device ${payload.settings.deviceId} missing switch capability`)
+        await this.plugin.showAlert(context)
+        return
+      }
+
+      const isOn = switchValue === 'on'
 
       await this.sendCommand(
         payload.settings.deviceId,

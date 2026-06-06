@@ -1,3 +1,7 @@
+TODO : 
+- Change Property Inspector to fit each device
+- Oauth instead of PAT
+
 # Smartthings plugin for StreamDeck
 
 A StreamDeck plugin to control your smartthings devices and scenes.

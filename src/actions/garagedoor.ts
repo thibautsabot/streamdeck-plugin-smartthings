@@ -26,7 +26,7 @@ export class GarageDoorAction extends BaseDeviceAction<GarageDoorAction> {
 
       const state = doorValue === 'open' ? 1 : 0
       this.plugin.setState(state, context)
-      await this.plugin.setTitle('', context)
+      await this.clearErrorTitle(context)
     } catch (error) {
       await this.handleError(context, error, settings.deviceId)
     }
@@ -42,7 +42,17 @@ export class GarageDoorAction extends BaseDeviceAction<GarageDoorAction> {
         payload.settings.deviceId,
         globalSettings.accessToken
       )
-      const isOpen = deviceStatus.components?.main?.doorControl?.door?.value === 'open'
+
+      const doorValue = deviceStatus.components?.main?.doorControl?.door?.value
+      if (!doorValue) {
+        console.warn(
+          `[GarageDoor] Device ${payload.settings.deviceId} missing doorControl capability`
+        )
+        await this.plugin.showAlert(context)
+        return
+      }
+
+      const isOpen = doorValue === 'open'
 
       await this.sendCommand(
         payload.settings.deviceId,

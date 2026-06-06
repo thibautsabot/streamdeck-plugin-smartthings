@@ -152,6 +152,14 @@ export abstract class BaseDeviceAction<T extends BaseDeviceAction<T>> extends St
   }
 
   /**
+   * Helper to clear any error titles (e.g., OFFLINE messages).
+   * Call this when device successfully responds.
+   */
+  protected async clearErrorTitle(context: string): Promise<void> {
+    await this.plugin.setTitle('', context)
+  }
+
+  /**
    * Subclasses must implement this to update device-specific state
    */
   protected abstract updateDeviceState(

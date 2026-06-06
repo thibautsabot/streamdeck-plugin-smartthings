@@ -126,5 +126,36 @@ describe('GarageDoorAction', () => {
 
       expect(window.fetch).not.toHaveBeenCalled()
     })
+
+    it('should show alert when device lacks doorControl capability', async () => {
+      server.use(
+        rest.get('https://api.smartthings.com/v1/devices/42/status', (req, res, ctx) => {
+          return res(
+            ctx.json({
+              components: {
+                main: {
+                  // No doorControl capability
+                },
+              },
+            })
+          )
+        })
+      )
+
+      const showAlert = jest.spyOn(garageDoorAction.plugin, 'showAlert').mockImplementation()
+      const warn = jest.spyOn(console, 'warn').mockImplementation()
+
+      await garageDoorAction.onKeyUp(
+        fakeKeyUpEvent<DeviceSettingsInterface>({ deviceId: '42', behaviour: 'toggle' })
+      )
+
+      expect(showAlert).toHaveBeenCalled()
+      expect(warn).toHaveBeenCalledWith(
+        '[GarageDoor] Device 42 missing doorControl capability'
+      )
+
+      showAlert.mockRestore()
+      warn.mockRestore()
+    })
   })
 })
