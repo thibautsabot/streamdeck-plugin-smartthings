@@ -9,6 +9,12 @@ export class LightAction extends BaseDeviceAction<LightAction> {
     super(plugin, actionName)
   }
 
+  /**
+   * Updates the StreamDeck button's visual state (on/off).
+   * Note: We check the switch capability (not switchLevel/dimming) because the button
+   * only has 2 visual states: ON or OFF. The dimming behavior (MORE/LESS) is handled
+   * separately in onKeyUp when the user presses the button.
+   */
   protected async updateDeviceState(
     context: string,
     settings: LightSettingsInterface

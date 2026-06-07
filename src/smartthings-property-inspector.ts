@@ -15,18 +15,36 @@ import {
   GlobalSettingsInterface,
   SceneSettingsInterface,
   DeviceSettingsInterface,
+  LightSettingsInterface,
 } from './utils/interface'
+import { LightBehavior } from './utils/smartthings-types'
 import { PagedResult, SceneSummary, DeviceList } from '@smartthings/core-sdk'
 
 const pluginName = 'com.thibautsabot.streamdeck'
 
 class SmartthingsPI extends StreamDeckPropertyInspectorHandler {
   private selectOptions?: SelectElement[]
-  private selectedBehaviour = 'toggle'
-  private selectedOptionId: string
+  private selectedBehaviour: LightBehavior = LightBehavior.TOGGLE
+  private selectedOptionId = ''
 
   constructor() {
     super()
+  }
+
+  private isLightAction(): boolean {
+    return this.actionInfo.action === pluginName + '.light'
+  }
+
+  private isSceneAction(): boolean {
+    return this.actionInfo.action === pluginName + '.scene'
+  }
+
+  private isDeviceAction(): boolean {
+    return (
+      this.actionInfo.action === pluginName + '.light' ||
+      this.actionInfo.action === pluginName + '.switch' ||
+      this.actionInfo.action === pluginName + '.garagedoor'
+    )
   }
 
   @SDOnPiEvent('documentLoaded')
@@ -40,19 +58,18 @@ class SmartthingsPI extends StreamDeckPropertyInspectorHandler {
     select?.addEventListener('change', this.onSelectChanged.bind(this))
     behaviour?.addEventListener('change', this.onRadioChanged.bind(this))
 
-    switch (this.actionInfo.action) {
-      case pluginName + '.device': {
-        selectLabel.textContent = 'Devices'
-        validateButton.textContent = 'Fetch devices list'
-        addSelectOption({ select: select, element: { id: 'none', name: 'No device' } })
+    if (this.isSceneAction()) {
+      validateButton.textContent = 'Fetch scenes list'
+      selectLabel.textContent = 'Scenes'
+      addSelectOption({ select: select, element: { id: 'none', name: 'No scene' } })
+    } else if (this.isDeviceAction()) {
+      selectLabel.textContent = 'Devices'
+      validateButton.textContent = 'Fetch devices list'
+      addSelectOption({ select: select, element: { id: 'none', name: 'No device' } })
+
+      // Only show behaviour selector for Light action
+      if (this.isLightAction()) {
         behaviour.className = 'sdpi-item' // Remove hidden class and display radio selection
-        break
-      }
-      case pluginName + '.scene': {
-        validateButton.textContent = 'Fetch scenes list'
-        selectLabel.textContent = 'Scenes'
-        addSelectOption({ select: select, element: { id: 'none', name: 'No scene' } })
-        break
       }
     }
   }
@@ -63,74 +80,64 @@ class SmartthingsPI extends StreamDeckPropertyInspectorHandler {
 
     let elements: SelectElement[] = []
 
-    switch (this.actionInfo.action) {
-      case pluginName + '.scene': {
-        const res = await fetchApi<PagedResult<SceneSummary>>({
-          endpoint: '/scenes',
-          method: 'GET',
-          accessToken,
-        })
-        elements = res.items.map((item) => ({
-          id: item.sceneId,
-          name: item.sceneName,
-        }))
-        break
-      }
-      case pluginName + '.device': {
-        const res = await fetchApi<DeviceList>({
-          endpoint: '/devices',
-          method: 'GET',
-          accessToken,
-        })
-        elements = res.items.map((item) => ({
-          id: item.deviceId,
-          name: item.label,
-        }))
-        break
-      }
+    if (this.isSceneAction()) {
+      const res = await fetchApi<PagedResult<SceneSummary>>({
+        endpoint: '/scenes',
+        method: 'GET',
+        accessToken,
+      })
+      elements = res.items.map((item) => ({
+        id: item.sceneId,
+        name: item.sceneName,
+      }))
+    } else if (this.isDeviceAction()) {
+      const res = await fetchApi<DeviceList>({
+        endpoint: '/devices',
+        method: 'GET',
+        accessToken,
+      })
+      elements = res.items.map((item) => ({
+        id: item.deviceId,
+        name: item.label,
+      }))
     }
 
-    this.setSettings({
-      selectOptions: elements,
-      behaviour: this.selectedBehaviour,
-    })
-    this.requestSettings() // requestSettings will add the options to the select element
+    // Store selectOptions locally for later use
+    this.selectOptions = elements
+
+    // Request settings to trigger didReceiveSettings which will populate the dropdown
+    this.requestSettings()
   }
 
   public onSelectChanged(e: Event) {
     const newSelection = (e.target as HTMLSelectElement).value
     this.selectedOptionId = newSelection
-    switch (this.actionInfo.action) {
-      case pluginName + '.scene': {
-        this.setSettings<SceneSettingsInterface>({
-          selectOptions: this.selectOptions,
-          sceneId: newSelection,
-        })
-        break
-      }
-      case pluginName + '.device': {
-        this.setSettings<DeviceSettingsInterface>({
-          selectOptions: this.selectOptions,
-          deviceId: newSelection,
-          behaviour: this.selectedBehaviour
-        })
-        break
-      }
+
+    if (this.isSceneAction()) {
+      this.setSettings<SceneSettingsInterface>({
+        sceneId: newSelection,
+      })
+    } else if (this.isLightAction()) {
+      this.setSettings<LightSettingsInterface>({
+        deviceId: newSelection,
+        behaviour: this.selectedBehaviour,
+      })
+    } else if (this.isDeviceAction()) {
+      this.setSettings<DeviceSettingsInterface>({
+        deviceId: newSelection,
+      })
     }
   }
 
   public onRadioChanged(e: Event) {
-    const newSelection = (e.target as HTMLSelectElement).value
+    const newSelection = (e.target as HTMLInputElement).value as LightBehavior
 
-    switch (this.actionInfo.action) {
-      case pluginName + '.device': {
-        this.setSettings<DeviceSettingsInterface>({
-          selectOptions: this.selectOptions,
-          deviceId: this.selectedOptionId,
-          behaviour: newSelection
-        })
-        break
-      }
+    if (this.isLightAction()) {
+      this.selectedBehaviour = newSelection
+      this.setSettings<LightSettingsInterface>({
+        deviceId: this.selectedOptionId,
+        behaviour: newSelection,
+      })
     }
   }
 
@@ -152,29 +159,42 @@ class SmartthingsPI extends StreamDeckPropertyInspectorHandler {
   @SDOnPiEvent('didReceiveSettings')
   onReceiveSettings({
     payload,
-  }: DidReceiveSettingsEvent<DeviceSettingsInterface | SceneSettingsInterface>): void {
+  }: DidReceiveSettingsEvent<
+    DeviceSettingsInterface | SceneSettingsInterface | LightSettingsInterface
+  >): void {
     const select = document.getElementById('select_value') as HTMLSelectElement
-    this.selectOptions = payload.settings.selectOptions
-    select.length = 1 // Only keep the "No element" option
-    this.selectOptions?.forEach((element) => addSelectOption({ select, element }))
+
+    // Populate dropdown if we have options
+    if (this.selectOptions) {
+      select.length = 1 // Only keep the "No element" option
+      this.selectOptions.forEach((element) => addSelectOption({ select, element }))
+    }
 
     let activeIndex: number | undefined
-    if (isDeviceSetting(payload.settings)) {
-      const deviceId = payload.settings.deviceId
-      this.selectedOptionId = deviceId
 
-      this.selectedBehaviour = payload.settings.behaviour;
-      (document.getElementById(this.selectedBehaviour) as HTMLInputElement).checked = true
-
-      activeIndex = this.selectOptions?.findIndex((element) => element.id === deviceId) || 0
-    }
     if (isSceneSetting(payload.settings)) {
       const sceneId = payload.settings.sceneId
-      activeIndex = this.selectOptions?.findIndex((element) => element.id === sceneId) || 0
-
       this.selectedOptionId = sceneId
+      activeIndex = this.selectOptions?.findIndex((element) => element.id === sceneId)
+    } else if (isDeviceSetting(payload.settings)) {
+      const deviceId = payload.settings.deviceId
+      this.selectedOptionId = deviceId
+      activeIndex = this.selectOptions?.findIndex((element) => element.id === deviceId)
+
+      // Handle behaviour for light actions
+      if (this.isLightAction() && 'behaviour' in payload.settings) {
+        const lightSettings = payload.settings as LightSettingsInterface
+        this.selectedBehaviour = lightSettings.behaviour ?? LightBehavior.TOGGLE
+        const behaviourElement = document.getElementById(
+          this.selectedBehaviour
+        ) as HTMLInputElement
+        if (behaviourElement) {
+          behaviourElement.checked = true
+        }
+      }
     }
-    select.selectedIndex = activeIndex !== undefined ? activeIndex + 1 : 0 // + 1 because of the "No element" first option
+
+    select.selectedIndex = activeIndex !== undefined && activeIndex >= 0 ? activeIndex + 1 : 0 // + 1 because of the "No element" first option
   }
 }
 

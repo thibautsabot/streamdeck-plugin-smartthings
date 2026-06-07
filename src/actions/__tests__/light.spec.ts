@@ -3,7 +3,8 @@ import 'isomorphic-fetch'
 import { FakeStreamdeckApi, fakeKeyUpEvent } from '../../utils/fakeApi'
 
 import { LightAction } from '../light'
-import { DeviceSettingsInterface } from '../../utils/interface'
+import { LightSettingsInterface } from '../../utils/interface'
+import { LightBehavior } from '../../utils/smartthings-types'
 import { Smartthings } from '../../smartthings-plugin'
 import { rest } from 'msw'
 import { setupServer } from 'msw/node'
@@ -55,7 +56,7 @@ describe('LightAction', () => {
       jest.spyOn(window, 'fetch')
 
       await lightAction.onKeyUp(
-        fakeKeyUpEvent<DeviceSettingsInterface>({ deviceId: '42', behaviour: 'toggle' })
+        fakeKeyUpEvent<LightSettingsInterface>({ deviceId: '42', behaviour: LightBehavior.TOGGLE })
       )
 
       expect(window.fetch).toHaveBeenLastCalledWith(
@@ -103,7 +104,7 @@ describe('LightAction', () => {
       jest.spyOn(window, 'fetch')
 
       await lightAction.onKeyUp(
-        fakeKeyUpEvent<DeviceSettingsInterface>({ deviceId: '42', behaviour: 'toggle' })
+        fakeKeyUpEvent<LightSettingsInterface>({ deviceId: '42', behaviour: LightBehavior.TOGGLE })
       )
 
       expect(window.fetch).toHaveBeenLastCalledWith(
@@ -151,7 +152,7 @@ describe('LightAction', () => {
       jest.spyOn(window, 'fetch')
 
       await lightAction.onKeyUp(
-        fakeKeyUpEvent<DeviceSettingsInterface>({ deviceId: '42', behaviour: LightBehavior.MORE })
+        fakeKeyUpEvent<LightSettingsInterface>({ deviceId: '42', behaviour: LightBehavior.MORE })
       )
 
       expect(window.fetch).toHaveBeenLastCalledWith(
@@ -200,7 +201,7 @@ describe('LightAction', () => {
       jest.spyOn(window, 'fetch')
 
       await lightAction.onKeyUp(
-        fakeKeyUpEvent<DeviceSettingsInterface>({ deviceId: '42', behaviour: LightBehavior.LESS })
+        fakeKeyUpEvent<LightSettingsInterface>({ deviceId: '42', behaviour: LightBehavior.LESS })
       )
 
       expect(window.fetch).toHaveBeenLastCalledWith(
@@ -249,7 +250,7 @@ describe('LightAction', () => {
       jest.spyOn(window, 'fetch')
 
       await lightAction.onKeyUp(
-        fakeKeyUpEvent<DeviceSettingsInterface>({ deviceId: '42', behaviour: LightBehavior.MORE })
+        fakeKeyUpEvent<LightSettingsInterface>({ deviceId: '42', behaviour: LightBehavior.MORE })
       )
 
       expect(window.fetch).toHaveBeenLastCalledWith(
@@ -298,7 +299,7 @@ describe('LightAction', () => {
       jest.spyOn(window, 'fetch')
 
       await lightAction.onKeyUp(
-        fakeKeyUpEvent<DeviceSettingsInterface>({ deviceId: '42', behaviour: LightBehavior.LESS })
+        fakeKeyUpEvent<LightSettingsInterface>({ deviceId: '42', behaviour: LightBehavior.LESS })
       )
 
       expect(window.fetch).toHaveBeenLastCalledWith(
@@ -323,7 +324,7 @@ describe('LightAction', () => {
       jest.spyOn(window, 'fetch')
 
       await lightAction.onKeyUp(
-        fakeKeyUpEvent<DeviceSettingsInterface>({ deviceId: '42', behaviour: 'toggle' })
+        fakeKeyUpEvent<LightSettingsInterface>({ deviceId: '42', behaviour: LightBehavior.TOGGLE })
       )
 
       expect(window.fetch).not.toHaveBeenCalled()
@@ -348,7 +349,7 @@ describe('LightAction', () => {
       const warn = jest.spyOn(console, 'warn').mockImplementation()
 
       await lightAction.onKeyUp(
-        fakeKeyUpEvent<DeviceSettingsInterface>({ deviceId: '42', behaviour: 'toggle' })
+        fakeKeyUpEvent<LightSettingsInterface>({ deviceId: '42', behaviour: LightBehavior.TOGGLE })
       )
 
       expect(showAlert).toHaveBeenCalled()
