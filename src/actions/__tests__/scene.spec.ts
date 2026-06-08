@@ -5,7 +5,7 @@ import { FakeStreamdeckApi, fakeKeyUpEvent } from '../../utils/fakeApi'
 import { SceneAction } from '../scene'
 import { SceneSettingsInterface } from '../../utils/interface'
 import { Smartthings } from '../../smartthings-plugin'
-import { rest } from 'msw'
+import { http, HttpResponse } from 'msw'
 import { setupServer } from 'msw/node'
 
 const server = setupServer()
@@ -27,8 +27,8 @@ describe('Test scene action', () => {
 
     it('should execute a scene', async () => {
       server.use(
-        rest.post('https://api.smartthings.com/v1/scenes/42/execute', (req, res, ctx) => {
-          return res(ctx.json({}))
+        http.post('https://api.smartthings.com/v1/scenes/42/execute', () => {
+          return HttpResponse.json({})
         }),
       )
 
@@ -79,8 +79,8 @@ describe('Test scene action', () => {
 
     it('should show success feedback when scene executes successfully', async () => {
       server.use(
-        rest.post('https://api.smartthings.com/v1/scenes/42/execute', (req, res, ctx) => {
-          return res(ctx.json({}))
+        http.post('https://api.smartthings.com/v1/scenes/42/execute', () => {
+          return HttpResponse.json({})
         }),
       )
 
@@ -97,9 +97,9 @@ describe('Test scene action', () => {
 
     it('should handle errors when scene execution fails', async () => {
       server.use(
-        rest.post('https://api.smartthings.com/v1/scenes/42/execute', (req, res, ctx) => {
-          return res(ctx.status(500), ctx.json({ error: 'Internal Server Error' }))
-        }),
+        http.post('https://api.smartthings.com/v1/scenes/42/execute', () => {
+          return HttpResponse.json({ error: 'Internal Server Error' }, { status: 500 })
+        })
       )
 
       const showAlert = jest.spyOn(sceneAction.plugin, 'showAlert').mockImplementation()

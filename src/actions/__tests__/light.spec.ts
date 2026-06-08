@@ -6,7 +6,7 @@ import { LightAction } from '../light'
 import { LightSettingsInterface } from '../../utils/interface'
 import { LightBehavior } from '../../utils/smartthings-types'
 import { Smartthings } from '../../smartthings-plugin'
-import { rest } from 'msw'
+import { http, HttpResponse } from 'msw'
 import { setupServer } from 'msw/node'
 
 const server = setupServer()
@@ -28,9 +28,8 @@ describe('LightAction', () => {
 
     it('should toggle light on', async () => {
       server.use(
-        rest.get('https://api.smartthings.com/v1/devices/42/status', (req, res, ctx) => {
-          return res(
-            ctx.json({
+        http.get('https://api.smartthings.com/v1/devices/42/status', () => {
+          return HttpResponse.json({
               components: {
                 main: {
                   switch: {
@@ -46,13 +45,11 @@ describe('LightAction', () => {
                 },
               },
             })
-          )
         }),
-        rest.post('https://api.smartthings.com/v1/devices/42/commands', (req, res, ctx) => {
-          return res(ctx.json({}))
+        http.post('https://api.smartthings.com/v1/devices/42/commands', () => {
+          return HttpResponse.json({})
         })
       )
-
       jest.spyOn(window, 'fetch')
 
       await lightAction.onKeyUp(
@@ -76,9 +73,8 @@ describe('LightAction', () => {
 
     it('should toggle light off', async () => {
       server.use(
-        rest.get('https://api.smartthings.com/v1/devices/42/status', (req, res, ctx) => {
-          return res(
-            ctx.json({
+        http.get('https://api.smartthings.com/v1/devices/42/status', () => {
+          return HttpResponse.json({
               components: {
                 main: {
                   switch: {
@@ -94,13 +90,11 @@ describe('LightAction', () => {
                 },
               },
             })
-          )
         }),
-        rest.post('https://api.smartthings.com/v1/devices/42/commands', (req, res, ctx) => {
-          return res(ctx.json({}))
+        http.post('https://api.smartthings.com/v1/devices/42/commands', () => {
+          return HttpResponse.json({})
         })
       )
-
       jest.spyOn(window, 'fetch')
 
       await lightAction.onKeyUp(
@@ -124,9 +118,8 @@ describe('LightAction', () => {
 
     it('should make light brighter', async () => {
       server.use(
-        rest.get('https://api.smartthings.com/v1/devices/42/status', (req, res, ctx) => {
-          return res(
-            ctx.json({
+        http.get('https://api.smartthings.com/v1/devices/42/status', () => {
+          return HttpResponse.json({
               components: {
                 main: {
                   switch: {
@@ -142,13 +135,11 @@ describe('LightAction', () => {
                 },
               },
             })
-          )
         }),
-        rest.post('https://api.smartthings.com/v1/devices/42/commands', (req, res, ctx) => {
-          return res(ctx.json({}))
+        http.post('https://api.smartthings.com/v1/devices/42/commands', () => {
+          return HttpResponse.json({})
         })
       )
-
       jest.spyOn(window, 'fetch')
 
       await lightAction.onKeyUp(
@@ -173,9 +164,8 @@ describe('LightAction', () => {
 
     it('should make light darker', async () => {
       server.use(
-        rest.get('https://api.smartthings.com/v1/devices/42/status', (req, res, ctx) => {
-          return res(
-            ctx.json({
+        http.get('https://api.smartthings.com/v1/devices/42/status', () => {
+          return HttpResponse.json({
               components: {
                 main: {
                   switch: {
@@ -191,13 +181,11 @@ describe('LightAction', () => {
                 },
               },
             })
-          )
         }),
-        rest.post('https://api.smartthings.com/v1/devices/42/commands', (req, res, ctx) => {
-          return res(ctx.json({}))
+        http.post('https://api.smartthings.com/v1/devices/42/commands', () => {
+          return HttpResponse.json({})
         })
       )
-
       jest.spyOn(window, 'fetch')
 
       await lightAction.onKeyUp(
@@ -222,9 +210,8 @@ describe('LightAction', () => {
 
     it('should cap brightness at 100', async () => {
       server.use(
-        rest.get('https://api.smartthings.com/v1/devices/42/status', (req, res, ctx) => {
-          return res(
-            ctx.json({
+        http.get('https://api.smartthings.com/v1/devices/42/status', () => {
+          return HttpResponse.json({
               components: {
                 main: {
                   switch: {
@@ -240,13 +227,11 @@ describe('LightAction', () => {
                 },
               },
             })
-          )
         }),
-        rest.post('https://api.smartthings.com/v1/devices/42/commands', (req, res, ctx) => {
-          return res(ctx.json({}))
+        http.post('https://api.smartthings.com/v1/devices/42/commands', () => {
+          return HttpResponse.json({})
         })
       )
-
       jest.spyOn(window, 'fetch')
 
       await lightAction.onKeyUp(
@@ -271,9 +256,8 @@ describe('LightAction', () => {
 
     it('should cap brightness at 0', async () => {
       server.use(
-        rest.get('https://api.smartthings.com/v1/devices/42/status', (req, res, ctx) => {
-          return res(
-            ctx.json({
+        http.get('https://api.smartthings.com/v1/devices/42/status', () => {
+          return HttpResponse.json({
               components: {
                 main: {
                   switch: {
@@ -289,13 +273,11 @@ describe('LightAction', () => {
                 },
               },
             })
-          )
         }),
-        rest.post('https://api.smartthings.com/v1/devices/42/commands', (req, res, ctx) => {
-          return res(ctx.json({}))
+        http.post('https://api.smartthings.com/v1/devices/42/commands', () => {
+          return HttpResponse.json({})
         })
       )
-
       jest.spyOn(window, 'fetch')
 
       await lightAction.onKeyUp(
@@ -332,18 +314,15 @@ describe('LightAction', () => {
 
     it('should show alert when device lacks switch capability', async () => {
       server.use(
-        rest.get('https://api.smartthings.com/v1/devices/42/status', (req, res, ctx) => {
-          return res(
-            ctx.json({
+        http.get('https://api.smartthings.com/v1/devices/42/status', () => {
+          return HttpResponse.json({
               components: {
                 main: {
                   // No switch capability
                 },
               },
             })
-          )
         })
-      )
 
       const showAlert = jest.spyOn(lightAction.plugin, 'showAlert').mockImplementation()
       const warn = jest.spyOn(console, 'warn').mockImplementation()

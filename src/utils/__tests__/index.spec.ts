@@ -3,7 +3,7 @@ import 'isomorphic-fetch'
 import { addSelectOption, fetchApi } from '../index'
 
 import { queryByAttribute } from '@testing-library/dom'
-import { rest } from 'msw'
+import { http, HttpResponse } from 'msw'
 import { setupServer } from 'msw/node'
 
 const server = setupServer()
@@ -19,8 +19,8 @@ describe('Test utils', () => {
 
     it('should call fetch', async () => {
       server.use(
-        rest.get('https://api.smartthings.com/v1/test', (req, res, ctx) => {
-          return res(ctx.json({}))
+        http.get('https://api.smartthings.com/v1/test', () => {
+          return HttpResponse.json({})
         })
       )
 

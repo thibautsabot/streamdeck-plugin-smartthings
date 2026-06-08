@@ -113,6 +113,7 @@ export function fakeWillAppearEvent<T>(settings: T): WillAppearEvent<T> {
       coordinates,
       state,
       isInMultiAction,
+      controller: 'Encoder',
     },
     action,
     context,

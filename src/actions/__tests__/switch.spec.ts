@@ -5,7 +5,7 @@ import { FakeStreamdeckApi, fakeKeyUpEvent } from '../../utils/fakeApi'
 import { SwitchAction } from '../switch'
 import { DeviceSettingsInterface } from '../../utils/interface'
 import { Smartthings } from '../../smartthings-plugin'
-import { rest } from 'msw'
+import { http, HttpResponse } from 'msw'
 import { setupServer } from 'msw/node'
 
 const server = setupServer()
@@ -27,23 +27,21 @@ describe('SwitchAction', () => {
 
     it('should turn on a switch', async () => {
       server.use(
-        rest.get('https://api.smartthings.com/v1/devices/42/status', (req, res, ctx) => {
-          return res(
-            ctx.json({
-              components: {
-                main: {
+        http.get('https://api.smartthings.com/v1/devices/42/status', () => {
+          return HttpResponse.json({
+            components: {
+              main: {
+                switch: {
                   switch: {
-                    switch: {
-                      value: 'off',
-                    },
+                    value: 'off',
                   },
                 },
               },
-            })
-          )
+            },
+          })
         }),
-        rest.post('https://api.smartthings.com/v1/devices/42/commands', (req, res, ctx) => {
-          return res(ctx.json({}))
+        http.post('https://api.smartthings.com/v1/devices/42/commands', () => {
+          return HttpResponse.json({})
         })
       )
 
@@ -51,6 +49,7 @@ describe('SwitchAction', () => {
 
       await switchAction.onKeyUp(
         fakeKeyUpEvent<DeviceSettingsInterface>({ deviceId: '42' })
+      )
       )
 
       expect(window.fetch).toHaveBeenLastCalledWith(
@@ -70,23 +69,21 @@ describe('SwitchAction', () => {
 
     it('should turn off a switch', async () => {
       server.use(
-        rest.get('https://api.smartthings.com/v1/devices/42/status', (req, res, ctx) => {
-          return res(
-            ctx.json({
-              components: {
-                main: {
+        http.get('https://api.smartthings.com/v1/devices/42/status', () => {
+          return HttpResponse.json({
+            components: {
+              main: {
+                switch: {
                   switch: {
-                    switch: {
-                      value: 'on',
-                    },
+                    value: 'on',
                   },
                 },
               },
-            })
-          )
+            },
+          })
         }),
-        rest.post('https://api.smartthings.com/v1/devices/42/commands', (req, res, ctx) => {
-          return res(ctx.json({}))
+        http.post('https://api.smartthings.com/v1/devices/42/commands', () => {
+          return HttpResponse.json({})
         })
       )
 
@@ -94,6 +91,7 @@ describe('SwitchAction', () => {
 
       await switchAction.onKeyUp(
         fakeKeyUpEvent<DeviceSettingsInterface>({ deviceId: '42' })
+      )
       )
 
       expect(window.fetch).toHaveBeenLastCalledWith(
@@ -119,22 +117,21 @@ describe('SwitchAction', () => {
       await switchAction.onKeyUp(
         fakeKeyUpEvent<DeviceSettingsInterface>({ deviceId: '42' })
       )
+      )
 
       expect(window.fetch).not.toHaveBeenCalled()
     })
 
     it('should show alert when device lacks switch capability', async () => {
       server.use(
-        rest.get('https://api.smartthings.com/v1/devices/42/status', (req, res, ctx) => {
-          return res(
-            ctx.json({
-              components: {
-                main: {
-                  // No switch capability
-                },
+        http.get('https://api.smartthings.com/v1/devices/42/status', () => {
+          return HttpResponse.json({
+            components: {
+              main: {
+                // No switch capability
               },
-            })
-          )
+            },
+          })
         })
       )
 
@@ -143,6 +140,7 @@ describe('SwitchAction', () => {
 
       await switchAction.onKeyUp(
         fakeKeyUpEvent<DeviceSettingsInterface>({ deviceId: '42' })
+      )
       )
 
       expect(showAlert).toHaveBeenCalled()
