@@ -1,10 +1,10 @@
 <!DOCTYPE html>
 <html lang="en">
     <head>
-        <title>com.thibautsabot.streamdeck.smartthings.pi</title>
+        <title>com.thibautsabot.streamdeck.smartthings.light.pi</title>
         <meta charset="utf-8">
         <link rel="stylesheet" href="sdpi.css">
-        <script src="./dist/smartthings-property-inspector-bundle.js"></script>
+        <script src="./dist/light-property-inspector-bundle.js"></script>
     </head>
     <body>
         <div class="sdpi-wrapper" id="mainSettings">
@@ -14,28 +14,29 @@
             </div>
             <div class="sdpi-item">
                 <div class="sdpi-item-label">Validate</div>
-                <button class="sdpi-item-value" id="validate_button">default validate value</button>
+                <button class="sdpi-item-value" id="validate_button">Fetch devices list</button>
             </div>
             <div class="sdpi-item">
-                <div class="sdpi-item-label" id="select_label">Default select value</div>
-                    <select class="sdpi-item-value select" id="select_value"></select>
+                <div class="sdpi-item-label" id="select_label">Devices</div>
+                <select class="sdpi-item-value select" id="select_value"></select>
             </div>
             <div class="sdpi-item">
-                <div class="hidden" id="behaviour">
-                    <div class="sdpi-item-label">Behaviour</div>
-                    <fieldset>
-                        <legend>Select a behaviour</legend>
-                        <div>
-                            <input type="radio" id="toggle" name="behaviour" value="toggle"
-                                    checked>
-                            <label for="toggle">Toggle</label><br/>
+                <div class="sdpi-item-label">Behaviour</div>
+                <fieldset>
+                    <legend>Select a behaviour</legend>
+                    <div>
+                        <input type="radio" id="toggle" name="behaviour" value="toggle" checked>
+                        <label for="toggle">Toggle</label><br/>
+                        <span id="more-option">
                             <input type="radio" id="more" name="behaviour" value="more">
                             <label for="more">Brighter</label><br/>
+                        </span>
+                        <span id="less-option">
                             <input type="radio" id="less" name="behaviour" value="less">
                             <label for="less">Darker</label>
-                        </div>
-                    </fieldset>
-                </div>
+                        </span>
+                    </div>
+                </fieldset>
             </div>
         </div>
     </body>

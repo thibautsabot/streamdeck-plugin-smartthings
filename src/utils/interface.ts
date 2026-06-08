@@ -15,3 +15,7 @@ export interface DeviceSettingsInterface {
 export interface LightSettingsInterface extends DeviceSettingsInterface {
   behaviour?: LightBehavior
 }
+
+export interface SwitchSettingsInterface extends DeviceSettingsInterface {}
+
+export interface GarageDoorSettingsInterface extends DeviceSettingsInterface {}

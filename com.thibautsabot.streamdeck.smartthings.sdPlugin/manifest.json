@@ -3,6 +3,7 @@
     {
       "Icon": "icons/scene",
       "Name": "Scene",
+      "PropertyInspectorPath": "public/scene-property-inspector.html",
       "States": [
         {
           "Image": "icons/scene_action"
@@ -14,6 +15,7 @@
     {
       "Icon": "icons/device",
       "Name": "Light",
+      "PropertyInspectorPath": "public/light-property-inspector.html",
       "States": [
         {
           "Image": "icons/device_off",
@@ -36,6 +38,7 @@
     {
       "Icon": "icons/device",
       "Name": "Switch",
+      "PropertyInspectorPath": "public/switch-property-inspector.html",
       "States": [
         {
           "Image": "icons/device_off",
@@ -58,6 +61,7 @@
     {
       "Icon": "icons/doorControl_closed",
       "Name": "Garage Door",
+      "PropertyInspectorPath": "public/garagedoor-property-inspector.html",
       "States": [
         {
           "Image": "icons/doorControl_closed",
@@ -83,7 +87,6 @@
   "Category": "Smartthings",
   "CategoryIcon": "icons/smartthings_cat",
   "CodePath": "public/plugin.html",
-  "PropertyInspectorPath": "public/property-inspector.html",
   "Description": "Smartthings actions",
   "Name": "Smartthings",
   "Icon": "icons/smartthings",

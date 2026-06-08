@@ -1,6 +1,6 @@
 import 'isomorphic-fetch'
 
-import { addSelectOption, fetchApi, isDeviceSetting, isSceneSetting } from '../index'
+import { addSelectOption, fetchApi } from '../index'
 
 import { queryByAttribute } from '@testing-library/dom'
 import { rest } from 'msw'
@@ -68,14 +68,5 @@ describe('Test utils', () => {
       expect(queryByAttribute('value', select, 'myNewId')).toBeFalsy()
     })
 
-    it('should recognize a device setting', () => {
-      expect(isDeviceSetting({ deviceId: '42' })).toBeTruthy()
-      expect(isDeviceSetting({ sceneId: '42' })).toBeFalsy()
-    })
-
-    it('should recognize a scene setting', () => {
-      expect(isSceneSetting({ sceneId: '42' })).toBeTruthy()
-      expect(isSceneSetting({ deviceId: '42' })).toBeFalsy()
-    })
   })
 })

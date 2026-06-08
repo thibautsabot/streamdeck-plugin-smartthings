@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <title>com.thibautsabot.streamdeck.smartthings.switch.pi</title>
+        <meta charset="utf-8">
+        <link rel="stylesheet" href="sdpi.css">
+        <script src="./dist/switch-property-inspector-bundle.js"></script>
+    </head>
+    <body>
+        <div class="sdpi-wrapper" id="mainSettings">
+            <div class="sdpi-item">
+                <div class="sdpi-item-label host-label">Personal access token</div>
+                <input class="sdpi-item-value" type="text" id="accesstoken">
+            </div>
+            <div class="sdpi-item">
+                <div class="sdpi-item-label">Validate</div>
+                <button class="sdpi-item-value" id="validate_button">Fetch devices list</button>
+            </div>
+            <div class="sdpi-item">
+                <div class="sdpi-item-label" id="select_label">Devices</div>
+                <select class="sdpi-item-value select" id="select_value"></select>
+            </div>
+        </div>
+    </body>
+</html>

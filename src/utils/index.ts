@@ -1,26 +1,9 @@
-import {
-  DeviceSettingsInterface,
-  GlobalSettingsInterface,
-  LightSettingsInterface,
-  SceneSettingsInterface,
-} from './interface'
+import { GlobalSettingsInterface } from './interface'
 
 export function isGlobalSettingsSet(
   settings: GlobalSettingsInterface | unknown
 ): settings is GlobalSettingsInterface {
   return (settings as GlobalSettingsInterface).accessToken !== undefined
-}
-
-export function isDeviceSetting(
-  settings: DeviceSettingsInterface | unknown
-): settings is DeviceSettingsInterface {
-  return (settings as DeviceSettingsInterface).deviceId !== undefined
-}
-
-export function isSceneSetting(
-  settings: SceneSettingsInterface | unknown
-): settings is SceneSettingsInterface {
-  return (settings as SceneSettingsInterface).sceneId !== undefined
 }
 
 export interface ApiError extends Error {

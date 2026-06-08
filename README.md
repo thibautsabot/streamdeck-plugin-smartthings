@@ -1,5 +1,4 @@
 TODO : 
-- Change Property Inspector to fit each device
 - Oauth instead of PAT
 
 
