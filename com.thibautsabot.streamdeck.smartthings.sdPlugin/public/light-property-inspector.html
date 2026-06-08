@@ -4,18 +4,13 @@
         <title>com.thibautsabot.streamdeck.smartthings.light.pi</title>
         <meta charset="utf-8">
         <link rel="stylesheet" href="sdpi.css">
+        <link rel="stylesheet" href="oauth-ui.css">
         <script src="./dist/light-property-inspector-bundle.js"></script>
     </head>
     <body>
         <div class="sdpi-wrapper" id="mainSettings">
-            <div class="sdpi-item">
-                <div class="sdpi-item-label host-label">Personal access token</div>
-                <input class="sdpi-item-value" type="text" id="accesstoken">
-            </div>
-            <div class="sdpi-item">
-                <div class="sdpi-item-label">Validate</div>
-                <button class="sdpi-item-value" id="validate_button">Fetch devices list</button>
-            </div>
+            <!-- OAuth UI injected here by JavaScript -->
+
             <div class="sdpi-item">
                 <div class="sdpi-item-label" id="select_label">Devices</div>
                 <select class="sdpi-item-value select" id="select_value"></select>

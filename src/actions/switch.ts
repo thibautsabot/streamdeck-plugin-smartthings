@@ -13,11 +13,13 @@ export class SwitchAction extends BaseDeviceAction<SwitchAction> {
     context: string,
     settings: DeviceSettingsInterface,
   ): Promise<void> {
-    const globalSettings = this.getGlobalSettings()
-    if (!globalSettings || !settings.deviceId) return
+    if (!settings.deviceId) return
+
+    const accessToken = await this.getAccessToken()
+    if (!accessToken) return
 
     try {
-      const deviceStatus = await this.fetchStatus(settings.deviceId, globalSettings.accessToken)
+      const deviceStatus = await this.fetchStatus(settings.deviceId, accessToken)
       const switchValue = DeviceCapabilities.getSwitchValue(deviceStatus)
 
       if (switchValue === null) {
@@ -41,14 +43,12 @@ export class SwitchAction extends BaseDeviceAction<SwitchAction> {
   }: KeyUpEvent<DeviceSettingsInterface>): Promise<void> {
     if (action !== 'com.thibautsabot.streamdeck.switch') return
 
-    const globalSettings = this.getGlobalSettings()
-    if (!globalSettings) return
+    const accessToken = await this.getAccessToken()
+
+    if (!accessToken) return
 
     try {
-      const deviceStatus = await this.fetchStatus(
-        payload.settings.deviceId,
-        globalSettings.accessToken,
-      )
+      const deviceStatus = await this.fetchStatus(payload.settings.deviceId, accessToken)
 
       const switchValue = DeviceCapabilities.getSwitchValue(deviceStatus)
       if (switchValue === null) {
@@ -60,12 +60,7 @@ export class SwitchAction extends BaseDeviceAction<SwitchAction> {
       const isOn = switchValue === SwitchValue.ON
       const newCommand = isOn ? SwitchValue.OFF : SwitchValue.ON
 
-      await this.sendCommand(
-        payload.settings.deviceId,
-        globalSettings.accessToken,
-        'switch',
-        newCommand,
-      )
+      await this.sendCommand(payload.settings.deviceId, accessToken, 'switch', newCommand)
 
       this.plugin.setState(isOn ? 0 : 1, context)
     } catch (error) {

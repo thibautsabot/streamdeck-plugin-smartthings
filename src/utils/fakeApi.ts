@@ -31,7 +31,7 @@ export class FakeStreamdeckApi extends StreamDeckPluginHandler {
 
   switchToProfile(profile: string, device?: string): void {}
 
-  sendToPropertyInspector(payload: any, action: string, context: string): void {}
+  sendToPropertyInspector(payload: unknown, action: string, context: string): void {}
 
   protected registerPi(actionInfo: string): void {}
 
@@ -53,7 +53,7 @@ export class FakeStreamdeckApi extends StreamDeckPluginHandler {
 
   logMessage(message: string): void {}
 
-  send(event: PossibleEventsToSend, data: any): void {}
+  send(event: PossibleEventsToSend, data: unknown): void {}
 
   enableDebug(): void {}
 

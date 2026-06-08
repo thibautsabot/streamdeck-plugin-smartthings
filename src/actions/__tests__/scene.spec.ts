@@ -3,10 +3,11 @@ import 'isomorphic-fetch'
 import { FakeStreamdeckApi, fakeKeyUpEvent } from '../../utils/fakeApi'
 
 import { SceneAction } from '../scene'
-import { SceneSettingsInterface } from '../../utils/interface'
+import { SceneSettingsInterface, GlobalSettingsInterface } from '../../utils/interface'
 import { Smartthings } from '../../smartthings-plugin'
 import { http, HttpResponse } from 'msw'
 import { setupServer } from 'msw/node'
+import { createMockGlobalSettings } from '../../test-helpers/oauth-fixtures'
 
 const server = setupServer()
 
@@ -22,7 +23,7 @@ describe('Test scene action', () => {
   describe('onKeyUp', () => {
     beforeEach(() => {
       jest.clearAllMocks()
-      sceneAction.plugin.settingsManager.getGlobalSettings = () => ({ accessToken: 'fakeToken' })
+      sceneAction.plugin.settingsManager.getGlobalSettings = () => createMockGlobalSettings()
     })
 
     it('should execute a scene', async () => {
@@ -48,7 +49,7 @@ describe('Test scene action', () => {
     })
 
     it('should not do anything without a token', async () => {
-      sceneAction.plugin.settingsManager.getGlobalSettings = () => ({ accessToken: undefined })
+      sceneAction.plugin.settingsManager.getGlobalSettings = jest.fn().mockReturnValue({} as GlobalSettingsInterface)
 
       const showAlert = jest.spyOn(sceneAction.plugin, 'showAlert').mockImplementation()
       jest.spyOn(window, 'fetch')

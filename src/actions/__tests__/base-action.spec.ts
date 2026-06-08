@@ -4,6 +4,7 @@ import { FakeStreamdeckApi } from '../../utils/fakeApi'
 import { BaseAction } from '../base-action'
 import { Smartthings } from '../../smartthings-plugin'
 import { ApiError } from '../../utils/index'
+import { GlobalSettingsInterface } from '../../utils/interface'
 
 // Create a concrete test class since BaseAction is abstract
 class TestAction extends BaseAction<TestAction> {
@@ -29,16 +30,30 @@ describe('BaseAction', () => {
   })
 
   describe('getGlobalSettings', () => {
-    it('should return settings when accessToken is defined', () => {
-      fakePlugin.settingsManager.getGlobalSettings = () => ({ accessToken: 'valid-token' })
+    it('should return settings when OAuth credentials are defined', () => {
+      const mockSettings = {
+        oauthTokens: {
+          accessToken: 'valid-access-token',
+          refreshToken: 'valid-refresh-token',
+          expiresAt: Date.now() + 3600000,
+          tokenType: 'Bearer',
+        },
+        oauthClientId: 'client-id',
+        oauthClientSecret: 'client-secret',
+      }
+      fakePlugin.settingsManager.getGlobalSettings = () => mockSettings
 
       const settings = testAction['getGlobalSettings']()
 
-      expect(settings).toEqual({ accessToken: 'valid-token' })
+      expect(settings).toEqual(mockSettings)
     })
 
-    it('should return null when accessToken is undefined', () => {
-      fakePlugin.settingsManager.getGlobalSettings = () => ({ accessToken: undefined })
+    it('should return null when OAuth credentials are incomplete', () => {
+      fakePlugin.settingsManager.getGlobalSettings = jest.fn().mockReturnValue({
+        oauthTokens: undefined,
+        oauthClientId: 'client-id',
+        oauthClientSecret: 'client-secret',
+      } as Partial<GlobalSettingsInterface>)
 
       const settings = testAction['getGlobalSettings']()
 
@@ -46,7 +61,7 @@ describe('BaseAction', () => {
     })
 
     it('should return null when settings is an empty object', () => {
-      fakePlugin.settingsManager.getGlobalSettings = () => ({} as any)
+      fakePlugin.settingsManager.getGlobalSettings = jest.fn().mockReturnValue({} as GlobalSettingsInterface)
 
       const settings = testAction['getGlobalSettings']()
 

@@ -13,11 +13,13 @@ export class GarageDoorAction extends BaseDeviceAction<GarageDoorAction> {
     context: string,
     settings: DeviceSettingsInterface,
   ): Promise<void> {
-    const globalSettings = this.getGlobalSettings()
-    if (!globalSettings || !settings.deviceId) return
+    if (!settings.deviceId) return
+
+    const accessToken = await this.getAccessToken()
+    if (!accessToken) return
 
     try {
-      const deviceStatus = await this.fetchStatus(settings.deviceId, globalSettings.accessToken)
+      const deviceStatus = await this.fetchStatus(settings.deviceId, accessToken)
       const doorValue = DeviceCapabilities.getDoorValue(deviceStatus)
 
       if (doorValue === null) {
@@ -68,14 +70,11 @@ export class GarageDoorAction extends BaseDeviceAction<GarageDoorAction> {
   }: KeyUpEvent<DeviceSettingsInterface>): Promise<void> {
     if (action !== 'com.thibautsabot.streamdeck.garagedoor') return
 
-    const globalSettings = this.getGlobalSettings()
-    if (!globalSettings) return
+    const accessToken = await this.getAccessToken()
+    if (!accessToken) return
 
     try {
-      const deviceStatus = await this.fetchStatus(
-        payload.settings.deviceId,
-        globalSettings.accessToken,
-      )
+      const deviceStatus = await this.fetchStatus(payload.settings.deviceId, accessToken)
 
       const doorValue = DeviceCapabilities.getDoorValue(deviceStatus)
       if (doorValue === null) {
@@ -90,7 +89,7 @@ export class GarageDoorAction extends BaseDeviceAction<GarageDoorAction> {
 
       await this.sendCommand(
         payload.settings.deviceId,
-        globalSettings.accessToken,
+        accessToken,
         'doorControl',
         isOpen ? 'close' : 'open',
       )

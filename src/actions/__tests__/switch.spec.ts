@@ -1,9 +1,10 @@
 import 'isomorphic-fetch'
+import { createMockGlobalSettings } from '../../test-helpers/oauth-fixtures'
 
 import { FakeStreamdeckApi, fakeKeyUpEvent } from '../../utils/fakeApi'
 
 import { SwitchAction } from '../switch'
-import { DeviceSettingsInterface } from '../../utils/interface'
+import { DeviceSettingsInterface, GlobalSettingsInterface } from '../../utils/interface'
 import { Smartthings } from '../../smartthings-plugin'
 import { http, HttpResponse } from 'msw'
 import { setupServer } from 'msw/node'
@@ -22,7 +23,7 @@ describe('SwitchAction', () => {
   describe('onKeyUp', () => {
     beforeEach(() => {
       jest.clearAllMocks()
-      switchAction.plugin.settingsManager.getGlobalSettings = () => ({ accessToken: 'fakeToken' })
+      switchAction.plugin.settingsManager.getGlobalSettings = () => createMockGlobalSettings()
     })
 
     it('should turn on a switch', async () => {
@@ -101,6 +102,18 @@ describe('SwitchAction', () => {
           headers: expect.anything(),
         },
       )
+    })
+
+    it('should not do anything without a token', async () => {
+      switchAction.plugin.settingsManager.getGlobalSettings = jest
+        .fn()
+        .mockReturnValue({} as GlobalSettingsInterface)
+
+      jest.spyOn(window, 'fetch')
+
+      await switchAction.onKeyUp(fakeKeyUpEvent<DeviceSettingsInterface>({ deviceId: '42' }))
+
+      expect(window.fetch).not.toHaveBeenCalled()
     })
 
     it('should show alert when device lacks switch capability', async () => {

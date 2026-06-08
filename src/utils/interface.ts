@@ -1,7 +1,12 @@
 import { LightBehavior } from './smartthings-types'
+import { OAuthTokens } from './oauth-client'
+
+/* eslint-disable @typescript-eslint/no-empty-object-type */
 
 export interface GlobalSettingsInterface {
-  accessToken: string
+  oauthTokens: OAuthTokens
+  oauthClientId: string
+  oauthClientSecret: string
 }
 
 export interface SceneSettingsInterface {

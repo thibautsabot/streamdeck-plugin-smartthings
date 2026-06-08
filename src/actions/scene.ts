@@ -7,18 +7,25 @@ import { Status } from '@smartthings/core-sdk'
 import { BaseAction } from './base-action'
 
 export class SceneAction extends BaseAction<SceneAction> {
-  constructor(public plugin: Smartthings, private actionName: string) {
+  constructor(
+    public plugin: Smartthings,
+    private actionName: string,
+  ) {
     super(plugin, actionName)
   }
 
   @SDOnActionEvent('keyUp')
-  public async onKeyUp({ context, payload, action }: KeyUpEvent<SceneSettingsInterface>): Promise<void> {
+  public async onKeyUp({
+    context,
+    payload,
+    action,
+  }: KeyUpEvent<SceneSettingsInterface>): Promise<void> {
     if (action !== 'com.thibautsabot.streamdeck.scene') return
 
-    const globalSettings = this.getGlobalSettings()
+    const accessToken = await this.getAccessToken()
 
-    // Validate global settings
-    if (!globalSettings) {
+    // Validate access token
+    if (!accessToken) {
       console.warn('[Scene] No access token configured')
       await this.plugin.showAlert(context)
       return
@@ -36,7 +43,7 @@ export class SceneAction extends BaseAction<SceneAction> {
     try {
       await fetchApi<Status>({
         endpoint: `/scenes/${sceneId}/execute`,
-        accessToken: globalSettings.accessToken,
+        accessToken,
         method: 'POST',
       })
 

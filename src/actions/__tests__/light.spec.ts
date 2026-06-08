@@ -1,9 +1,10 @@
 import 'isomorphic-fetch'
+import { createMockGlobalSettings } from '../../test-helpers/oauth-fixtures'
 
 import { FakeStreamdeckApi, fakeKeyUpEvent } from '../../utils/fakeApi'
 
 import { LightAction } from '../light'
-import { LightSettingsInterface } from '../../utils/interface'
+import { LightSettingsInterface, GlobalSettingsInterface } from '../../utils/interface'
 import { LightBehavior } from '../../utils/smartthings-types'
 import { Smartthings } from '../../smartthings-plugin'
 import { http, HttpResponse } from 'msw'
@@ -23,7 +24,7 @@ describe('LightAction', () => {
   describe('onKeyUp', () => {
     beforeEach(() => {
       jest.clearAllMocks()
-      lightAction.plugin.settingsManager.getGlobalSettings = () => ({ accessToken: 'fakeToken' })
+      lightAction.plugin.settingsManager.getGlobalSettings = () => (createMockGlobalSettings())
     })
 
     it('should toggle light on', async () => {
@@ -301,7 +302,7 @@ describe('LightAction', () => {
     })
 
     it('should not do anything without a token', async () => {
-      lightAction.plugin.settingsManager.getGlobalSettings = () => ({ accessToken: undefined })
+      lightAction.plugin.settingsManager.getGlobalSettings = jest.fn().mockReturnValue({} as GlobalSettingsInterface)
 
       jest.spyOn(window, 'fetch')
 

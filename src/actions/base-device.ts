@@ -11,6 +11,12 @@ import { Smartthings } from '../smartthings-plugin'
 import { BaseAction } from './base-action'
 
 /**
+ * SmartThings command arguments can be strings, numbers, or booleans
+ * Examples: setLevel(50), switch("on"), setColorTemperature(2700)
+ */
+type SmartThingsCommandArgument = string | number | boolean
+
+/**
  * Base class for all device actions with shared polling logic
  */
 export abstract class BaseDeviceAction<T extends BaseDeviceAction<T>> extends BaseAction<T> {
@@ -120,7 +126,7 @@ export abstract class BaseDeviceAction<T extends BaseDeviceAction<T>> extends Ba
     accessToken: string,
     capability: string,
     command: string,
-    args?: any[],
+    args?: SmartThingsCommandArgument[],
   ): Promise<void> {
     console.log(
       `[${this.constructor.name}] Sending command to device ${deviceId}: ${capability} ${command} ${

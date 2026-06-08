@@ -40,7 +40,9 @@
     "watchify": "^4.0.0"
   },
   "dependencies": {
+    "client-oauth2": "^4.3.3",
     "isomorphic-fetch": "^3.0.0",
-    "streamdeck-typescript": "^3.3.4"
+    "streamdeck-typescript": "^3.3.4",
+    "oauth-pkce": "^0.0.7"
   }
 }

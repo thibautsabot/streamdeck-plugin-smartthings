@@ -2,6 +2,7 @@ import { GlobalSettingsInterface } from '../utils/interface'
 import { StreamDeckAction } from 'streamdeck-typescript'
 import { isGlobalSettingsSet, ApiError } from '../utils/index'
 import { Smartthings } from '../smartthings-plugin'
+import { SmartThingsOAuthClient } from '../utils/oauth-client'
 
 /**
  * Base class for all actions (Scene and Device) with shared error handling and validation
@@ -20,6 +21,42 @@ export abstract class BaseAction<T extends BaseAction<T>> extends StreamDeckActi
   protected getGlobalSettings(): GlobalSettingsInterface | null {
     const globalSettings = this.plugin.settingsManager.getGlobalSettings<GlobalSettingsInterface>()
     return isGlobalSettingsSet(globalSettings) ? globalSettings : null
+  }
+
+  /**
+   * Get a valid access token, refreshing if necessary
+   * Automatically updates global settings if token was refreshed
+   */
+  protected async getAccessToken(): Promise<string | null> {
+    const globalSettings = this.getGlobalSettings()
+    if (!globalSettings) return null
+
+    const oauthClient = new SmartThingsOAuthClient(
+      globalSettings.oauthClientId,
+      globalSettings.oauthClientSecret
+    )
+
+    // Check if token needs refresh
+    if (oauthClient.isTokenExpired(globalSettings.oauthTokens)) {
+      try {
+        console.log('[OAuth] Token expired, refreshing...')
+        const newTokens = await oauthClient.refreshToken(globalSettings.oauthTokens.refreshToken)
+
+        // Save refreshed tokens
+        this.plugin.settingsManager.setGlobalSettings<GlobalSettingsInterface>({
+          ...globalSettings,
+          oauthTokens: newTokens,
+        })
+
+        console.log('[OAuth] Token refreshed successfully')
+        return newTokens.accessToken
+      } catch (error) {
+        console.error('[OAuth] Failed to refresh token:', error)
+        return null
+      }
+    }
+
+    return globalSettings.oauthTokens.accessToken
   }
 
   /**

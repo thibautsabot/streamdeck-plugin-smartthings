@@ -1,40 +1,59 @@
-TODO : 
-- Oauth instead of PAT
-
-
 # Smartthings plugin for StreamDeck
 
-A StreamDeck plugin to control your smartthings devices and scenes.
+A StreamDeck plugin to control your SmartThings devices and scenes with OAuth 2.0 authentication.
 
-Donwload the release from https://github.com/thibautsabot/streamdeck-plugin-smartthings/releases
+Download the release from https://github.com/thibautsabot/streamdeck-plugin-smartthings/releases
 
-Open `com.thibautsabot.streamdeck.smartthings.streamDeckPlugin` and install the plugin !
+Open `com.thibautsabot.streamdeck.smartthings.streamDeckPlugin` and install the plugin!
 
 ---
 
-Chose what you need from the list :
+Choose what you need from the list:
 
 <img width="264" alt="Screenshot 2021-03-29 at 11 10 38" src="https://user-images.githubusercontent.com/9283289/112819301-bd3e6d80-9084-11eb-86bd-a6e015268c9f.png">
 
+## Authentication Setup
 
-Add your smartthings personal access token and get everything from your hub !
+The plugin uses **OAuth 2.0 authentication** for secure access to your SmartThings devices with automatic token refresh.
 
-<img width="484" alt="Screenshot 2021-03-29 at 11 11 33" src="https://user-images.githubusercontent.com/9283289/112819309-c0395e00-9084-11eb-8bec-68d0f7cd8527.png">
+### Setting up OAuth
 
-## Access token
+1. **Create a SmartThings OAuth App**
+   - Go to [SmartThings Developer Workspace](https://smartthings.developer.samsung.com/workspace)
+   - Sign in with your Samsung/SmartThings account
+   - Create a new app with the following settings:
+     - App Type: **Automation for the SmartThings App**
+     - OAuth Client: **Confidential**
+     - Redirect URI: `http://localhost:8888/callback`
+     - Scopes: Select at least:
+       - `r:devices:*` (Read devices)
+       - `x:devices:*` (Execute devices)
+       - `r:scenes:*` (Read scenes)
+       - `x:scenes:*` (Execute scenes)
 
-A personal access token is required to fetch "smart things" from your hub.
+2. **Get your OAuth credentials**
+   - After creating the app, you'll receive:
+     - **Client ID**
+     - **Client Secret**
+   - Keep these credentials safe
 
-Head over to https://account.smartthings.com/tokens and connect to your Samsung / Smartthings account.
+3. **Configure the plugin**
+   - In StreamDeck, add a SmartThings action (Light, Switch, Garage Door, or Scene)
+   - Enter your **Client ID** and **Client Secret**
+   - Click "Authorize with SmartThings"
+   - A browser window will open - sign in and authorize the plugin
+   - Return to StreamDeck - you should see "✓ Authenticated"
 
-Click on "GENERATE NEW TOKEN".
+4. **Select your device or scene**
+   - The plugin will automatically fetch your devices/scenes
+   - Select the one you want to control from the dropdown
 
-![Screenshot 2021-03-29 at 11 24 37](https://user-images.githubusercontent.com/9283289/112819317-c29bb800-9084-11eb-882e-d54a4198c498.png)
+### Features
 
-
-Enter a name and tick at least "Devices" and "Scenes".
-
-**Your token is only stored on your machine !** It allows the plugin to control your devices, keep it secret. 
+- 🔒 **Secure OAuth 2.0** - Industry standard authentication
+- 🔄 **Automatic token refresh** - No manual re-authentication needed
+- 💾 **Tokens stored locally** - Your credentials never leave your machine
+- ⚡ **Fast and reliable** - Direct API communication with SmartThings 
 
 ## Informations
 
