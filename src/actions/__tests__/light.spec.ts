@@ -17,7 +17,7 @@ describe('LightAction', () => {
 
   const lightAction = new LightAction(
     new FakeStreamdeckApi() as Smartthings,
-    'com.thibautsabot.streamdeck.light'
+    'com.thibautsabot.streamdeck.light',
   )
 
   describe('onKeyUp', () => {
@@ -30,30 +30,30 @@ describe('LightAction', () => {
       server.use(
         http.get('https://api.smartthings.com/v1/devices/42/status', () => {
           return HttpResponse.json({
-              components: {
-                main: {
+            components: {
+              main: {
+                switch: {
                   switch: {
-                    switch: {
-                      value: 'off',
-                    },
+                    value: 'off',
                   },
-                  switchLevel: {
-                    level: {
-                      value: 50,
-                    },
+                },
+                switchLevel: {
+                  level: {
+                    value: 50,
                   },
                 },
               },
-            })
+            },
+          })
         }),
         http.post('https://api.smartthings.com/v1/devices/42/commands', () => {
           return HttpResponse.json({})
-        })
+        }),
       )
       jest.spyOn(window, 'fetch')
 
       await lightAction.onKeyUp(
-        fakeKeyUpEvent<LightSettingsInterface>({ deviceId: '42', behaviour: LightBehavior.TOGGLE })
+        fakeKeyUpEvent<LightSettingsInterface>({ deviceId: '42', behaviour: LightBehavior.TOGGLE }),
       )
 
       expect(window.fetch).toHaveBeenLastCalledWith(
@@ -67,7 +67,7 @@ describe('LightAction', () => {
           ]),
           method: 'POST',
           headers: expect.anything(),
-        }
+        },
       )
     })
 
@@ -75,30 +75,30 @@ describe('LightAction', () => {
       server.use(
         http.get('https://api.smartthings.com/v1/devices/42/status', () => {
           return HttpResponse.json({
-              components: {
-                main: {
+            components: {
+              main: {
+                switch: {
                   switch: {
-                    switch: {
-                      value: 'on',
-                    },
+                    value: 'on',
                   },
-                  switchLevel: {
-                    level: {
-                      value: 70,
-                    },
+                },
+                switchLevel: {
+                  level: {
+                    value: 70,
                   },
                 },
               },
-            })
+            },
+          })
         }),
         http.post('https://api.smartthings.com/v1/devices/42/commands', () => {
           return HttpResponse.json({})
-        })
+        }),
       )
       jest.spyOn(window, 'fetch')
 
       await lightAction.onKeyUp(
-        fakeKeyUpEvent<LightSettingsInterface>({ deviceId: '42', behaviour: LightBehavior.TOGGLE })
+        fakeKeyUpEvent<LightSettingsInterface>({ deviceId: '42', behaviour: LightBehavior.TOGGLE }),
       )
 
       expect(window.fetch).toHaveBeenLastCalledWith(
@@ -112,7 +112,7 @@ describe('LightAction', () => {
           ]),
           method: 'POST',
           headers: expect.anything(),
-        }
+        },
       )
     })
 
@@ -120,30 +120,30 @@ describe('LightAction', () => {
       server.use(
         http.get('https://api.smartthings.com/v1/devices/42/status', () => {
           return HttpResponse.json({
-              components: {
-                main: {
+            components: {
+              main: {
+                switch: {
                   switch: {
-                    switch: {
-                      value: 'on',
-                    },
+                    value: 'on',
                   },
-                  switchLevel: {
-                    level: {
-                      value: 70,
-                    },
+                },
+                switchLevel: {
+                  level: {
+                    value: 70,
                   },
                 },
               },
-            })
+            },
+          })
         }),
         http.post('https://api.smartthings.com/v1/devices/42/commands', () => {
           return HttpResponse.json({})
-        })
+        }),
       )
       jest.spyOn(window, 'fetch')
 
       await lightAction.onKeyUp(
-        fakeKeyUpEvent<LightSettingsInterface>({ deviceId: '42', behaviour: LightBehavior.MORE })
+        fakeKeyUpEvent<LightSettingsInterface>({ deviceId: '42', behaviour: LightBehavior.MORE }),
       )
 
       expect(window.fetch).toHaveBeenLastCalledWith(
@@ -158,7 +158,7 @@ describe('LightAction', () => {
           ]),
           method: 'POST',
           headers: expect.anything(),
-        }
+        },
       )
     })
 
@@ -166,30 +166,30 @@ describe('LightAction', () => {
       server.use(
         http.get('https://api.smartthings.com/v1/devices/42/status', () => {
           return HttpResponse.json({
-              components: {
-                main: {
+            components: {
+              main: {
+                switch: {
                   switch: {
-                    switch: {
-                      value: 'on',
-                    },
+                    value: 'on',
                   },
-                  switchLevel: {
-                    level: {
-                      value: 70,
-                    },
+                },
+                switchLevel: {
+                  level: {
+                    value: 70,
                   },
                 },
               },
-            })
+            },
+          })
         }),
         http.post('https://api.smartthings.com/v1/devices/42/commands', () => {
           return HttpResponse.json({})
-        })
+        }),
       )
       jest.spyOn(window, 'fetch')
 
       await lightAction.onKeyUp(
-        fakeKeyUpEvent<LightSettingsInterface>({ deviceId: '42', behaviour: LightBehavior.LESS })
+        fakeKeyUpEvent<LightSettingsInterface>({ deviceId: '42', behaviour: LightBehavior.LESS }),
       )
 
       expect(window.fetch).toHaveBeenLastCalledWith(
@@ -204,7 +204,7 @@ describe('LightAction', () => {
           ]),
           method: 'POST',
           headers: expect.anything(),
-        }
+        },
       )
     })
 
@@ -212,30 +212,30 @@ describe('LightAction', () => {
       server.use(
         http.get('https://api.smartthings.com/v1/devices/42/status', () => {
           return HttpResponse.json({
-              components: {
-                main: {
+            components: {
+              main: {
+                switch: {
                   switch: {
-                    switch: {
-                      value: 'on',
-                    },
+                    value: 'on',
                   },
-                  switchLevel: {
-                    level: {
-                      value: 95,
-                    },
+                },
+                switchLevel: {
+                  level: {
+                    value: 95,
                   },
                 },
               },
-            })
+            },
+          })
         }),
         http.post('https://api.smartthings.com/v1/devices/42/commands', () => {
           return HttpResponse.json({})
-        })
+        }),
       )
       jest.spyOn(window, 'fetch')
 
       await lightAction.onKeyUp(
-        fakeKeyUpEvent<LightSettingsInterface>({ deviceId: '42', behaviour: LightBehavior.MORE })
+        fakeKeyUpEvent<LightSettingsInterface>({ deviceId: '42', behaviour: LightBehavior.MORE }),
       )
 
       expect(window.fetch).toHaveBeenLastCalledWith(
@@ -250,7 +250,7 @@ describe('LightAction', () => {
           ]),
           method: 'POST',
           headers: expect.anything(),
-        }
+        },
       )
     })
 
@@ -258,30 +258,30 @@ describe('LightAction', () => {
       server.use(
         http.get('https://api.smartthings.com/v1/devices/42/status', () => {
           return HttpResponse.json({
-              components: {
-                main: {
+            components: {
+              main: {
+                switch: {
                   switch: {
-                    switch: {
-                      value: 'on',
-                    },
+                    value: 'on',
                   },
-                  switchLevel: {
-                    level: {
-                      value: 5,
-                    },
+                },
+                switchLevel: {
+                  level: {
+                    value: 5,
                   },
                 },
               },
-            })
+            },
+          })
         }),
         http.post('https://api.smartthings.com/v1/devices/42/commands', () => {
           return HttpResponse.json({})
-        })
+        }),
       )
       jest.spyOn(window, 'fetch')
 
       await lightAction.onKeyUp(
-        fakeKeyUpEvent<LightSettingsInterface>({ deviceId: '42', behaviour: LightBehavior.LESS })
+        fakeKeyUpEvent<LightSettingsInterface>({ deviceId: '42', behaviour: LightBehavior.LESS }),
       )
 
       expect(window.fetch).toHaveBeenLastCalledWith(
@@ -296,7 +296,7 @@ describe('LightAction', () => {
           ]),
           method: 'POST',
           headers: expect.anything(),
-        }
+        },
       )
     })
 
@@ -306,7 +306,7 @@ describe('LightAction', () => {
       jest.spyOn(window, 'fetch')
 
       await lightAction.onKeyUp(
-        fakeKeyUpEvent<LightSettingsInterface>({ deviceId: '42', behaviour: LightBehavior.TOGGLE })
+        fakeKeyUpEvent<LightSettingsInterface>({ deviceId: '42', behaviour: LightBehavior.TOGGLE }),
       )
 
       expect(window.fetch).not.toHaveBeenCalled()
@@ -316,19 +316,20 @@ describe('LightAction', () => {
       server.use(
         http.get('https://api.smartthings.com/v1/devices/42/status', () => {
           return HttpResponse.json({
-              components: {
-                main: {
-                  // No switch capability
-                },
+            components: {
+              main: {
+                // No switch capability
               },
-            })
-        })
+            },
+          })
+        }),
+      )
 
       const showAlert = jest.spyOn(lightAction.plugin, 'showAlert').mockImplementation()
       const warn = jest.spyOn(console, 'warn').mockImplementation()
 
       await lightAction.onKeyUp(
-        fakeKeyUpEvent<LightSettingsInterface>({ deviceId: '42', behaviour: LightBehavior.TOGGLE })
+        fakeKeyUpEvent<LightSettingsInterface>({ deviceId: '42', behaviour: LightBehavior.TOGGLE }),
       )
 
       expect(showAlert).toHaveBeenCalled()

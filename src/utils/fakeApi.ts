@@ -1,9 +1,6 @@
 import { KeyUpEvent, WillAppearEvent, StateType, TargetType } from 'streamdeck-typescript'
 import { PossibleEventsToSend, StreamDeckPluginHandler } from 'streamdeck-typescript'
 
-/* eslint-disable @typescript-eslint/ban-types */
-/* eslint-disable @typescript-eslint/no-unused-vars */
-/* eslint-disable @typescript-eslint/no-empty-function */
 export class FakeStreamdeckApi extends StreamDeckPluginHandler {
   state: StateType
   title: string
@@ -63,11 +60,7 @@ export class FakeStreamdeckApi extends StreamDeckPluginHandler {
   addEventListener(event: string, fnc: Function): void {}
 }
 
-/* eslint-enable @typescript-eslint/ban-types */
-/* eslint-enable @typescript-eslint/no-unused-vars */
-/* eslint-enable @typescript-eslint/no-empty-function */
-
-export function fakeKeyUpEvent<T>(settings : T): KeyUpEvent<T> {
+export function fakeKeyUpEvent<T>(settings: T): KeyUpEvent<T> {
   const coordinates = {
     column: 0,
     row: 0,

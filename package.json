@@ -16,6 +16,8 @@
   "author": "Thibaut Sabot",
   "license": "MIT",
   "devDependencies": {
+    "@eslint/eslintrc": "^3.3.5",
+    "@eslint/js": "^10.0.1",
     "@smartthings/core-sdk": "^8.5.1",
     "@testing-library/dom": "^10.4.1",
     "@tsconfig/recommended": "^1.0.13",
@@ -25,13 +27,16 @@
     "@typescript-eslint/parser": "^8.60.1",
     "eslint": "^9.18.0",
     "eslint-config-prettier": "^10.1.8",
+    "globals": "^17.6.0",
     "jest": "^30.4.2",
     "jest-environment-jsdom": "^30.4.1",
+    "jest-fixed-jsdom": "^0.0.11",
     "msw": "^2.14.6",
     "prettier": "^3.8.3",
     "ts-jest": "^29.4.11",
     "ts-node": "^10.9.2",
     "typescript": "^5.7.3",
+    "undici": "^8.4.1",
     "watchify": "^4.0.0"
   },
   "dependencies": {

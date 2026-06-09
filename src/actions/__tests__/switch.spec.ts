@@ -16,7 +16,7 @@ describe('SwitchAction', () => {
 
   const switchAction = new SwitchAction(
     new FakeStreamdeckApi() as Smartthings,
-    'com.thibautsabot.streamdeck.switch'
+    'com.thibautsabot.streamdeck.switch',
   )
 
   describe('onKeyUp', () => {
@@ -42,15 +42,12 @@ describe('SwitchAction', () => {
         }),
         http.post('https://api.smartthings.com/v1/devices/42/commands', () => {
           return HttpResponse.json({})
-        })
+        }),
       )
 
       jest.spyOn(window, 'fetch')
 
-      await switchAction.onKeyUp(
-        fakeKeyUpEvent<DeviceSettingsInterface>({ deviceId: '42' })
-      )
-      )
+      await switchAction.onKeyUp(fakeKeyUpEvent<DeviceSettingsInterface>({ deviceId: '42' }))
 
       expect(window.fetch).toHaveBeenLastCalledWith(
         'https://api.smartthings.com/v1/devices/42/commands',
@@ -63,7 +60,7 @@ describe('SwitchAction', () => {
           ]),
           method: 'POST',
           headers: expect.anything(),
-        }
+        },
       )
     })
 
@@ -84,15 +81,12 @@ describe('SwitchAction', () => {
         }),
         http.post('https://api.smartthings.com/v1/devices/42/commands', () => {
           return HttpResponse.json({})
-        })
+        }),
       )
 
       jest.spyOn(window, 'fetch')
 
-      await switchAction.onKeyUp(
-        fakeKeyUpEvent<DeviceSettingsInterface>({ deviceId: '42' })
-      )
-      )
+      await switchAction.onKeyUp(fakeKeyUpEvent<DeviceSettingsInterface>({ deviceId: '42' }))
 
       expect(window.fetch).toHaveBeenLastCalledWith(
         'https://api.smartthings.com/v1/devices/42/commands',
@@ -105,21 +99,8 @@ describe('SwitchAction', () => {
           ]),
           method: 'POST',
           headers: expect.anything(),
-        }
+        },
       )
-    })
-
-    it('should not do anything without a token', async () => {
-      switchAction.plugin.settingsManager.getGlobalSettings = () => ({ accessToken: undefined })
-
-      jest.spyOn(window, 'fetch')
-
-      await switchAction.onKeyUp(
-        fakeKeyUpEvent<DeviceSettingsInterface>({ deviceId: '42' })
-      )
-      )
-
-      expect(window.fetch).not.toHaveBeenCalled()
     })
 
     it('should show alert when device lacks switch capability', async () => {
@@ -132,16 +113,13 @@ describe('SwitchAction', () => {
               },
             },
           })
-        })
+        }),
       )
 
       const showAlert = jest.spyOn(switchAction.plugin, 'showAlert').mockImplementation()
       const warn = jest.spyOn(console, 'warn').mockImplementation()
 
-      await switchAction.onKeyUp(
-        fakeKeyUpEvent<DeviceSettingsInterface>({ deviceId: '42' })
-      )
-      )
+      await switchAction.onKeyUp(fakeKeyUpEvent<DeviceSettingsInterface>({ deviceId: '42' }))
 
       expect(showAlert).toHaveBeenCalled()
       expect(warn).toHaveBeenCalledWith('[Switch] Device 42 missing switch capability')

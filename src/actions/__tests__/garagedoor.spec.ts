@@ -1,10 +1,6 @@
 import 'isomorphic-fetch'
 
-import {
-  FakeStreamdeckApi,
-  fakeKeyUpEvent,
-  fakeWillAppearEvent,
-} from '../../utils/fakeApi'
+import { FakeStreamdeckApi, fakeKeyUpEvent, fakeWillAppearEvent } from '../../utils/fakeApi'
 
 import { GarageDoorAction } from '../garagedoor'
 import { DeviceSettingsInterface } from '../../utils/interface'
@@ -20,7 +16,7 @@ describe('GarageDoorAction', () => {
 
   const garageDoorAction = new GarageDoorAction(
     new FakeStreamdeckApi() as Smartthings,
-    'com.thibautsabot.streamdeck.garagedoor'
+    'com.thibautsabot.streamdeck.garagedoor',
   )
 
   describe('onKeyUp', () => {
@@ -35,26 +31,24 @@ describe('GarageDoorAction', () => {
       server.use(
         http.get('https://api.smartthings.com/v1/devices/42/status', () => {
           return HttpResponse.json({
-              components: {
-                main: {
-                  doorControl: {
-                    door: {
-                      value: 'closed',
-                    },
+            components: {
+              main: {
+                doorControl: {
+                  door: {
+                    value: 'closed',
                   },
                 },
               },
-            })
+            },
+          })
         }),
         http.post('https://api.smartthings.com/v1/devices/42/commands', () => {
           return HttpResponse.json({})
-        })
+        }),
       )
       jest.spyOn(window, 'fetch')
 
-      await garageDoorAction.onKeyUp(
-        fakeKeyUpEvent<DeviceSettingsInterface>({ deviceId: '42' })
-      )
+      await garageDoorAction.onKeyUp(fakeKeyUpEvent<DeviceSettingsInterface>({ deviceId: '42' }))
 
       expect(window.fetch).toHaveBeenLastCalledWith(
         'https://api.smartthings.com/v1/devices/42/commands',
@@ -67,7 +61,7 @@ describe('GarageDoorAction', () => {
           ]),
           method: 'POST',
           headers: expect.anything(),
-        }
+        },
       )
     })
 
@@ -75,26 +69,24 @@ describe('GarageDoorAction', () => {
       server.use(
         http.get('https://api.smartthings.com/v1/devices/42/status', () => {
           return HttpResponse.json({
-              components: {
-                main: {
-                  doorControl: {
-                    door: {
-                      value: 'open',
-                    },
+            components: {
+              main: {
+                doorControl: {
+                  door: {
+                    value: 'open',
                   },
                 },
               },
-            })
+            },
+          })
         }),
         http.post('https://api.smartthings.com/v1/devices/42/commands', () => {
           return HttpResponse.json({})
-        })
+        }),
       )
       jest.spyOn(window, 'fetch')
 
-      await garageDoorAction.onKeyUp(
-        fakeKeyUpEvent<DeviceSettingsInterface>({ deviceId: '42' })
-      )
+      await garageDoorAction.onKeyUp(fakeKeyUpEvent<DeviceSettingsInterface>({ deviceId: '42' }))
 
       expect(window.fetch).toHaveBeenLastCalledWith(
         'https://api.smartthings.com/v1/devices/42/commands',
@@ -107,7 +99,7 @@ describe('GarageDoorAction', () => {
           ]),
           method: 'POST',
           headers: expect.anything(),
-        }
+        },
       )
     })
 
@@ -115,13 +107,10 @@ describe('GarageDoorAction', () => {
       garageDoorAction.plugin.settingsManager.getGlobalSettings = () => ({
         accessToken: undefined,
       })
-      )
 
       jest.spyOn(window, 'fetch')
 
-      await garageDoorAction.onKeyUp(
-        fakeKeyUpEvent<DeviceSettingsInterface>({ deviceId: '42' })
-      )
+      await garageDoorAction.onKeyUp(fakeKeyUpEvent<DeviceSettingsInterface>({ deviceId: '42' }))
 
       expect(window.fetch).not.toHaveBeenCalled()
     })
@@ -130,25 +119,22 @@ describe('GarageDoorAction', () => {
       server.use(
         http.get('https://api.smartthings.com/v1/devices/42/status', () => {
           return HttpResponse.json({
-              components: {
-                main: {
-                  // No doorControl capability
-                },
+            components: {
+              main: {
+                // No doorControl capability
               },
-            })
-        })
+            },
+          })
+        }),
+      )
 
       const showAlert = jest.spyOn(garageDoorAction.plugin, 'showAlert').mockImplementation()
       const warn = jest.spyOn(console, 'warn').mockImplementation()
 
-      await garageDoorAction.onKeyUp(
-        fakeKeyUpEvent<DeviceSettingsInterface>({ deviceId: '42' })
-      )
+      await garageDoorAction.onKeyUp(fakeKeyUpEvent<DeviceSettingsInterface>({ deviceId: '42' }))
 
       expect(showAlert).toHaveBeenCalled()
-      expect(warn).toHaveBeenCalledWith(
-        '[GarageDoor] Device 42 missing doorControl capability'
-      )
+      expect(warn).toHaveBeenCalledWith('[GarageDoor] Device 42 missing doorControl capability')
 
       showAlert.mockRestore()
       warn.mockRestore()
@@ -167,23 +153,25 @@ describe('GarageDoorAction', () => {
       server.use(
         http.get('https://api.smartthings.com/v1/devices/42/status', () => {
           return HttpResponse.json({
-              components: {
-                main: {
-                  doorControl: {
-                    door: {
-                      value: 'opening',
-                    },
+            components: {
+              main: {
+                doorControl: {
+                  door: {
+                    value: 'opening',
                   },
                 },
               },
-            })
-        })
+            },
+          })
+        }),
+      )
 
       const setState = jest.spyOn(garageDoorAction.plugin, 'setState').mockImplementation()
       const setTitle = jest.spyOn(garageDoorAction.plugin, 'setTitle').mockImplementation()
 
       await garageDoorAction.onWillAppear(
-        fakeWillAppearEvent<DeviceSettingsInterface>({ deviceId: '42' })
+        fakeWillAppearEvent<DeviceSettingsInterface>({ deviceId: '42' }),
+      )
 
       expect(setState).toHaveBeenCalledWith(1, expect.anything())
       expect(setTitle).toHaveBeenCalledWith('⬆️ OPENING', expect.anything())
@@ -196,23 +184,25 @@ describe('GarageDoorAction', () => {
       server.use(
         http.get('https://api.smartthings.com/v1/devices/42/status', () => {
           return HttpResponse.json({
-              components: {
-                main: {
-                  doorControl: {
-                    door: {
-                      value: 'closing',
-                    },
+            components: {
+              main: {
+                doorControl: {
+                  door: {
+                    value: 'closing',
                   },
                 },
               },
-            })
-        })
+            },
+          })
+        }),
+      )
 
       const setState = jest.spyOn(garageDoorAction.plugin, 'setState').mockImplementation()
       const setTitle = jest.spyOn(garageDoorAction.plugin, 'setTitle').mockImplementation()
 
       await garageDoorAction.onWillAppear(
-        fakeWillAppearEvent<DeviceSettingsInterface>({ deviceId: '42' })
+        fakeWillAppearEvent<DeviceSettingsInterface>({ deviceId: '42' }),
+      )
 
       expect(setState).toHaveBeenCalledWith(0, expect.anything())
       expect(setTitle).toHaveBeenCalledWith('⬇️ CLOSING', expect.anything())
@@ -225,23 +215,25 @@ describe('GarageDoorAction', () => {
       server.use(
         http.get('https://api.smartthings.com/v1/devices/42/status', () => {
           return HttpResponse.json({
-              components: {
-                main: {
-                  doorControl: {
-                    door: {
-                      value: 'unknown',
-                    },
+            components: {
+              main: {
+                doorControl: {
+                  door: {
+                    value: 'unknown',
                   },
                 },
               },
-            })
-        })
+            },
+          })
+        }),
+      )
 
       const setState = jest.spyOn(garageDoorAction.plugin, 'setState').mockImplementation()
       const setTitle = jest.spyOn(garageDoorAction.plugin, 'setTitle').mockImplementation()
 
       await garageDoorAction.onWillAppear(
-        fakeWillAppearEvent<DeviceSettingsInterface>({ deviceId: '42' })
+        fakeWillAppearEvent<DeviceSettingsInterface>({ deviceId: '42' }),
+      )
 
       expect(setState).toHaveBeenCalledWith(0, expect.anything())
       expect(setTitle).toHaveBeenCalledWith('❓ UNKNOWN', expect.anything())
@@ -254,23 +246,25 @@ describe('GarageDoorAction', () => {
       server.use(
         http.get('https://api.smartthings.com/v1/devices/42/status', () => {
           return HttpResponse.json({
-              components: {
-                main: {
-                  doorControl: {
-                    door: {
-                      value: 'open',
-                    },
+            components: {
+              main: {
+                doorControl: {
+                  door: {
+                    value: 'open',
                   },
                 },
               },
-            })
-        })
+            },
+          })
+        }),
+      )
 
       const setState = jest.spyOn(garageDoorAction.plugin, 'setState').mockImplementation()
       const setTitle = jest.spyOn(garageDoorAction.plugin, 'setTitle').mockImplementation()
 
       await garageDoorAction.onWillAppear(
-        fakeWillAppearEvent<DeviceSettingsInterface>({ deviceId: '42' })
+        fakeWillAppearEvent<DeviceSettingsInterface>({ deviceId: '42' }),
+      )
 
       expect(setState).toHaveBeenCalledWith(1, expect.anything())
       expect(setTitle).toHaveBeenCalledWith('', expect.anything())
