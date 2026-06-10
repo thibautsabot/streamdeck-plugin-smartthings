@@ -1,7 +1,7 @@
 import { GlobalSettingsInterface } from './interface'
 
 export function isGlobalSettingsSet(
-  settings: GlobalSettingsInterface | unknown
+  settings: GlobalSettingsInterface | unknown,
 ): settings is GlobalSettingsInterface {
   return (settings as GlobalSettingsInterface).accessToken !== undefined
 }
@@ -26,7 +26,6 @@ export async function fetchApi<T>({ body, endpoint, method, accessToken }: Fetch
     },
     body,
   })
-
   if (!response.ok) {
     const error = new Error(`HTTP ${response.status}: ${response.statusText}`) as ApiError
     error.status = response.status

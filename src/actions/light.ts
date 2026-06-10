@@ -17,7 +17,7 @@ export class LightAction extends BaseDeviceAction<LightAction> {
    */
   protected async updateDeviceState(
     context: string,
-    settings: LightSettingsInterface
+    settings: LightSettingsInterface,
   ): Promise<void> {
     const globalSettings = this.getGlobalSettings()
     if (!globalSettings || !settings.deviceId) return
@@ -40,7 +40,13 @@ export class LightAction extends BaseDeviceAction<LightAction> {
   }
 
   @SDOnActionEvent('keyUp')
-  public async onKeyUp({ context, payload }: KeyUpEvent<LightSettingsInterface>): Promise<void> {
+  public async onKeyUp({
+    context,
+    payload,
+    action,
+  }: KeyUpEvent<LightSettingsInterface>): Promise<void> {
+    if (action !== 'com.thibautsabot.streamdeck.light') return
+
     const globalSettings = this.getGlobalSettings()
     if (!globalSettings) return
 
@@ -49,7 +55,7 @@ export class LightAction extends BaseDeviceAction<LightAction> {
     try {
       const deviceStatus = await this.fetchStatus(
         payload.settings.deviceId,
-        globalSettings.accessToken
+        globalSettings.accessToken,
       )
 
       const switchValue = DeviceCapabilities.getSwitchValue(deviceStatus)
@@ -67,7 +73,7 @@ export class LightAction extends BaseDeviceAction<LightAction> {
             payload.settings.deviceId,
             globalSettings.accessToken,
             'switch',
-            newCommand
+            newCommand,
           )
           this.plugin.setState(isOn ? 0 : 1, context)
           break
@@ -76,7 +82,7 @@ export class LightAction extends BaseDeviceAction<LightAction> {
           const currentLevel = DeviceCapabilities.getSwitchLevel(deviceStatus)
           if (currentLevel === null) {
             console.warn(
-              `[Light] Device ${payload.settings.deviceId} doesn't support dimming - use Switch action instead`
+              `[Light] Device ${payload.settings.deviceId} doesn't support dimming - use Switch action instead`,
             )
             await this.plugin.showAlert(context)
             return
@@ -87,7 +93,7 @@ export class LightAction extends BaseDeviceAction<LightAction> {
             globalSettings.accessToken,
             'switchLevel',
             'setLevel',
-            [nextLevel]
+            [nextLevel],
           )
           break
 
@@ -95,7 +101,7 @@ export class LightAction extends BaseDeviceAction<LightAction> {
           const level = DeviceCapabilities.getSwitchLevel(deviceStatus)
           if (level === null) {
             console.warn(
-              `[Light] Device ${payload.settings.deviceId} doesn't support dimming - use Switch action instead`
+              `[Light] Device ${payload.settings.deviceId} doesn't support dimming - use Switch action instead`,
             )
             await this.plugin.showAlert(context)
             return
@@ -106,12 +112,10 @@ export class LightAction extends BaseDeviceAction<LightAction> {
             globalSettings.accessToken,
             'switchLevel',
             'setLevel',
-            [prevLevel]
+            [prevLevel],
           )
           break
       }
-
-      this.startAggressivePolling(context, payload.settings)
     } catch (error) {
       await this.handleError(context, error, payload.settings.deviceId)
     }

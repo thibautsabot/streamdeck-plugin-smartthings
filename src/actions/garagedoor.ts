@@ -11,7 +11,7 @@ export class GarageDoorAction extends BaseDeviceAction<GarageDoorAction> {
 
   protected async updateDeviceState(
     context: string,
-    settings: DeviceSettingsInterface
+    settings: DeviceSettingsInterface,
   ): Promise<void> {
     const globalSettings = this.getGlobalSettings()
     if (!globalSettings || !settings.deviceId) return
@@ -61,20 +61,26 @@ export class GarageDoorAction extends BaseDeviceAction<GarageDoorAction> {
   }
 
   @SDOnActionEvent('keyUp')
-  public async onKeyUp({ context, payload }: KeyUpEvent<DeviceSettingsInterface>): Promise<void> {
+  public async onKeyUp({
+    context,
+    payload,
+    action,
+  }: KeyUpEvent<DeviceSettingsInterface>): Promise<void> {
+    if (action !== 'com.thibautsabot.streamdeck.garagedoor') return
+
     const globalSettings = this.getGlobalSettings()
     if (!globalSettings) return
 
     try {
       const deviceStatus = await this.fetchStatus(
         payload.settings.deviceId,
-        globalSettings.accessToken
+        globalSettings.accessToken,
       )
 
       const doorValue = DeviceCapabilities.getDoorValue(deviceStatus)
       if (doorValue === null) {
         console.warn(
-          `[GarageDoor] Device ${payload.settings.deviceId} missing doorControl capability`
+          `[GarageDoor] Device ${payload.settings.deviceId} missing doorControl capability`,
         )
         await this.plugin.showAlert(context)
         return
@@ -86,11 +92,10 @@ export class GarageDoorAction extends BaseDeviceAction<GarageDoorAction> {
         payload.settings.deviceId,
         globalSettings.accessToken,
         'doorControl',
-        isOpen ? 'close' : 'open'
+        isOpen ? 'close' : 'open',
       )
 
       this.plugin.setState(isOpen ? 0 : 1, context)
-      this.startAggressivePolling(context, payload.settings)
     } catch (error) {
       await this.handleError(context, error, payload.settings.deviceId)
     }

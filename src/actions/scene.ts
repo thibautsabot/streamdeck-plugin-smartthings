@@ -12,7 +12,9 @@ export class SceneAction extends BaseAction<SceneAction> {
   }
 
   @SDOnActionEvent('keyUp')
-  public async onKeyUp({ context, payload }: KeyUpEvent<SceneSettingsInterface>): Promise<void> {
+  public async onKeyUp({ context, payload, action }: KeyUpEvent<SceneSettingsInterface>): Promise<void> {
+    if (action !== 'com.thibautsabot.streamdeck.scene') return
+
     const globalSettings = this.getGlobalSettings()
 
     // Validate global settings

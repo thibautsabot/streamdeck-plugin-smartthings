@@ -17,11 +17,14 @@ export abstract class BaseDeviceAction<T extends BaseDeviceAction<T>> extends Ba
   private pollingIntervals: Map<string, NodeJS.Timeout> = new Map()
   private aggressivePollingTimeouts: Map<string, NodeJS.Timeout> = new Map()
 
-  protected readonly POLL_INTERVAL_MS = 5000 // Normal polling: every 5 seconds
-  protected readonly AGGRESSIVE_POLL_INTERVAL_MS = 500 // Aggressive polling: every 0.5 seconds
-  protected readonly AGGRESSIVE_POLL_DURATION_MS = 10000 // Poll aggressively for 10 seconds after button press
+  protected readonly POLL_INTERVAL_MS = 60000 // Normal polling: every 60 seconds
+  protected readonly AGGRESSIVE_POLL_INTERVAL_MS = 2000 // Aggressive polling: every 2 seconds
+  protected readonly AGGRESSIVE_POLL_DURATION_MS = 6000 // Poll aggressively for 6 seconds after button press
 
-  constructor(public plugin: Smartthings, actionName: string) {
+  constructor(
+    public plugin: Smartthings,
+    actionName: string,
+  ) {
     super(plugin, actionName)
   }
 
@@ -117,8 +120,13 @@ export abstract class BaseDeviceAction<T extends BaseDeviceAction<T>> extends Ba
     accessToken: string,
     capability: string,
     command: string,
-    args?: any[]
+    args?: any[],
   ): Promise<void> {
+    console.log(
+      `[${this.constructor.name}] Sending command to device ${deviceId}: ${capability} ${command} ${
+        args ? JSON.stringify(args) : ''
+      }`,
+    )
     await fetchApi({
       endpoint: `/devices/${deviceId}/commands`,
       method: 'POST',
@@ -138,6 +146,6 @@ export abstract class BaseDeviceAction<T extends BaseDeviceAction<T>> extends Ba
    */
   protected abstract updateDeviceState(
     context: string,
-    settings: DeviceSettingsInterface
+    settings: DeviceSettingsInterface,
   ): Promise<void>
 }

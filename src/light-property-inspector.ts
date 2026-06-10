@@ -25,10 +25,11 @@ export class LightPropertyInspector extends BasePropertyInspector<LightSettingsI
     }))
   }
 
-  onDocumentLoaded(): void {
-    super.onDocumentLoaded()
-    const behaviour = document.getElementById('behaviour') as HTMLDivElement
-    behaviour?.addEventListener('change', this.onRadioChanged.bind(this))
+  protected onDocumentLoadedExtended(): void {
+    const radioButtons = document.querySelectorAll('input[name="behaviour"]')
+    radioButtons.forEach((radio) => {
+      radio.addEventListener('change', this.onRadioChanged.bind(this))
+    })
   }
 
   protected async onSelectChanged(e: Event): Promise<void> {

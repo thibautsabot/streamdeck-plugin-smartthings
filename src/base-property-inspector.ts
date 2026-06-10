@@ -25,7 +25,12 @@ export abstract class BasePropertyInspector<
     select?.addEventListener('change', this.onSelectChanged.bind(this))
 
     addSelectOption({ select, element: { id: 'none', name: this.getDefaultOptionLabel() } })
+
+    this.onDocumentLoadedExtended()
   }
+
+  protected onDocumentLoadedExtended(): void {}
+
 
   @SDOnPiEvent('globalSettingsAvailable')
   propertyInspectorDidAppear(): void {
