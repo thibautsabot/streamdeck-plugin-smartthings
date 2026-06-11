@@ -139,6 +139,73 @@ describe('SmartThingsOAuthClient', () => {
     })
   })
 
+  describe('convertToken edge cases', () => {
+    it('should handle token without expires_in', async () => {
+      const mockToken = {
+        accessToken: 'access-token-123',
+        refreshToken: 'refresh-token-456',
+        tokenType: 'Bearer',
+        data: {},
+      }
+
+      mockGetToken.mockResolvedValue(mockToken)
+
+      const result = await client.exchangeCodeForToken('auth-code-123', 'verifier-123')
+
+      expect(result.expiresAt).toBe(0)
+    })
+
+    it('should handle token without refreshToken', async () => {
+      const mockToken = {
+        accessToken: 'access-token-123',
+        tokenType: 'Bearer',
+        data: {
+          expires_in: 3600,
+        },
+      }
+
+      mockGetToken.mockResolvedValue(mockToken)
+
+      const result = await client.exchangeCodeForToken('auth-code-123', 'verifier-123')
+
+      expect(result.refreshToken).toBe('')
+    })
+
+    it('should handle token without tokenType', async () => {
+      const mockToken = {
+        accessToken: 'access-token-123',
+        refreshToken: 'refresh-token-456',
+        data: {
+          expires_in: 3600,
+        },
+      }
+
+      mockGetToken.mockResolvedValue(mockToken)
+
+      const result = await client.exchangeCodeForToken('auth-code-123', 'verifier-123')
+
+      expect(result.tokenType).toBe('Bearer')
+    })
+
+    it('should throw error with fallback message when error has no body or message', async () => {
+      const error = {}
+      mockGetToken.mockRejectedValue(error)
+
+      await expect(client.exchangeCodeForToken('invalid-code', 'verifier-123')).rejects.toThrow(
+        'Token exchange failed'
+      )
+    })
+
+    it('should throw error with error.message when no error_description', async () => {
+      const error = new Error('Network error')
+      mockGetToken.mockRejectedValue(error)
+
+      await expect(client.exchangeCodeForToken('invalid-code', 'verifier-123')).rejects.toThrow(
+        'Network error'
+      )
+    })
+  })
+
   describe('isTokenExpired', () => {
     it('should return false when token has no expiry', () => {
       const tokens: OAuthTokens = {

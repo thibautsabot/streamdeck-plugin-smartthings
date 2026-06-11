@@ -60,6 +60,7 @@ describe('Test scene action', () => {
       sceneAction.plugin.settingsManager.getGlobalSettings = jest.fn().mockReturnValue({} as GlobalSettingsInterface)
 
       const showAlert = jest.spyOn(sceneAction.plugin, 'showAlert').mockImplementation()
+      const warn = jest.spyOn(console, 'warn').mockImplementation()
       jest.spyOn(window, 'fetch')
 
       await sceneAction.onKeyUp(
@@ -68,8 +69,10 @@ describe('Test scene action', () => {
 
       expect(window.fetch).not.toHaveBeenCalled()
       expect(showAlert).toHaveBeenCalled()
+      expect(warn).toHaveBeenCalledWith('[Scene] No access token configured')
 
       showAlert.mockRestore()
+      warn.mockRestore()
     })
 
     it('should show alert when sceneId is missing', async () => {
@@ -120,6 +123,16 @@ describe('Test scene action', () => {
       expect(showAlert).toHaveBeenCalled()
 
       showAlert.mockRestore()
+    })
+
+    it('should ignore keyUp events from wrong action', async () => {
+      jest.spyOn(window, 'fetch')
+
+      await sceneAction.onKeyUp(
+        fakeKeyUpEvent<SceneSettingsInterface>({ sceneId: '42' }, 'com.other.action')
+      )
+
+      expect(window.fetch).not.toHaveBeenCalled()
     })
   })
 })

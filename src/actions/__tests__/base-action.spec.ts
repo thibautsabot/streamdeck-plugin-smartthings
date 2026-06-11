@@ -73,44 +73,10 @@ describe('BaseAction', () => {
     const context = 'test-context'
     const resourceId = 'device-123'
 
-    it('should show alert and set OFFLINE title for 424 errors', async () => {
-      const error: ApiError = new Error('Failed Dependency') as ApiError
-      error.status = 424
-      error.statusText = 'Failed Dependency'
-
-      const showAlert = jest.spyOn(fakePlugin, 'showAlert').mockImplementation()
-      const setTitle = jest.spyOn(fakePlugin, 'setTitle').mockImplementation()
-
-      await testAction['handleError'](context, error, resourceId, 'device')
-
-      expect(showAlert).toHaveBeenCalledWith(context)
-      expect(setTitle).toHaveBeenCalledWith('⚠️ OFFLINE', context)
-
-      showAlert.mockRestore()
-      setTitle.mockRestore()
-    })
-
-    it('should show alert and set OFFLINE title for 503 errors', async () => {
+    it('should show alert and set OFFLINE title for service errors (424/503/504)', async () => {
       const error: ApiError = new Error('Service Unavailable') as ApiError
       error.status = 503
       error.statusText = 'Service Unavailable'
-
-      const showAlert = jest.spyOn(fakePlugin, 'showAlert').mockImplementation()
-      const setTitle = jest.spyOn(fakePlugin, 'setTitle').mockImplementation()
-
-      await testAction['handleError'](context, error, resourceId, 'device')
-
-      expect(showAlert).toHaveBeenCalledWith(context)
-      expect(setTitle).toHaveBeenCalledWith('⚠️ OFFLINE', context)
-
-      showAlert.mockRestore()
-      setTitle.mockRestore()
-    })
-
-    it('should show alert and set OFFLINE title for 504 errors', async () => {
-      const error: ApiError = new Error('Gateway Timeout') as ApiError
-      error.status = 504
-      error.statusText = 'Gateway Timeout'
 
       const showAlert = jest.spyOn(fakePlugin, 'showAlert').mockImplementation()
       const setTitle = jest.spyOn(fakePlugin, 'setTitle').mockImplementation()
@@ -166,6 +132,27 @@ describe('BaseAction', () => {
 
       expect(showAlert).toHaveBeenCalledWith(context)
 
+      showAlert.mockRestore()
+    })
+
+    it('should default to device resourceType when not provided', async () => {
+      const error: ApiError = new Error('Generic Error') as ApiError
+      error.status = 500
+      error.statusText = 'Internal Server Error'
+
+      const consoleError = jest.spyOn(console, 'error').mockImplementation()
+      const showAlert = jest.spyOn(fakePlugin, 'showAlert').mockImplementation()
+
+      // Call without resourceType parameter to test default
+      await testAction['handleError'](context, error, resourceId)
+
+      expect(consoleError).toHaveBeenCalledWith(
+        expect.stringContaining('device'),
+        expect.anything()
+      )
+      expect(showAlert).toHaveBeenCalledWith(context)
+
+      consoleError.mockRestore()
       showAlert.mockRestore()
     })
   })

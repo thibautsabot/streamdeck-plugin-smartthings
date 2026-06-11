@@ -16,6 +16,9 @@
   "author": "Thibaut Sabot",
   "license": "MIT",
   "devDependencies": {
+    "@babel/plugin-proposal-decorators": "^7.29.7",
+    "@babel/preset-env": "^7.29.7",
+    "@babel/preset-typescript": "^7.29.7",
     "@eslint/eslintrc": "^3.3.5",
     "@eslint/js": "^10.0.1",
     "@smartthings/core-sdk": "^8.5.1",
@@ -25,6 +28,8 @@
     "@types/node": "^20.17.16",
     "@typescript-eslint/eslint-plugin": "^8.60.1",
     "@typescript-eslint/parser": "^8.60.1",
+    "babel-jest": "^30.4.1",
+    "babel-plugin-istanbul": "^8.0.0",
     "eslint": "^9.18.0",
     "eslint-config-prettier": "^10.1.8",
     "globals": "^17.6.0",
@@ -42,7 +47,7 @@
   "dependencies": {
     "client-oauth2": "^4.3.3",
     "isomorphic-fetch": "^3.0.0",
-    "streamdeck-typescript": "^3.3.4",
-    "oauth-pkce": "^0.0.7"
+    "oauth-pkce": "^0.0.7",
+    "streamdeck-typescript": "^3.3.4"
   }
 }

@@ -146,6 +146,32 @@ describe('GarageDoorAction', () => {
       showAlert.mockRestore()
       warn.mockRestore()
     })
+
+    it('should ignore keyUp events from wrong action', async () => {
+      jest.spyOn(window, 'fetch')
+
+      await garageDoorAction.onKeyUp(
+        fakeKeyUpEvent<DeviceSettingsInterface>({ deviceId: '42' }, 'com.other.action'),
+      )
+
+      expect(window.fetch).not.toHaveBeenCalled()
+    })
+
+    it('should handle API errors gracefully', async () => {
+      server.use(
+        http.get('https://api.smartthings.com/v1/devices/42/status', () => {
+          return HttpResponse.json({ error: 'Unauthorized' }, { status: 401 })
+        }),
+      )
+
+      const handleError = jest.spyOn(garageDoorAction as any, 'handleError').mockImplementation()
+
+      await garageDoorAction.onKeyUp(fakeKeyUpEvent<DeviceSettingsInterface>({ deviceId: '42' }, 'com.thibautsabot.streamdeck.garagedoor'))
+
+      expect(handleError).toHaveBeenCalled()
+
+      handleError.mockRestore()
+    })
   })
 
   describe('updateDeviceState - intermediate states', () => {
@@ -216,7 +242,7 @@ describe('GarageDoorAction', () => {
       setTitle.mockRestore()
     })
 
-    it('should display UNKNOWN state with title', async () => {
+    it('should warn and return early for unknown door state', async () => {
       server.use(
         http.get('https://api.smartthings.com/v1/devices/42/status', () => {
           return HttpResponse.json({
@@ -233,18 +259,18 @@ describe('GarageDoorAction', () => {
         }),
       )
 
+      const warn = jest.spyOn(console, 'warn').mockImplementation()
       const setState = jest.spyOn(garageDoorAction.plugin, 'setState').mockImplementation()
-      const setTitle = jest.spyOn(garageDoorAction.plugin, 'setTitle').mockImplementation()
 
       await garageDoorAction.onWillAppear(
         fakeWillAppearEvent<DeviceSettingsInterface>({ deviceId: '42' }, 'com.thibautsabot.streamdeck.garagedoor'),
       )
 
-      expect(setState).toHaveBeenCalledWith(0, expect.anything())
-      expect(setTitle).toHaveBeenCalledWith('❓ UNKNOWN', expect.anything())
+      expect(warn).toHaveBeenCalledWith('[GarageDoor] Device 42 missing doorControl capability')
+      expect(setState).not.toHaveBeenCalled()
 
+      warn.mockRestore()
       setState.mockRestore()
-      setTitle.mockRestore()
     })
 
     it('should clear title for stable states (OPEN/CLOSED)', async () => {
@@ -276,6 +302,64 @@ describe('GarageDoorAction', () => {
 
       setState.mockRestore()
       setTitle.mockRestore()
+    })
+
+    it('should return early when no deviceId', async () => {
+      jest.spyOn(window, 'fetch')
+
+      await garageDoorAction['updateDeviceState']('test-context', {} as DeviceSettingsInterface)
+
+      expect(window.fetch).not.toHaveBeenCalled()
+    })
+
+    it('should return early when no access token', async () => {
+      garageDoorAction.plugin.settingsManager.getGlobalSettings = jest
+        .fn()
+        .mockReturnValue({} as GlobalSettingsInterface)
+
+      jest.spyOn(window, 'fetch')
+
+      await garageDoorAction['updateDeviceState']('test-context', { deviceId: '42' })
+
+      expect(window.fetch).not.toHaveBeenCalled()
+    })
+
+    it('should warn when device missing doorControl capability in updateDeviceState', async () => {
+      garageDoorAction.plugin.settingsManager.getGlobalSettings = () => createMockGlobalSettings()
+
+      server.use(
+        http.get('https://api.smartthings.com/v1/devices/42/status', () => {
+          return HttpResponse.json({
+            components: { main: {} },
+          })
+        }),
+      )
+
+      const warn = jest.spyOn(console, 'warn').mockImplementation()
+
+      await garageDoorAction['updateDeviceState']('test-context', { deviceId: '42' })
+
+      expect(warn).toHaveBeenCalledWith('[GarageDoor] Device 42 missing doorControl capability')
+
+      warn.mockRestore()
+    })
+
+    it('should handle errors in updateDeviceState', async () => {
+      garageDoorAction.plugin.settingsManager.getGlobalSettings = () => createMockGlobalSettings()
+
+      server.use(
+        http.get('https://api.smartthings.com/v1/devices/42/status', () => {
+          return HttpResponse.json({ error: 'Server error' }, { status: 500 })
+        }),
+      )
+
+      const handleError = jest.spyOn(garageDoorAction as any, 'handleError').mockImplementation()
+
+      await garageDoorAction['updateDeviceState']('test-context', { deviceId: '42' })
+
+      expect(handleError).toHaveBeenCalled()
+
+      handleError.mockRestore()
     })
   })
 })
