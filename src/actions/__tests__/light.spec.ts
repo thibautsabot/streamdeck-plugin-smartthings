@@ -32,7 +32,7 @@ describe('LightAction', () => {
   describe('onKeyUp', () => {
     beforeEach(() => {
       jest.clearAllMocks()
-      lightAction.plugin.settingsManager.getGlobalSettings = () => (createMockGlobalSettings())
+      lightAction.plugin.settingsManager.getGlobalSettings = () => createMockGlobalSettings()
     })
 
     it('should toggle light on', async () => {
@@ -62,7 +62,10 @@ describe('LightAction', () => {
       jest.spyOn(window, 'fetch')
 
       await lightAction.onKeyUp(
-        fakeKeyUpEvent<LightSettingsInterface>({ deviceId: '42', behaviour: LightBehavior.TOGGLE }, 'com.thibautsabot.streamdeck.light'),
+        fakeKeyUpEvent<LightSettingsInterface>(
+          { deviceId: '42', behaviour: LightBehavior.TOGGLE },
+          'com.thibautsabot.streamdeck.light',
+        ),
       )
 
       expect(window.fetch).toHaveBeenLastCalledWith(
@@ -107,7 +110,10 @@ describe('LightAction', () => {
       jest.spyOn(window, 'fetch')
 
       await lightAction.onKeyUp(
-        fakeKeyUpEvent<LightSettingsInterface>({ deviceId: '42', behaviour: LightBehavior.TOGGLE }, 'com.thibautsabot.streamdeck.light'),
+        fakeKeyUpEvent<LightSettingsInterface>(
+          { deviceId: '42', behaviour: LightBehavior.TOGGLE },
+          'com.thibautsabot.streamdeck.light',
+        ),
       )
 
       expect(window.fetch).toHaveBeenLastCalledWith(
@@ -152,7 +158,10 @@ describe('LightAction', () => {
       jest.spyOn(window, 'fetch')
 
       await lightAction.onKeyUp(
-        fakeKeyUpEvent<LightSettingsInterface>({ deviceId: '42', behaviour: LightBehavior.MORE }, 'com.thibautsabot.streamdeck.light'),
+        fakeKeyUpEvent<LightSettingsInterface>(
+          { deviceId: '42', behaviour: LightBehavior.MORE },
+          'com.thibautsabot.streamdeck.light',
+        ),
       )
 
       expect(window.fetch).toHaveBeenLastCalledWith(
@@ -198,7 +207,10 @@ describe('LightAction', () => {
       jest.spyOn(window, 'fetch')
 
       await lightAction.onKeyUp(
-        fakeKeyUpEvent<LightSettingsInterface>({ deviceId: '42', behaviour: LightBehavior.LESS }, 'com.thibautsabot.streamdeck.light'),
+        fakeKeyUpEvent<LightSettingsInterface>(
+          { deviceId: '42', behaviour: LightBehavior.LESS },
+          'com.thibautsabot.streamdeck.light',
+        ),
       )
 
       expect(window.fetch).toHaveBeenLastCalledWith(
@@ -244,7 +256,10 @@ describe('LightAction', () => {
       jest.spyOn(window, 'fetch')
 
       await lightAction.onKeyUp(
-        fakeKeyUpEvent<LightSettingsInterface>({ deviceId: '42', behaviour: LightBehavior.MORE }, 'com.thibautsabot.streamdeck.light'),
+        fakeKeyUpEvent<LightSettingsInterface>(
+          { deviceId: '42', behaviour: LightBehavior.MORE },
+          'com.thibautsabot.streamdeck.light',
+        ),
       )
 
       expect(window.fetch).toHaveBeenLastCalledWith(
@@ -290,7 +305,10 @@ describe('LightAction', () => {
       jest.spyOn(window, 'fetch')
 
       await lightAction.onKeyUp(
-        fakeKeyUpEvent<LightSettingsInterface>({ deviceId: '42', behaviour: LightBehavior.LESS }, 'com.thibautsabot.streamdeck.light'),
+        fakeKeyUpEvent<LightSettingsInterface>(
+          { deviceId: '42', behaviour: LightBehavior.LESS },
+          'com.thibautsabot.streamdeck.light',
+        ),
       )
 
       expect(window.fetch).toHaveBeenLastCalledWith(
@@ -310,12 +328,17 @@ describe('LightAction', () => {
     })
 
     it('should not do anything without a token', async () => {
-      lightAction.plugin.settingsManager.getGlobalSettings = jest.fn().mockReturnValue({} as GlobalSettingsInterface)
+      lightAction.plugin.settingsManager.getGlobalSettings = jest
+        .fn()
+        .mockReturnValue({} as GlobalSettingsInterface)
 
       jest.spyOn(window, 'fetch')
 
       await lightAction.onKeyUp(
-        fakeKeyUpEvent<LightSettingsInterface>({ deviceId: '42', behaviour: LightBehavior.TOGGLE }, 'com.thibautsabot.streamdeck.light'),
+        fakeKeyUpEvent<LightSettingsInterface>(
+          { deviceId: '42', behaviour: LightBehavior.TOGGLE },
+          'com.thibautsabot.streamdeck.light',
+        ),
       )
 
       expect(window.fetch).not.toHaveBeenCalled()
@@ -338,7 +361,10 @@ describe('LightAction', () => {
       const warn = jest.spyOn(console, 'warn').mockImplementation()
 
       await lightAction.onKeyUp(
-        fakeKeyUpEvent<LightSettingsInterface>({ deviceId: '42', behaviour: LightBehavior.TOGGLE }, 'com.thibautsabot.streamdeck.light'),
+        fakeKeyUpEvent<LightSettingsInterface>(
+          { deviceId: '42', behaviour: LightBehavior.TOGGLE },
+          'com.thibautsabot.streamdeck.light',
+        ),
       )
 
       expect(showAlert).toHaveBeenCalled()
@@ -366,7 +392,10 @@ describe('LightAction', () => {
       const warn = jest.spyOn(console, 'warn').mockImplementation()
 
       await lightAction.onKeyUp(
-        fakeKeyUpEvent<LightSettingsInterface>({ deviceId: '42', behaviour: LightBehavior.MORE }, 'com.thibautsabot.streamdeck.light'),
+        fakeKeyUpEvent<LightSettingsInterface>(
+          { deviceId: '42', behaviour: LightBehavior.MORE },
+          'com.thibautsabot.streamdeck.light',
+        ),
       )
 
       expect(showAlert).toHaveBeenCalled()
@@ -396,7 +425,10 @@ describe('LightAction', () => {
       const warn = jest.spyOn(console, 'warn').mockImplementation()
 
       await lightAction.onKeyUp(
-        fakeKeyUpEvent<LightSettingsInterface>({ deviceId: '42', behaviour: LightBehavior.LESS }, 'com.thibautsabot.streamdeck.light'),
+        fakeKeyUpEvent<LightSettingsInterface>(
+          { deviceId: '42', behaviour: LightBehavior.LESS },
+          'com.thibautsabot.streamdeck.light',
+        ),
       )
 
       expect(showAlert).toHaveBeenCalled()
@@ -431,7 +463,10 @@ describe('LightAction', () => {
       const handleError = spyOnPrivateMethod(lightAction, 'handleError').mockImplementation()
 
       await lightAction.onKeyUp(
-        fakeKeyUpEvent<LightSettingsInterface>({ deviceId: '42', behaviour: LightBehavior.TOGGLE }, 'com.thibautsabot.streamdeck.light'),
+        fakeKeyUpEvent<LightSettingsInterface>(
+          { deviceId: '42', behaviour: LightBehavior.TOGGLE },
+          'com.thibautsabot.streamdeck.light',
+        ),
       )
 
       expect(handleError).toHaveBeenCalled()
@@ -566,7 +601,10 @@ describe('LightAction', () => {
       jest.spyOn(window, 'fetch')
 
       await lightAction.onKeyUp(
-        fakeKeyUpEvent<LightSettingsInterface>({ deviceId: '42' }, 'com.thibautsabot.streamdeck.light'),
+        fakeKeyUpEvent<LightSettingsInterface>(
+          { deviceId: '42' },
+          'com.thibautsabot.streamdeck.light',
+        ),
       )
 
       expect(window.fetch).toHaveBeenLastCalledWith(

@@ -56,7 +56,12 @@ describe('SwitchAction', () => {
 
       jest.spyOn(window, 'fetch')
 
-      await switchAction.onKeyUp(fakeKeyUpEvent<DeviceSettingsInterface>({ deviceId: '42' }, 'com.thibautsabot.streamdeck.switch'))
+      await switchAction.onKeyUp(
+        fakeKeyUpEvent<DeviceSettingsInterface>(
+          { deviceId: '42' },
+          'com.thibautsabot.streamdeck.switch',
+        ),
+      )
 
       expect(window.fetch).toHaveBeenLastCalledWith(
         'https://api.smartthings.com/v1/devices/42/commands',
@@ -95,7 +100,12 @@ describe('SwitchAction', () => {
 
       jest.spyOn(window, 'fetch')
 
-      await switchAction.onKeyUp(fakeKeyUpEvent<DeviceSettingsInterface>({ deviceId: '42' }, 'com.thibautsabot.streamdeck.switch'))
+      await switchAction.onKeyUp(
+        fakeKeyUpEvent<DeviceSettingsInterface>(
+          { deviceId: '42' },
+          'com.thibautsabot.streamdeck.switch',
+        ),
+      )
 
       expect(window.fetch).toHaveBeenLastCalledWith(
         'https://api.smartthings.com/v1/devices/42/commands',
@@ -119,7 +129,12 @@ describe('SwitchAction', () => {
 
       jest.spyOn(window, 'fetch')
 
-      await switchAction.onKeyUp(fakeKeyUpEvent<DeviceSettingsInterface>({ deviceId: '42' }, 'com.thibautsabot.streamdeck.switch'))
+      await switchAction.onKeyUp(
+        fakeKeyUpEvent<DeviceSettingsInterface>(
+          { deviceId: '42' },
+          'com.thibautsabot.streamdeck.switch',
+        ),
+      )
 
       expect(window.fetch).not.toHaveBeenCalled()
     })
@@ -140,7 +155,12 @@ describe('SwitchAction', () => {
       const showAlert = jest.spyOn(switchAction.plugin, 'showAlert').mockImplementation()
       const warn = jest.spyOn(console, 'warn').mockImplementation()
 
-      await switchAction.onKeyUp(fakeKeyUpEvent<DeviceSettingsInterface>({ deviceId: '42' }, 'com.thibautsabot.streamdeck.switch'))
+      await switchAction.onKeyUp(
+        fakeKeyUpEvent<DeviceSettingsInterface>(
+          { deviceId: '42' },
+          'com.thibautsabot.streamdeck.switch',
+        ),
+      )
 
       expect(showAlert).toHaveBeenCalled()
       expect(warn).toHaveBeenCalledWith('[Switch] Device 42 missing switch capability')
@@ -168,7 +188,12 @@ describe('SwitchAction', () => {
 
       const handleError = spyOnPrivateMethod(switchAction, 'handleError').mockImplementation()
 
-      await switchAction.onKeyUp(fakeKeyUpEvent<DeviceSettingsInterface>({ deviceId: '42' }, 'com.thibautsabot.streamdeck.switch'))
+      await switchAction.onKeyUp(
+        fakeKeyUpEvent<DeviceSettingsInterface>(
+          { deviceId: '42' },
+          'com.thibautsabot.streamdeck.switch',
+        ),
+      )
 
       expect(handleError).toHaveBeenCalled()
 

@@ -6,6 +6,8 @@ interface PKCEResult {
   challenge: string
 }
 
+/* eslint-disable @typescript-eslint/no-require-imports */
+
 // We need to mock oauth-pkce to test the error path
 jest.mock('oauth-pkce', () => {
   return jest.fn()
@@ -23,9 +25,11 @@ describe('SmartThingsOAuthClient PKCE Error', () => {
     const getPkce = require('oauth-pkce') as jest.Mock
 
     // Mock PKCE to return an error
-    getPkce.mockImplementation((length: number, callback: (error: Error | null, result: PKCEResult | null) => void) => {
-      callback(new Error('PKCE generation failed'), null)
-    })
+    getPkce.mockImplementation(
+      (length: number, callback: (error: Error | null, result: PKCEResult | null) => void) => {
+        callback(new Error('PKCE generation failed'), null)
+      },
+    )
 
     await expect(client.getAuthorizationUrl()).rejects.toThrow('PKCE generation failed')
   })
@@ -34,12 +38,14 @@ describe('SmartThingsOAuthClient PKCE Error', () => {
     const getPkce = require('oauth-pkce') as jest.Mock
 
     // Mock PKCE to succeed
-    getPkce.mockImplementation((length: number, callback: (error: Error | null, result: PKCEResult | null) => void) => {
-      callback(null, {
-        verifier: 'test-verifier',
-        challenge: 'test-challenge',
-      })
-    })
+    getPkce.mockImplementation(
+      (length: number, callback: (error: Error | null, result: PKCEResult | null) => void) => {
+        callback(null, {
+          verifier: 'test-verifier',
+          challenge: 'test-challenge',
+        })
+      },
+    )
 
     const result = await client.getAuthorizationUrl()
 

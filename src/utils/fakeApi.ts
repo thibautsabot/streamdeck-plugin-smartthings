@@ -77,7 +77,9 @@ export function createMockResponse<T>(json: T, ok: boolean = true, status: numbe
     redirected: false,
     type: 'basic',
     url: '',
-    clone: function() { return this },
+    clone: function () {
+      return this
+    },
     body: null,
     bodyUsed: false,
     arrayBuffer: async () => new ArrayBuffer(0),

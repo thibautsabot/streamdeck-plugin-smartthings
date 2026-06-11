@@ -6,6 +6,7 @@ import {
 import { isGlobalSettingsSet, addSelectOption, SelectElement } from './utils/index'
 import { GlobalSettingsInterface } from './utils/interface'
 import { SmartThingsOAuthClient } from './utils/oauth-client'
+import { getValidAccessToken, refreshAccessToken } from './utils/token-manager'
 
 export abstract class BasePropertyInspector<TSettings> extends StreamDeckPropertyInspectorHandler {
   protected selectOptions?: SelectElement[]
@@ -116,9 +117,18 @@ export abstract class BasePropertyInspector<TSettings> extends StreamDeckPropert
         if (apiError.status === 401) {
           const oauthClient = new SmartThingsOAuthClient(
             globalSettings.oauthClientId,
-            globalSettings.oauthClientSecret
+            globalSettings.oauthClientSecret,
           )
-          const refreshedToken = await this.refreshAccessToken(globalSettings, oauthClient)
+          const refreshedToken = await refreshAccessToken(
+            globalSettings,
+            oauthClient,
+            (newTokens) => {
+              this.settingsManager.setGlobalSettings<GlobalSettingsInterface>({
+                ...globalSettings,
+                oauthTokens: newTokens,
+              })
+            },
+          )
 
           if (refreshedToken) {
             try {
@@ -159,11 +169,12 @@ export abstract class BasePropertyInspector<TSettings> extends StreamDeckPropert
 
       window.open(authUrl, '_blank')
 
+      // Show the code input and submit button sections
       const codeInputSection = document.getElementById('code_input_section')
       const submitCodeSection = document.getElementById('submit_code_section')
 
-      if (codeInputSection) codeInputSection.style.display = ''
-      if (submitCodeSection) submitCodeSection.style.display = ''
+      if (codeInputSection) codeInputSection.style.display = 'flex'
+      if (submitCodeSection) submitCodeSection.style.display = 'flex'
     } catch (error) {
       console.error('[OAuth] Failed to get authorization URL:', error)
       alert(`Failed to start OAuth flow: ${error}`)
@@ -267,39 +278,12 @@ export abstract class BasePropertyInspector<TSettings> extends StreamDeckPropert
    * Automatically updates global settings if token was refreshed
    */
   protected async getAccessToken(globalSettings: GlobalSettingsInterface): Promise<string | null> {
-    const oauthClient = new SmartThingsOAuthClient(
-      globalSettings.oauthClientId,
-      globalSettings.oauthClientSecret
-    )
-
-    // Check if token needs refresh based on expiry time
-    if (oauthClient.isTokenExpired(globalSettings.oauthTokens)) {
-      return this.refreshAccessToken(globalSettings, oauthClient)
-    }
-
-    return globalSettings.oauthTokens.accessToken
-  }
-
-  /**
-   * Refresh the access token using the refresh token
-   */
-  private async refreshAccessToken(
-    globalSettings: GlobalSettingsInterface,
-    oauthClient: SmartThingsOAuthClient
-  ): Promise<string | null> {
-    try {
-      const newTokens = await oauthClient.refreshToken(globalSettings.oauthTokens.refreshToken)
-
+    return getValidAccessToken(globalSettings, (newTokens) => {
       this.settingsManager.setGlobalSettings<GlobalSettingsInterface>({
         ...globalSettings,
         oauthTokens: newTokens,
       })
-
-      return newTokens.accessToken
-    } catch (error) {
-      console.error('[PropertyInspector] Token refresh failed:', error)
-      return null
-    }
+    })
   }
 
   protected updateOAuthButtonState() {

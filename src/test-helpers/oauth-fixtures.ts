@@ -18,7 +18,7 @@ export function createMockOAuthTokens(overrides?: Partial<OAuthTokens>): OAuthTo
  * Create mock global settings with OAuth for testing
  */
 export function createMockGlobalSettings(
-  overrides?: Partial<GlobalSettingsInterface>
+  overrides?: Partial<GlobalSettingsInterface>,
 ): GlobalSettingsInterface {
   return {
     oauthTokens: createMockOAuthTokens(),

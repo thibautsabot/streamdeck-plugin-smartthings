@@ -61,7 +61,9 @@ describe('BaseAction', () => {
     })
 
     it('should return null when settings is an empty object', () => {
-      fakePlugin.settingsManager.getGlobalSettings = jest.fn().mockReturnValue({} as GlobalSettingsInterface)
+      fakePlugin.settingsManager.getGlobalSettings = jest
+        .fn()
+        .mockReturnValue({} as GlobalSettingsInterface)
 
       const settings = testAction['getGlobalSettings']()
 
@@ -148,7 +150,7 @@ describe('BaseAction', () => {
 
       expect(consoleError).toHaveBeenCalledWith(
         expect.stringContaining('device'),
-        expect.anything()
+        expect.anything(),
       )
       expect(showAlert).toHaveBeenCalledWith(context)
 

@@ -37,9 +37,8 @@ describe('BaseAction Token Management', () => {
       getAuthorizationUrl: jest.fn(),
       exchangeCodeForToken: jest.fn(),
     }
-
     ;(SmartThingsOAuthClient as jest.MockedClass<typeof SmartThingsOAuthClient>).mockImplementation(
-      () => mockOAuthClient as unknown as SmartThingsOAuthClient
+      () => mockOAuthClient as unknown as SmartThingsOAuthClient,
     )
   })
 
@@ -107,8 +106,8 @@ describe('BaseAction Token Management', () => {
         ...mockSettings,
         oauthTokens: newTokens,
       })
-      expect(consoleLog).toHaveBeenCalledWith('[OAuth] Token expired, refreshing...')
-      expect(consoleLog).toHaveBeenCalledWith('[OAuth] Token refreshed successfully')
+      expect(consoleLog).toHaveBeenCalledWith('[TokenManager] Refreshing expired token...')
+      expect(consoleLog).toHaveBeenCalledWith('[TokenManager] Token refreshed successfully')
 
       consoleLog.mockRestore()
     })
@@ -135,8 +134,8 @@ describe('BaseAction Token Management', () => {
 
       expect(result).toBeNull()
       expect(consoleError).toHaveBeenCalledWith(
-        '[OAuth] Failed to refresh token:',
-        expect.any(Error)
+        '[TokenManager] Token refresh failed:',
+        expect.any(Error),
       )
 
       consoleError.mockRestore()

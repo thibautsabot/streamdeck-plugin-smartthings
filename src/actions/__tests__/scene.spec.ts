@@ -25,7 +25,7 @@ describe('Test scene action', () => {
 
   const sceneAction = new SceneAction(
     new FakeStreamdeckApi() as Smartthings,
-    'com.thibautsabot.streamdeck.scene'
+    'com.thibautsabot.streamdeck.scene',
   )
 
   describe('onKeyUp', () => {
@@ -44,7 +44,10 @@ describe('Test scene action', () => {
       jest.spyOn(window, 'fetch')
 
       await sceneAction.onKeyUp(
-        fakeKeyUpEvent<SceneSettingsInterface>({ sceneId: '42' }, 'com.thibautsabot.streamdeck.scene')
+        fakeKeyUpEvent<SceneSettingsInterface>(
+          { sceneId: '42' },
+          'com.thibautsabot.streamdeck.scene',
+        ),
       )
 
       expect(window.fetch).toHaveBeenCalledWith(
@@ -52,19 +55,24 @@ describe('Test scene action', () => {
         {
           method: 'POST',
           headers: expect.anything(),
-        }
+        },
       )
     })
 
     it('should not do anything without a token', async () => {
-      sceneAction.plugin.settingsManager.getGlobalSettings = jest.fn().mockReturnValue({} as GlobalSettingsInterface)
+      sceneAction.plugin.settingsManager.getGlobalSettings = jest
+        .fn()
+        .mockReturnValue({} as GlobalSettingsInterface)
 
       const showAlert = jest.spyOn(sceneAction.plugin, 'showAlert').mockImplementation()
       const warn = jest.spyOn(console, 'warn').mockImplementation()
       jest.spyOn(window, 'fetch')
 
       await sceneAction.onKeyUp(
-        fakeKeyUpEvent<SceneSettingsInterface>({ sceneId: '42' }, 'com.thibautsabot.streamdeck.scene')
+        fakeKeyUpEvent<SceneSettingsInterface>(
+          { sceneId: '42' },
+          'com.thibautsabot.streamdeck.scene',
+        ),
       )
 
       expect(window.fetch).not.toHaveBeenCalled()
@@ -80,7 +88,10 @@ describe('Test scene action', () => {
       jest.spyOn(window, 'fetch')
 
       await sceneAction.onKeyUp(
-        fakeKeyUpEvent<SceneSettingsInterface>({ sceneId: '' }, 'com.thibautsabot.streamdeck.scene')
+        fakeKeyUpEvent<SceneSettingsInterface>(
+          { sceneId: '' },
+          'com.thibautsabot.streamdeck.scene',
+        ),
       )
 
       expect(window.fetch).not.toHaveBeenCalled()
@@ -99,7 +110,10 @@ describe('Test scene action', () => {
       const showOk = jest.spyOn(sceneAction.plugin, 'showOk').mockImplementation()
 
       await sceneAction.onKeyUp(
-        fakeKeyUpEvent<SceneSettingsInterface>({ sceneId: '42' }, 'com.thibautsabot.streamdeck.scene')
+        fakeKeyUpEvent<SceneSettingsInterface>(
+          { sceneId: '42' },
+          'com.thibautsabot.streamdeck.scene',
+        ),
       )
 
       expect(showOk).toHaveBeenCalled()
@@ -111,13 +125,16 @@ describe('Test scene action', () => {
       server.use(
         http.post('https://api.smartthings.com/v1/scenes/42/execute', () => {
           return HttpResponse.json({ error: 'Internal Server Error' }, { status: 500 })
-        })
+        }),
       )
 
       const showAlert = jest.spyOn(sceneAction.plugin, 'showAlert').mockImplementation()
 
       await sceneAction.onKeyUp(
-        fakeKeyUpEvent<SceneSettingsInterface>({ sceneId: '42' }, 'com.thibautsabot.streamdeck.scene')
+        fakeKeyUpEvent<SceneSettingsInterface>(
+          { sceneId: '42' },
+          'com.thibautsabot.streamdeck.scene',
+        ),
       )
 
       expect(showAlert).toHaveBeenCalled()
@@ -129,7 +146,7 @@ describe('Test scene action', () => {
       jest.spyOn(window, 'fetch')
 
       await sceneAction.onKeyUp(
-        fakeKeyUpEvent<SceneSettingsInterface>({ sceneId: '42' }, 'com.other.action')
+        fakeKeyUpEvent<SceneSettingsInterface>({ sceneId: '42' }, 'com.other.action'),
       )
 
       expect(window.fetch).not.toHaveBeenCalled()

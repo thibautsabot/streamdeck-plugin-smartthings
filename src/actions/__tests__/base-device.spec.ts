@@ -215,9 +215,9 @@ describe('BaseDeviceAction', () => {
 
   describe('fetchStatus', () => {
     it('should fetch device status from SmartThings API', async () => {
-      const mockFetch = jest.spyOn(global, 'fetch').mockResolvedValue(
-        createMockResponse({ components: { main: {} } })
-      )
+      const mockFetch = jest
+        .spyOn(global, 'fetch')
+        .mockResolvedValue(createMockResponse({ components: { main: {} } }))
 
       await testAction['fetchStatus']('device-123', 'access-token')
 
@@ -237,9 +237,7 @@ describe('BaseDeviceAction', () => {
 
   describe('sendCommand', () => {
     it('should send command to device', async () => {
-      const mockFetch = jest.spyOn(global, 'fetch').mockResolvedValue(
-        createMockResponse({})
-      )
+      const mockFetch = jest.spyOn(global, 'fetch').mockResolvedValue(createMockResponse({}))
 
       const consoleLog = jest.spyOn(console, 'log').mockImplementation()
 
@@ -267,9 +265,7 @@ describe('BaseDeviceAction', () => {
     })
 
     it('should send command with arguments', async () => {
-      const mockFetch = jest.spyOn(global, 'fetch').mockResolvedValue(
-        createMockResponse({})
-      )
+      const mockFetch = jest.spyOn(global, 'fetch').mockResolvedValue(createMockResponse({}))
 
       await testAction['sendCommand']('device-123', 'access-token', 'switchLevel', 'setLevel', [50])
 

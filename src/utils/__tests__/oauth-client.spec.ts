@@ -42,16 +42,21 @@ describe('SmartThingsOAuthClient', () => {
     jest.clearAllMocks()
 
     // Setup default mock implementations
-    mockGetUri.mockImplementation((options: { state: string; query: { code_challenge: string; code_challenge_method: string } }) => {
-      const params = new URLSearchParams({
-        client_id: 'test-client-id',
-        redirect_uri: 'https://streamdeck-smartthings-oauth.vercel.app/oauth-callback.html',
-        state: options.state,
-        code_challenge: options.query.code_challenge,
-        code_challenge_method: options.query.code_challenge_method,
-      })
-      return `https://api.smartthings.com/oauth/authorize?${params.toString()}`
-    })
+    mockGetUri.mockImplementation(
+      (options: {
+        state: string
+        query: { code_challenge: string; code_challenge_method: string }
+      }) => {
+        const params = new URLSearchParams({
+          client_id: 'test-client-id',
+          redirect_uri: 'https://streamdeck-smartthings-oauth.vercel.app/oauth-callback.html',
+          state: options.state,
+          code_challenge: options.query.code_challenge,
+          code_challenge_method: options.query.code_challenge_method,
+        })
+        return `https://api.smartthings.com/oauth/authorize?${params.toString()}`
+      },
+    )
 
     client = new SmartThingsOAuthClient(clientId, clientSecret)
   })
@@ -97,7 +102,7 @@ describe('SmartThingsOAuthClient', () => {
           body: {
             code_verifier: 'verifier-123',
           },
-        }
+        },
       )
 
       expect(result.accessToken).toBe('access-token-123')
@@ -112,7 +117,7 @@ describe('SmartThingsOAuthClient', () => {
       mockGetToken.mockRejectedValue(error)
 
       await expect(client.exchangeCodeForToken('invalid-code', 'verifier-123')).rejects.toThrow(
-        'Authorization code is invalid'
+        'Authorization code is invalid',
       )
     })
   })
@@ -197,7 +202,7 @@ describe('SmartThingsOAuthClient', () => {
       mockGetToken.mockRejectedValue(error)
 
       await expect(client.exchangeCodeForToken('invalid-code', 'verifier-123')).rejects.toThrow(
-        'Token exchange failed'
+        'Token exchange failed',
       )
     })
 
@@ -206,7 +211,7 @@ describe('SmartThingsOAuthClient', () => {
       mockGetToken.mockRejectedValue(error)
 
       await expect(client.exchangeCodeForToken('invalid-code', 'verifier-123')).rejects.toThrow(
-        'Network error'
+        'Network error',
       )
     })
   })
