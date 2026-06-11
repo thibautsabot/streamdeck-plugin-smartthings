@@ -3,7 +3,12 @@ import { GlobalSettingsInterface } from './interface'
 export function isGlobalSettingsSet(
   settings: GlobalSettingsInterface | unknown,
 ): settings is GlobalSettingsInterface {
-  return (settings as GlobalSettingsInterface).accessToken !== undefined
+  const typed = settings as GlobalSettingsInterface
+  return (
+    typed.oauthTokens !== undefined &&
+    typed.oauthClientId !== undefined &&
+    typed.oauthClientSecret !== undefined
+  )
 }
 
 export interface ApiError extends Error {

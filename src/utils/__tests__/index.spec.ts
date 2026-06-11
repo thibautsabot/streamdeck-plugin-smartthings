@@ -21,7 +21,7 @@ describe('Test utils', () => {
       server.use(
         http.get('https://api.smartthings.com/v1/test', () => {
           return HttpResponse.json({})
-        })
+        }),
       )
 
       jest.spyOn(window, 'fetch')
@@ -67,6 +67,5 @@ describe('Test utils', () => {
 
       expect(queryByAttribute('value', select, 'myNewId')).toBeFalsy()
     })
-
   })
 })

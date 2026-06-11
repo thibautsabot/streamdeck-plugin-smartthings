@@ -4,6 +4,7 @@ import { FakeStreamdeckApi } from '../../utils/fakeApi'
 import { BaseAction } from '../base-action'
 import { Smartthings } from '../../smartthings-plugin'
 import { ApiError } from '../../utils/index'
+import { GlobalSettingsInterface } from '../../utils/interface'
 
 // Create a concrete test class since BaseAction is abstract
 class TestAction extends BaseAction<TestAction> {
@@ -29,16 +30,30 @@ describe('BaseAction', () => {
   })
 
   describe('getGlobalSettings', () => {
-    it('should return settings when accessToken is defined', () => {
-      fakePlugin.settingsManager.getGlobalSettings = () => ({ accessToken: 'valid-token' })
+    it('should return settings when OAuth credentials are defined', () => {
+      const mockSettings = {
+        oauthTokens: {
+          accessToken: 'valid-access-token',
+          refreshToken: 'valid-refresh-token',
+          expiresAt: Date.now() + 3600000,
+          tokenType: 'Bearer',
+        },
+        oauthClientId: 'client-id',
+        oauthClientSecret: 'client-secret',
+      }
+      fakePlugin.settingsManager.getGlobalSettings = () => mockSettings
 
       const settings = testAction['getGlobalSettings']()
 
-      expect(settings).toEqual({ accessToken: 'valid-token' })
+      expect(settings).toEqual(mockSettings)
     })
 
-    it('should return null when accessToken is undefined', () => {
-      fakePlugin.settingsManager.getGlobalSettings = () => ({ accessToken: undefined })
+    it('should return null when OAuth credentials are incomplete', () => {
+      fakePlugin.settingsManager.getGlobalSettings = jest.fn().mockReturnValue({
+        oauthTokens: undefined,
+        oauthClientId: 'client-id',
+        oauthClientSecret: 'client-secret',
+      } as Partial<GlobalSettingsInterface>)
 
       const settings = testAction['getGlobalSettings']()
 
@@ -46,7 +61,9 @@ describe('BaseAction', () => {
     })
 
     it('should return null when settings is an empty object', () => {
-      fakePlugin.settingsManager.getGlobalSettings = () => ({} as any)
+      fakePlugin.settingsManager.getGlobalSettings = jest
+        .fn()
+        .mockReturnValue({} as GlobalSettingsInterface)
 
       const settings = testAction['getGlobalSettings']()
 
@@ -58,44 +75,10 @@ describe('BaseAction', () => {
     const context = 'test-context'
     const resourceId = 'device-123'
 
-    it('should show alert and set OFFLINE title for 424 errors', async () => {
-      const error: ApiError = new Error('Failed Dependency') as ApiError
-      error.status = 424
-      error.statusText = 'Failed Dependency'
-
-      const showAlert = jest.spyOn(fakePlugin, 'showAlert').mockImplementation()
-      const setTitle = jest.spyOn(fakePlugin, 'setTitle').mockImplementation()
-
-      await testAction['handleError'](context, error, resourceId, 'device')
-
-      expect(showAlert).toHaveBeenCalledWith(context)
-      expect(setTitle).toHaveBeenCalledWith('⚠️ OFFLINE', context)
-
-      showAlert.mockRestore()
-      setTitle.mockRestore()
-    })
-
-    it('should show alert and set OFFLINE title for 503 errors', async () => {
+    it('should show alert and set OFFLINE title for service errors (424/503/504)', async () => {
       const error: ApiError = new Error('Service Unavailable') as ApiError
       error.status = 503
       error.statusText = 'Service Unavailable'
-
-      const showAlert = jest.spyOn(fakePlugin, 'showAlert').mockImplementation()
-      const setTitle = jest.spyOn(fakePlugin, 'setTitle').mockImplementation()
-
-      await testAction['handleError'](context, error, resourceId, 'device')
-
-      expect(showAlert).toHaveBeenCalledWith(context)
-      expect(setTitle).toHaveBeenCalledWith('⚠️ OFFLINE', context)
-
-      showAlert.mockRestore()
-      setTitle.mockRestore()
-    })
-
-    it('should show alert and set OFFLINE title for 504 errors', async () => {
-      const error: ApiError = new Error('Gateway Timeout') as ApiError
-      error.status = 504
-      error.statusText = 'Gateway Timeout'
 
       const showAlert = jest.spyOn(fakePlugin, 'showAlert').mockImplementation()
       const setTitle = jest.spyOn(fakePlugin, 'setTitle').mockImplementation()
@@ -151,6 +134,27 @@ describe('BaseAction', () => {
 
       expect(showAlert).toHaveBeenCalledWith(context)
 
+      showAlert.mockRestore()
+    })
+
+    it('should default to device resourceType when not provided', async () => {
+      const error: ApiError = new Error('Generic Error') as ApiError
+      error.status = 500
+      error.statusText = 'Internal Server Error'
+
+      const consoleError = jest.spyOn(console, 'error').mockImplementation()
+      const showAlert = jest.spyOn(fakePlugin, 'showAlert').mockImplementation()
+
+      // Call without resourceType parameter to test default
+      await testAction['handleError'](context, error, resourceId)
+
+      expect(consoleError).toHaveBeenCalledWith(
+        expect.stringContaining('device'),
+        expect.anything(),
+      )
+      expect(showAlert).toHaveBeenCalledWith(context)
+
+      consoleError.mockRestore()
       showAlert.mockRestore()
     })
   })

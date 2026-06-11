@@ -9,13 +9,19 @@
   "scripts": {
     "browserify": "browserify build/smartthings-plugin.js > com.thibautsabot.streamdeck.smartthings.sdPlugin/public/dist/smartthings-plugin-bundle.js && browserify build/scene-property-inspector.js > com.thibautsabot.streamdeck.smartthings.sdPlugin/public/dist/scene-property-inspector-bundle.js && browserify build/light-property-inspector.js > com.thibautsabot.streamdeck.smartthings.sdPlugin/public/dist/light-property-inspector-bundle.js && browserify build/switch-property-inspector.js > com.thibautsabot.streamdeck.smartthings.sdPlugin/public/dist/switch-property-inspector-bundle.js && browserify build/garagedoor-property-inspector.js > com.thibautsabot.streamdeck.smartthings.sdPlugin/public/dist/garagedoor-property-inspector-bundle.js",
     "build": "npm run tsc && npm run browserify",
-    "lint": "eslint src/**/*.ts",
+    "lint": "eslint \"src/**/*.ts\"",
+    "lint:fix": "eslint \"src/**/*.ts\" --fix",
+    "format": "prettier --write \"src/**/*.ts\"",
     "test": "jest --coverage",
-    "tsc": "tsc -p tsconfig.json"
+    "tsc": "tsc -p tsconfig.json",
+    "prepare": "husky"
   },
   "author": "Thibaut Sabot",
   "license": "MIT",
   "devDependencies": {
+    "@babel/plugin-proposal-decorators": "^7.29.7",
+    "@babel/preset-env": "^7.29.7",
+    "@babel/preset-typescript": "^7.29.7",
     "@eslint/eslintrc": "^3.3.5",
     "@eslint/js": "^10.0.1",
     "@smartthings/core-sdk": "^8.5.1",
@@ -25,12 +31,16 @@
     "@types/node": "^20.17.16",
     "@typescript-eslint/eslint-plugin": "^8.60.1",
     "@typescript-eslint/parser": "^8.60.1",
+    "babel-jest": "^30.4.1",
+    "babel-plugin-istanbul": "^8.0.0",
     "eslint": "^9.18.0",
     "eslint-config-prettier": "^10.1.8",
     "globals": "^17.6.0",
+    "husky": "^9.1.7",
     "jest": "^30.4.2",
     "jest-environment-jsdom": "^30.4.1",
     "jest-fixed-jsdom": "^0.0.11",
+    "lint-staged": "^17.0.7",
     "msw": "^2.14.6",
     "prettier": "^3.8.3",
     "ts-jest": "^29.4.11",
@@ -40,7 +50,15 @@
     "watchify": "^4.0.0"
   },
   "dependencies": {
+    "client-oauth2": "^4.3.3",
     "isomorphic-fetch": "^3.0.0",
+    "oauth-pkce": "^0.0.7",
     "streamdeck-typescript": "^3.3.4"
+  },
+  "lint-staged": {
+    "*.ts": [
+      "prettier --write",
+      "eslint --fix"
+    ]
   }
 }

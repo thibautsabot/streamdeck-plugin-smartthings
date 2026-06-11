@@ -2,15 +2,16 @@ import { GlobalSettingsInterface } from '../utils/interface'
 import { StreamDeckAction } from 'streamdeck-typescript'
 import { isGlobalSettingsSet, ApiError } from '../utils/index'
 import { Smartthings } from '../smartthings-plugin'
+import { getValidAccessToken } from '../utils/token-manager'
 
 /**
  * Base class for all actions (Scene and Device) with shared error handling and validation
  */
-export abstract class BaseAction<T extends BaseAction<T>> extends StreamDeckAction<
-  Smartthings,
-  T
-> {
-  constructor(public plugin: Smartthings, actionName: string) {
+export abstract class BaseAction<T extends BaseAction<T>> extends StreamDeckAction<Smartthings, T> {
+  constructor(
+    public plugin: Smartthings,
+    actionName: string,
+  ) {
     super(plugin, actionName)
   }
 
@@ -23,6 +24,22 @@ export abstract class BaseAction<T extends BaseAction<T>> extends StreamDeckActi
   }
 
   /**
+   * Get a valid access token, refreshing if necessary
+   * Automatically updates global settings if token was refreshed
+   */
+  protected async getAccessToken(): Promise<string | null> {
+    const globalSettings = this.getGlobalSettings()
+    if (!globalSettings) return null
+
+    return getValidAccessToken(globalSettings, (newTokens) => {
+      this.plugin.settingsManager.setGlobalSettings<GlobalSettingsInterface>({
+        ...globalSettings,
+        oauthTokens: newTokens,
+      })
+    })
+  }
+
+  /**
    * Handle API errors with consistent logging and user feedback.
    * Automatically detects offline/unavailable status and updates title accordingly.
    */
@@ -30,7 +47,7 @@ export abstract class BaseAction<T extends BaseAction<T>> extends StreamDeckActi
     context: string,
     error: unknown,
     resourceId: string,
-    resourceType: 'device' | 'scene' = 'device'
+    resourceType: 'device' | 'scene' = 'device',
   ): Promise<void> {
     const apiError = error as ApiError
     console.error(`[${this.constructor.name}] Error for ${resourceType} ${resourceId}:`, apiError)
@@ -43,11 +60,11 @@ export abstract class BaseAction<T extends BaseAction<T>> extends StreamDeckActi
       await this.plugin.setTitle('⚠️ OFFLINE', context)
     } else if (apiError.status === 404) {
       console.error(
-        `[${this.constructor.name}] ${resourceType} ${resourceId} not found - may have been deleted`
+        `[${this.constructor.name}] ${resourceType} ${resourceId} not found - may have been deleted`,
       )
     } else if (apiError.status === 401 || apiError.status === 403) {
       console.error(
-        `[${this.constructor.name}] Authentication/permission error - check access token`
+        `[${this.constructor.name}] Authentication/permission error - check access token`,
       )
     } else if (apiError.status === 429) {
       console.error(`[${this.constructor.name}] Rate limit exceeded - too many requests`)

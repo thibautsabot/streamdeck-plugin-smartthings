@@ -13,7 +13,6 @@ export enum DoorValue {
   CLOSED = 'closed',
   OPENING = 'opening',
   CLOSING = 'closing',
-  UNKNOWN = 'unknown',
 }
 
 export enum LightBehavior {
@@ -54,26 +53,5 @@ export class DeviceCapabilities {
   static getSwitchLevel(deviceStatus: DeviceStatus): number | null {
     const value = deviceStatus.components?.main?.switchLevel?.level?.value
     return typeof value === 'number' ? value : null
-  }
-
-  /**
-   * Check if device has switch capability
-   */
-  static hasSwitch(deviceStatus: DeviceStatus): boolean {
-    return this.getSwitchValue(deviceStatus) !== null
-  }
-
-  /**
-   * Check if device has door control capability
-   */
-  static hasDoorControl(deviceStatus: DeviceStatus): boolean {
-    return this.getDoorValue(deviceStatus) !== null
-  }
-
-  /**
-   * Check if device has switch level (dimmer) capability
-   */
-  static hasSwitchLevel(deviceStatus: DeviceStatus): boolean {
-    return this.getSwitchLevel(deviceStatus) !== null
   }
 }

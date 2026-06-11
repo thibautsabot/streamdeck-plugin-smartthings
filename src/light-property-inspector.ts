@@ -66,18 +66,20 @@ export class LightPropertyInspector extends BasePropertyInspector<LightSettingsI
     const globalSettings = this.settingsManager.getGlobalSettings<GlobalSettingsInterface>()
     if (!isGlobalSettingsSet(globalSettings)) return
 
+    const accessToken = globalSettings.oauthTokens.accessToken
+
     try {
       const deviceStatus = await fetchApi<DeviceStatus>({
         endpoint: `/devices/${deviceId}/status`,
         method: 'GET',
-        accessToken: globalSettings.accessToken,
+        accessToken,
       })
 
       const hasSwitchLevel = deviceStatus.components?.main?.switchLevel?.level?.value !== undefined
 
       if (hasSwitchLevel) {
-        if (moreOption) moreOption.style.display = ''
-        if (lessOption) lessOption.style.display = ''
+        if (moreOption) moreOption.style.display = 'inline'
+        if (lessOption) lessOption.style.display = 'inline'
       } else {
         if (moreOption) moreOption.style.display = 'none'
         if (lessOption) lessOption.style.display = 'none'
@@ -92,8 +94,9 @@ export class LightPropertyInspector extends BasePropertyInspector<LightSettingsI
       }
     } catch (error) {
       console.warn('[LightPropertyInspector] Could not fetch device capabilities:', error)
-      if (moreOption) moreOption.style.display = ''
-      if (lessOption) lessOption.style.display = ''
+      // On error, show all options as fallback
+      if (moreOption) moreOption.style.display = 'inline'
+      if (lessOption) lessOption.style.display = 'inline'
     }
   }
 

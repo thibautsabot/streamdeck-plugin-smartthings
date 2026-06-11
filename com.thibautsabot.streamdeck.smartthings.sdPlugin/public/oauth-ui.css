@@ -1,0 +1,36 @@
+/* Shared OAuth UI styles */
+.auth-status {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 8px 12px;
+    border-radius: 4px;
+    background: #d4edda;
+    color: #155724;
+    font-size: 13px;
+    margin-bottom: 10px;
+}
+
+.auth-status-icon {
+    font-size: 16px;
+    margin-right: 8px;
+}
+
+.sign-out-btn {
+    background: transparent;
+    border: 1px solid #155724;
+    color: #155724;
+    padding: 4px 12px;
+    border-radius: 3px;
+    cursor: pointer;
+    font-size: 12px;
+}
+
+.sign-out-btn:hover {
+    background: #155724;
+    color: white;
+}
+
+#oauth_section {
+    margin-bottom: 15px;
+}
