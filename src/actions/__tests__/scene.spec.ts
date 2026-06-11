@@ -9,6 +9,14 @@ import { http, HttpResponse } from 'msw'
 import { setupServer } from 'msw/node'
 import { createMockGlobalSettings } from '../../test-helpers/oauth-fixtures'
 
+// Mock the OAuth client
+jest.mock('../../utils/oauth-client', () => ({
+  SmartThingsOAuthClient: jest.fn().mockImplementation(() => ({
+    isTokenExpired: jest.fn().mockReturnValue(false),
+    refreshToken: jest.fn(),
+  })),
+}))
+
 const server = setupServer()
 
 describe('Test scene action', () => {
@@ -36,7 +44,7 @@ describe('Test scene action', () => {
       jest.spyOn(window, 'fetch')
 
       await sceneAction.onKeyUp(
-        fakeKeyUpEvent<SceneSettingsInterface>({ sceneId: '42' })
+        fakeKeyUpEvent<SceneSettingsInterface>({ sceneId: '42' }, 'com.thibautsabot.streamdeck.scene')
       )
 
       expect(window.fetch).toHaveBeenCalledWith(
@@ -55,7 +63,7 @@ describe('Test scene action', () => {
       jest.spyOn(window, 'fetch')
 
       await sceneAction.onKeyUp(
-        fakeKeyUpEvent<SceneSettingsInterface>({ sceneId: '42' })
+        fakeKeyUpEvent<SceneSettingsInterface>({ sceneId: '42' }, 'com.thibautsabot.streamdeck.scene')
       )
 
       expect(window.fetch).not.toHaveBeenCalled()
@@ -69,7 +77,7 @@ describe('Test scene action', () => {
       jest.spyOn(window, 'fetch')
 
       await sceneAction.onKeyUp(
-        fakeKeyUpEvent<SceneSettingsInterface>({ sceneId: '' })
+        fakeKeyUpEvent<SceneSettingsInterface>({ sceneId: '' }, 'com.thibautsabot.streamdeck.scene')
       )
 
       expect(window.fetch).not.toHaveBeenCalled()
@@ -88,7 +96,7 @@ describe('Test scene action', () => {
       const showOk = jest.spyOn(sceneAction.plugin, 'showOk').mockImplementation()
 
       await sceneAction.onKeyUp(
-        fakeKeyUpEvent<SceneSettingsInterface>({ sceneId: '42' })
+        fakeKeyUpEvent<SceneSettingsInterface>({ sceneId: '42' }, 'com.thibautsabot.streamdeck.scene')
       )
 
       expect(showOk).toHaveBeenCalled()
@@ -106,7 +114,7 @@ describe('Test scene action', () => {
       const showAlert = jest.spyOn(sceneAction.plugin, 'showAlert').mockImplementation()
 
       await sceneAction.onKeyUp(
-        fakeKeyUpEvent<SceneSettingsInterface>({ sceneId: '42' })
+        fakeKeyUpEvent<SceneSettingsInterface>({ sceneId: '42' }, 'com.thibautsabot.streamdeck.scene')
       )
 
       expect(showAlert).toHaveBeenCalled()

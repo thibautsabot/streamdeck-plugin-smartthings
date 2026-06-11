@@ -9,6 +9,14 @@ import { Smartthings } from '../../smartthings-plugin'
 import { http, HttpResponse } from 'msw'
 import { setupServer } from 'msw/node'
 
+// Mock the OAuth client
+jest.mock('../../utils/oauth-client', () => ({
+  SmartThingsOAuthClient: jest.fn().mockImplementation(() => ({
+    isTokenExpired: jest.fn().mockReturnValue(false),
+    refreshToken: jest.fn(),
+  })),
+}))
+
 const server = setupServer()
 
 describe('GarageDoorAction', () => {
@@ -47,7 +55,7 @@ describe('GarageDoorAction', () => {
       )
       jest.spyOn(window, 'fetch')
 
-      await garageDoorAction.onKeyUp(fakeKeyUpEvent<DeviceSettingsInterface>({ deviceId: '42' }))
+      await garageDoorAction.onKeyUp(fakeKeyUpEvent<DeviceSettingsInterface>({ deviceId: '42' }, 'com.thibautsabot.streamdeck.garagedoor'))
 
       expect(window.fetch).toHaveBeenLastCalledWith(
         'https://api.smartthings.com/v1/devices/42/commands',
@@ -85,7 +93,7 @@ describe('GarageDoorAction', () => {
       )
       jest.spyOn(window, 'fetch')
 
-      await garageDoorAction.onKeyUp(fakeKeyUpEvent<DeviceSettingsInterface>({ deviceId: '42' }))
+      await garageDoorAction.onKeyUp(fakeKeyUpEvent<DeviceSettingsInterface>({ deviceId: '42' }, 'com.thibautsabot.streamdeck.garagedoor'))
 
       expect(window.fetch).toHaveBeenLastCalledWith(
         'https://api.smartthings.com/v1/devices/42/commands',
@@ -109,7 +117,7 @@ describe('GarageDoorAction', () => {
 
       jest.spyOn(window, 'fetch')
 
-      await garageDoorAction.onKeyUp(fakeKeyUpEvent<DeviceSettingsInterface>({ deviceId: '42' }))
+      await garageDoorAction.onKeyUp(fakeKeyUpEvent<DeviceSettingsInterface>({ deviceId: '42' }, 'com.thibautsabot.streamdeck.garagedoor'))
 
       expect(window.fetch).not.toHaveBeenCalled()
     })
@@ -130,7 +138,7 @@ describe('GarageDoorAction', () => {
       const showAlert = jest.spyOn(garageDoorAction.plugin, 'showAlert').mockImplementation()
       const warn = jest.spyOn(console, 'warn').mockImplementation()
 
-      await garageDoorAction.onKeyUp(fakeKeyUpEvent<DeviceSettingsInterface>({ deviceId: '42' }))
+      await garageDoorAction.onKeyUp(fakeKeyUpEvent<DeviceSettingsInterface>({ deviceId: '42' }, 'com.thibautsabot.streamdeck.garagedoor'))
 
       expect(showAlert).toHaveBeenCalled()
       expect(warn).toHaveBeenCalledWith('[GarageDoor] Device 42 missing doorControl capability')
@@ -167,7 +175,7 @@ describe('GarageDoorAction', () => {
       const setTitle = jest.spyOn(garageDoorAction.plugin, 'setTitle').mockImplementation()
 
       await garageDoorAction.onWillAppear(
-        fakeWillAppearEvent<DeviceSettingsInterface>({ deviceId: '42' }),
+        fakeWillAppearEvent<DeviceSettingsInterface>({ deviceId: '42' }, 'com.thibautsabot.streamdeck.garagedoor'),
       )
 
       expect(setState).toHaveBeenCalledWith(1, expect.anything())
@@ -198,7 +206,7 @@ describe('GarageDoorAction', () => {
       const setTitle = jest.spyOn(garageDoorAction.plugin, 'setTitle').mockImplementation()
 
       await garageDoorAction.onWillAppear(
-        fakeWillAppearEvent<DeviceSettingsInterface>({ deviceId: '42' }),
+        fakeWillAppearEvent<DeviceSettingsInterface>({ deviceId: '42' }, 'com.thibautsabot.streamdeck.garagedoor'),
       )
 
       expect(setState).toHaveBeenCalledWith(0, expect.anything())
@@ -229,7 +237,7 @@ describe('GarageDoorAction', () => {
       const setTitle = jest.spyOn(garageDoorAction.plugin, 'setTitle').mockImplementation()
 
       await garageDoorAction.onWillAppear(
-        fakeWillAppearEvent<DeviceSettingsInterface>({ deviceId: '42' }),
+        fakeWillAppearEvent<DeviceSettingsInterface>({ deviceId: '42' }, 'com.thibautsabot.streamdeck.garagedoor'),
       )
 
       expect(setState).toHaveBeenCalledWith(0, expect.anything())
@@ -260,7 +268,7 @@ describe('GarageDoorAction', () => {
       const setTitle = jest.spyOn(garageDoorAction.plugin, 'setTitle').mockImplementation()
 
       await garageDoorAction.onWillAppear(
-        fakeWillAppearEvent<DeviceSettingsInterface>({ deviceId: '42' }),
+        fakeWillAppearEvent<DeviceSettingsInterface>({ deviceId: '42' }, 'com.thibautsabot.streamdeck.garagedoor'),
       )
 
       expect(setState).toHaveBeenCalledWith(1, expect.anything())

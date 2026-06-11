@@ -9,6 +9,14 @@ import { Smartthings } from '../../smartthings-plugin'
 import { http, HttpResponse } from 'msw'
 import { setupServer } from 'msw/node'
 
+// Mock the OAuth client
+jest.mock('../../utils/oauth-client', () => ({
+  SmartThingsOAuthClient: jest.fn().mockImplementation(() => ({
+    isTokenExpired: jest.fn().mockReturnValue(false),
+    refreshToken: jest.fn(),
+  })),
+}))
+
 const server = setupServer()
 
 describe('SwitchAction', () => {
@@ -48,7 +56,7 @@ describe('SwitchAction', () => {
 
       jest.spyOn(window, 'fetch')
 
-      await switchAction.onKeyUp(fakeKeyUpEvent<DeviceSettingsInterface>({ deviceId: '42' }))
+      await switchAction.onKeyUp(fakeKeyUpEvent<DeviceSettingsInterface>({ deviceId: '42' }, 'com.thibautsabot.streamdeck.switch'))
 
       expect(window.fetch).toHaveBeenLastCalledWith(
         'https://api.smartthings.com/v1/devices/42/commands',
@@ -87,7 +95,7 @@ describe('SwitchAction', () => {
 
       jest.spyOn(window, 'fetch')
 
-      await switchAction.onKeyUp(fakeKeyUpEvent<DeviceSettingsInterface>({ deviceId: '42' }))
+      await switchAction.onKeyUp(fakeKeyUpEvent<DeviceSettingsInterface>({ deviceId: '42' }, 'com.thibautsabot.streamdeck.switch'))
 
       expect(window.fetch).toHaveBeenLastCalledWith(
         'https://api.smartthings.com/v1/devices/42/commands',
@@ -111,7 +119,7 @@ describe('SwitchAction', () => {
 
       jest.spyOn(window, 'fetch')
 
-      await switchAction.onKeyUp(fakeKeyUpEvent<DeviceSettingsInterface>({ deviceId: '42' }))
+      await switchAction.onKeyUp(fakeKeyUpEvent<DeviceSettingsInterface>({ deviceId: '42' }, 'com.thibautsabot.streamdeck.switch'))
 
       expect(window.fetch).not.toHaveBeenCalled()
     })
@@ -132,7 +140,7 @@ describe('SwitchAction', () => {
       const showAlert = jest.spyOn(switchAction.plugin, 'showAlert').mockImplementation()
       const warn = jest.spyOn(console, 'warn').mockImplementation()
 
-      await switchAction.onKeyUp(fakeKeyUpEvent<DeviceSettingsInterface>({ deviceId: '42' }))
+      await switchAction.onKeyUp(fakeKeyUpEvent<DeviceSettingsInterface>({ deviceId: '42' }, 'com.thibautsabot.streamdeck.switch'))
 
       expect(showAlert).toHaveBeenCalled()
       expect(warn).toHaveBeenCalledWith('[Switch] Device 42 missing switch capability')

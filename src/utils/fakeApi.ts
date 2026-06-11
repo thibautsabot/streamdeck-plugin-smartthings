@@ -60,7 +60,7 @@ export class FakeStreamdeckApi extends StreamDeckPluginHandler {
   addEventListener(event: string, fnc: Function): void {}
 }
 
-export function fakeKeyUpEvent<T>(settings: T): KeyUpEvent<T> {
+export function fakeKeyUpEvent<T>(settings: T, actionUuid?: string): KeyUpEvent<T> {
   const coordinates = {
     column: 0,
     row: 0,
@@ -68,7 +68,7 @@ export function fakeKeyUpEvent<T>(settings: T): KeyUpEvent<T> {
   const state = StateType.ON
   const userDesiredState = StateType.ON
   const isInMultiAction = false
-  const action = ''
+  const action = actionUuid || ''
   const context = ''
   const device = ''
   const event = 'keyUp'
@@ -88,14 +88,14 @@ export function fakeKeyUpEvent<T>(settings: T): KeyUpEvent<T> {
   }
 }
 
-export function fakeWillAppearEvent<T>(settings: T): WillAppearEvent<T> {
+export function fakeWillAppearEvent<T>(settings: T, actionUuid?: string): WillAppearEvent<T> {
   const coordinates = {
     column: 0,
     row: 0,
   }
   const state = StateType.ON
   const isInMultiAction = false
-  const action = ''
+  const action = actionUuid || ''
   const context = ''
   const device = ''
   const event = 'willAppear'
