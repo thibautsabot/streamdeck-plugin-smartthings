@@ -26,7 +26,7 @@ Control your SmartThings devices and scenes directly from your Stream Deck with 
 
 Before you can use the plugin, you need to create an OAuth application in the SmartThings CLI:
 
-(TL;DR: These setup are also shown is this ![video](oauth.mp4))
+[![Video TLDR](./preview_oauth.png)](https://streamable.com/xal3or)
 
 1. Install the [Smartthings CLI Github](https://github.com/SmartThingsCommunity/smartthings-cli#installation)
 2. Run `smartthings apps:create` in your terminal
@@ -82,7 +82,7 @@ The plugin uses **PKCE (Proof Key for Code Exchange)**, a secure OAuth 2.0 flow 
 
 ### Project Overview
 
-This plugin is built with TypeScript and uses the [SmartThings API](https://smartthings.developer.samsung.com/docs) for device control. It was created from [typescript-streamdeck-boilerplate](https://github.com/thibautsabot/typescript-streamdeck-boilerplate/).
+This plugin is built with TypeScript and uses the [SmartThings API](https://developer.smartthings.com/docs/api/public) for device control. It was created from [typescript-streamdeck-boilerplate](https://github.com/thibautsabot/typescript-streamdeck-boilerplate/).
 
 **Current capabilities:**
 - Control any SmartThings "switch" devices (lights, switches, outlets, etc.)
@@ -142,9 +142,3 @@ Contributions are welcome! Here's how you can help:
 - Commit with clear messages
 - Push to your fork
 - Open a Pull Request
-
-
-**Devices not showing:**
-- Check that you selected all required scopes in SmartThings app
-- Try re-authorizing
-- Check Stream Deck console for API errors
