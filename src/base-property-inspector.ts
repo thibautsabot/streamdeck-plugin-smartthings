@@ -99,11 +99,40 @@ export abstract class BasePropertyInspector<TSettings> extends StreamDeckPropert
 
       // Fetch devices/scenes for this button type
       try {
-        const elements = await this.fetchOptions(globalSettings.oauthTokens.accessToken)
+        const accessToken = await this.getAccessToken(globalSettings)
+        if (!accessToken) {
+          console.error('[PropertyInspector] Failed to get valid access token')
+          return
+        }
+        const elements = await this.fetchOptions(accessToken)
         this.selectOptions = elements
         this.populateDropdown()
       } catch (error) {
-        console.error('[PropertyInspector] Failed to fetch options:', error)
+        const apiError = error as { status?: number }
+        console.error('[PropertyInspector] Failed to fetch options:', apiError)
+
+        // If we get a 401, the token might be invalid even though it appears valid locally
+        // Try to refresh it
+        if (apiError.status === 401) {
+          const oauthClient = new SmartThingsOAuthClient(
+            globalSettings.oauthClientId,
+            globalSettings.oauthClientSecret
+          )
+          const refreshedToken = await this.refreshAccessToken(globalSettings, oauthClient)
+
+          if (refreshedToken) {
+            try {
+              const elements = await this.fetchOptions(refreshedToken)
+              this.selectOptions = elements
+              this.populateDropdown()
+              return
+            } catch (retryError) {
+              console.error('[PropertyInspector] Failed after token refresh:', retryError)
+            }
+          }
+          alert('Your session is no longer valid. Please sign out and sign in again.')
+          this.showUnauthenticatedUI()
+        }
       }
     } else {
       // User is not authenticated - show OAuth form, hide status banner
@@ -231,6 +260,46 @@ export abstract class BasePropertyInspector<TSettings> extends StreamDeckPropert
 
     if (authBanner) authBanner.style.display = 'none'
     if (oauthSection) oauthSection.style.display = 'block'
+  }
+
+  /**
+   * Get a valid access token, refreshing if necessary
+   * Automatically updates global settings if token was refreshed
+   */
+  protected async getAccessToken(globalSettings: GlobalSettingsInterface): Promise<string | null> {
+    const oauthClient = new SmartThingsOAuthClient(
+      globalSettings.oauthClientId,
+      globalSettings.oauthClientSecret
+    )
+
+    // Check if token needs refresh based on expiry time
+    if (oauthClient.isTokenExpired(globalSettings.oauthTokens)) {
+      return this.refreshAccessToken(globalSettings, oauthClient)
+    }
+
+    return globalSettings.oauthTokens.accessToken
+  }
+
+  /**
+   * Refresh the access token using the refresh token
+   */
+  private async refreshAccessToken(
+    globalSettings: GlobalSettingsInterface,
+    oauthClient: SmartThingsOAuthClient
+  ): Promise<string | null> {
+    try {
+      const newTokens = await oauthClient.refreshToken(globalSettings.oauthTokens.refreshToken)
+
+      this.settingsManager.setGlobalSettings<GlobalSettingsInterface>({
+        ...globalSettings,
+        oauthTokens: newTokens,
+      })
+
+      return newTokens.accessToken
+    } catch (error) {
+      console.error('[PropertyInspector] Token refresh failed:', error)
+      return null
+    }
   }
 
   protected updateOAuthButtonState() {
