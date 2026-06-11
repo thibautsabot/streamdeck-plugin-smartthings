@@ -54,7 +54,7 @@ export class GarageDoorAction extends BaseDeviceAction<GarageDoorAction> {
     payload,
     action,
   }: KeyUpEvent<DeviceSettingsInterface>): Promise<void> {
-    if (action !== 'com.thibautsabot.streamdeck.garagedoor') return
+    if (action !== 'com.thibautsabot.streamdeck.smartthings.garagedoor') return
 
     const accessToken = await this.getAccessToken()
     if (!accessToken) return

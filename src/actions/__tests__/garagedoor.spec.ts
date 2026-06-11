@@ -30,7 +30,7 @@ describe('GarageDoorAction', () => {
 
   const garageDoorAction = new GarageDoorAction(
     new FakeStreamdeckApi() as Smartthings,
-    'com.thibautsabot.streamdeck.garagedoor',
+    'com.thibautsabot.streamdeck.smartthings.garagedoor',
   )
 
   describe('onKeyUp', () => {
@@ -63,7 +63,7 @@ describe('GarageDoorAction', () => {
       await garageDoorAction.onKeyUp(
         fakeKeyUpEvent<DeviceSettingsInterface>(
           { deviceId: '42' },
-          'com.thibautsabot.streamdeck.garagedoor',
+          'com.thibautsabot.streamdeck.smartthings.garagedoor',
         ),
       )
 
@@ -106,7 +106,7 @@ describe('GarageDoorAction', () => {
       await garageDoorAction.onKeyUp(
         fakeKeyUpEvent<DeviceSettingsInterface>(
           { deviceId: '42' },
-          'com.thibautsabot.streamdeck.garagedoor',
+          'com.thibautsabot.streamdeck.smartthings.garagedoor',
         ),
       )
 
@@ -135,7 +135,7 @@ describe('GarageDoorAction', () => {
       await garageDoorAction.onKeyUp(
         fakeKeyUpEvent<DeviceSettingsInterface>(
           { deviceId: '42' },
-          'com.thibautsabot.streamdeck.garagedoor',
+          'com.thibautsabot.streamdeck.smartthings.garagedoor',
         ),
       )
 
@@ -161,7 +161,7 @@ describe('GarageDoorAction', () => {
       await garageDoorAction.onKeyUp(
         fakeKeyUpEvent<DeviceSettingsInterface>(
           { deviceId: '42' },
-          'com.thibautsabot.streamdeck.garagedoor',
+          'com.thibautsabot.streamdeck.smartthings.garagedoor',
         ),
       )
 
@@ -194,7 +194,7 @@ describe('GarageDoorAction', () => {
       await garageDoorAction.onKeyUp(
         fakeKeyUpEvent<DeviceSettingsInterface>(
           { deviceId: '42' },
-          'com.thibautsabot.streamdeck.garagedoor',
+          'com.thibautsabot.streamdeck.smartthings.garagedoor',
         ),
       )
 
@@ -233,7 +233,7 @@ describe('GarageDoorAction', () => {
       await garageDoorAction.onWillAppear(
         fakeWillAppearEvent<DeviceSettingsInterface>(
           { deviceId: '42' },
-          'com.thibautsabot.streamdeck.garagedoor',
+          'com.thibautsabot.streamdeck.smartthings.garagedoor',
         ),
       )
 
@@ -267,7 +267,7 @@ describe('GarageDoorAction', () => {
       await garageDoorAction.onWillAppear(
         fakeWillAppearEvent<DeviceSettingsInterface>(
           { deviceId: '42' },
-          'com.thibautsabot.streamdeck.garagedoor',
+          'com.thibautsabot.streamdeck.smartthings.garagedoor',
         ),
       )
 
@@ -301,7 +301,7 @@ describe('GarageDoorAction', () => {
       await garageDoorAction.onWillAppear(
         fakeWillAppearEvent<DeviceSettingsInterface>(
           { deviceId: '42' },
-          'com.thibautsabot.streamdeck.garagedoor',
+          'com.thibautsabot.streamdeck.smartthings.garagedoor',
         ),
       )
 
@@ -335,7 +335,7 @@ describe('GarageDoorAction', () => {
       await garageDoorAction.onWillAppear(
         fakeWillAppearEvent<DeviceSettingsInterface>(
           { deviceId: '42' },
-          'com.thibautsabot.streamdeck.garagedoor',
+          'com.thibautsabot.streamdeck.smartthings.garagedoor',
         ),
       )
 

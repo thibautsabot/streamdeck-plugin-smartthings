@@ -25,7 +25,7 @@ describe('SwitchAction', () => {
 
   const switchAction = new SwitchAction(
     new FakeStreamdeckApi() as Smartthings,
-    'com.thibautsabot.streamdeck.switch',
+    'com.thibautsabot.streamdeck.smartthings.switch',
   )
 
   describe('onKeyUp', () => {
@@ -59,7 +59,7 @@ describe('SwitchAction', () => {
       await switchAction.onKeyUp(
         fakeKeyUpEvent<DeviceSettingsInterface>(
           { deviceId: '42' },
-          'com.thibautsabot.streamdeck.switch',
+          'com.thibautsabot.streamdeck.smartthings.switch',
         ),
       )
 
@@ -103,7 +103,7 @@ describe('SwitchAction', () => {
       await switchAction.onKeyUp(
         fakeKeyUpEvent<DeviceSettingsInterface>(
           { deviceId: '42' },
-          'com.thibautsabot.streamdeck.switch',
+          'com.thibautsabot.streamdeck.smartthings.switch',
         ),
       )
 
@@ -132,7 +132,7 @@ describe('SwitchAction', () => {
       await switchAction.onKeyUp(
         fakeKeyUpEvent<DeviceSettingsInterface>(
           { deviceId: '42' },
-          'com.thibautsabot.streamdeck.switch',
+          'com.thibautsabot.streamdeck.smartthings.switch',
         ),
       )
 
@@ -158,7 +158,7 @@ describe('SwitchAction', () => {
       await switchAction.onKeyUp(
         fakeKeyUpEvent<DeviceSettingsInterface>(
           { deviceId: '42' },
-          'com.thibautsabot.streamdeck.switch',
+          'com.thibautsabot.streamdeck.smartthings.switch',
         ),
       )
 
@@ -191,7 +191,7 @@ describe('SwitchAction', () => {
       await switchAction.onKeyUp(
         fakeKeyUpEvent<DeviceSettingsInterface>(
           { deviceId: '42' },
-          'com.thibautsabot.streamdeck.switch',
+          'com.thibautsabot.streamdeck.smartthings.switch',
         ),
       )
 

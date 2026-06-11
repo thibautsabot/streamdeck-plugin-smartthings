@@ -47,7 +47,7 @@ export class LightAction extends BaseDeviceAction<LightAction> {
     payload,
     action,
   }: KeyUpEvent<LightSettingsInterface>): Promise<void> {
-    if (action !== 'com.thibautsabot.streamdeck.light') return
+    if (action !== 'com.thibautsabot.streamdeck.smartthings.light') return
 
     const accessToken = await this.getAccessToken()
     if (!accessToken) return

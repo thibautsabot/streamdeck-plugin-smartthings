@@ -20,7 +20,7 @@ export class SceneAction extends BaseAction<SceneAction> {
     payload,
     action,
   }: KeyUpEvent<SceneSettingsInterface>): Promise<void> {
-    if (action !== 'com.thibautsabot.streamdeck.scene') return
+    if (action !== 'com.thibautsabot.streamdeck.smartthings.scene') return
 
     const accessToken = await this.getAccessToken()
 

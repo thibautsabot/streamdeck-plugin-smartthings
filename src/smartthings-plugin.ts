@@ -7,10 +7,10 @@ import { StreamDeckPluginHandler } from 'streamdeck-typescript'
 export class Smartthings extends StreamDeckPluginHandler {
   constructor() {
     super()
-    new SceneAction(this, 'com.thibautsabot.streamdeck.scene')
-    new LightAction(this, 'com.thibautsabot.streamdeck.light')
-    new SwitchAction(this, 'com.thibautsabot.streamdeck.switch')
-    new GarageDoorAction(this, 'com.thibautsabot.streamdeck.garagedoor')
+    new SceneAction(this, 'com.thibautsabot.streamdeck.smartthings.scene')
+    new LightAction(this, 'com.thibautsabot.streamdeck.smartthings.light')
+    new SwitchAction(this, 'com.thibautsabot.streamdeck.smartthings.switch')
+    new GarageDoorAction(this, 'com.thibautsabot.streamdeck.smartthings.garagedoor')
   }
 }
 

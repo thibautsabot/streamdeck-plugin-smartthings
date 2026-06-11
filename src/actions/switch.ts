@@ -41,7 +41,7 @@ export class SwitchAction extends BaseDeviceAction<SwitchAction> {
     payload,
     action,
   }: KeyUpEvent<DeviceSettingsInterface>): Promise<void> {
-    if (action !== 'com.thibautsabot.streamdeck.switch') return
+    if (action !== 'com.thibautsabot.streamdeck.smartthings.switch') return
 
     const accessToken = await this.getAccessToken()
 

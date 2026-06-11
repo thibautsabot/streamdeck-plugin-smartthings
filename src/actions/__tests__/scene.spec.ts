@@ -25,7 +25,7 @@ describe('Test scene action', () => {
 
   const sceneAction = new SceneAction(
     new FakeStreamdeckApi() as Smartthings,
-    'com.thibautsabot.streamdeck.scene',
+    'com.thibautsabot.streamdeck.smartthings.scene',
   )
 
   describe('onKeyUp', () => {
@@ -46,7 +46,7 @@ describe('Test scene action', () => {
       await sceneAction.onKeyUp(
         fakeKeyUpEvent<SceneSettingsInterface>(
           { sceneId: '42' },
-          'com.thibautsabot.streamdeck.scene',
+          'com.thibautsabot.streamdeck.smartthings.scene',
         ),
       )
 
@@ -71,7 +71,7 @@ describe('Test scene action', () => {
       await sceneAction.onKeyUp(
         fakeKeyUpEvent<SceneSettingsInterface>(
           { sceneId: '42' },
-          'com.thibautsabot.streamdeck.scene',
+          'com.thibautsabot.streamdeck.smartthings.scene',
         ),
       )
 
@@ -90,7 +90,7 @@ describe('Test scene action', () => {
       await sceneAction.onKeyUp(
         fakeKeyUpEvent<SceneSettingsInterface>(
           { sceneId: '' },
-          'com.thibautsabot.streamdeck.scene',
+          'com.thibautsabot.streamdeck.smartthings.scene',
         ),
       )
 
@@ -112,7 +112,7 @@ describe('Test scene action', () => {
       await sceneAction.onKeyUp(
         fakeKeyUpEvent<SceneSettingsInterface>(
           { sceneId: '42' },
-          'com.thibautsabot.streamdeck.scene',
+          'com.thibautsabot.streamdeck.smartthings.scene',
         ),
       )
 
@@ -133,7 +133,7 @@ describe('Test scene action', () => {
       await sceneAction.onKeyUp(
         fakeKeyUpEvent<SceneSettingsInterface>(
           { sceneId: '42' },
-          'com.thibautsabot.streamdeck.scene',
+          'com.thibautsabot.streamdeck.smartthings.scene',
         ),
       )
 

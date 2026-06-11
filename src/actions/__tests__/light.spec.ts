@@ -26,7 +26,7 @@ describe('LightAction', () => {
 
   const lightAction = new LightAction(
     new FakeStreamdeckApi() as Smartthings,
-    'com.thibautsabot.streamdeck.light',
+    'com.thibautsabot.streamdeck.smartthings.light',
   )
 
   describe('onKeyUp', () => {
@@ -64,7 +64,7 @@ describe('LightAction', () => {
       await lightAction.onKeyUp(
         fakeKeyUpEvent<LightSettingsInterface>(
           { deviceId: '42', behaviour: LightBehavior.TOGGLE },
-          'com.thibautsabot.streamdeck.light',
+          'com.thibautsabot.streamdeck.smartthings.light',
         ),
       )
 
@@ -112,7 +112,7 @@ describe('LightAction', () => {
       await lightAction.onKeyUp(
         fakeKeyUpEvent<LightSettingsInterface>(
           { deviceId: '42', behaviour: LightBehavior.TOGGLE },
-          'com.thibautsabot.streamdeck.light',
+          'com.thibautsabot.streamdeck.smartthings.light',
         ),
       )
 
@@ -160,7 +160,7 @@ describe('LightAction', () => {
       await lightAction.onKeyUp(
         fakeKeyUpEvent<LightSettingsInterface>(
           { deviceId: '42', behaviour: LightBehavior.MORE },
-          'com.thibautsabot.streamdeck.light',
+          'com.thibautsabot.streamdeck.smartthings.light',
         ),
       )
 
@@ -209,7 +209,7 @@ describe('LightAction', () => {
       await lightAction.onKeyUp(
         fakeKeyUpEvent<LightSettingsInterface>(
           { deviceId: '42', behaviour: LightBehavior.LESS },
-          'com.thibautsabot.streamdeck.light',
+          'com.thibautsabot.streamdeck.smartthings.light',
         ),
       )
 
@@ -258,7 +258,7 @@ describe('LightAction', () => {
       await lightAction.onKeyUp(
         fakeKeyUpEvent<LightSettingsInterface>(
           { deviceId: '42', behaviour: LightBehavior.MORE },
-          'com.thibautsabot.streamdeck.light',
+          'com.thibautsabot.streamdeck.smartthings.light',
         ),
       )
 
@@ -307,7 +307,7 @@ describe('LightAction', () => {
       await lightAction.onKeyUp(
         fakeKeyUpEvent<LightSettingsInterface>(
           { deviceId: '42', behaviour: LightBehavior.LESS },
-          'com.thibautsabot.streamdeck.light',
+          'com.thibautsabot.streamdeck.smartthings.light',
         ),
       )
 
@@ -337,7 +337,7 @@ describe('LightAction', () => {
       await lightAction.onKeyUp(
         fakeKeyUpEvent<LightSettingsInterface>(
           { deviceId: '42', behaviour: LightBehavior.TOGGLE },
-          'com.thibautsabot.streamdeck.light',
+          'com.thibautsabot.streamdeck.smartthings.light',
         ),
       )
 
@@ -363,7 +363,7 @@ describe('LightAction', () => {
       await lightAction.onKeyUp(
         fakeKeyUpEvent<LightSettingsInterface>(
           { deviceId: '42', behaviour: LightBehavior.TOGGLE },
-          'com.thibautsabot.streamdeck.light',
+          'com.thibautsabot.streamdeck.smartthings.light',
         ),
       )
 
@@ -394,7 +394,7 @@ describe('LightAction', () => {
       await lightAction.onKeyUp(
         fakeKeyUpEvent<LightSettingsInterface>(
           { deviceId: '42', behaviour: LightBehavior.MORE },
-          'com.thibautsabot.streamdeck.light',
+          'com.thibautsabot.streamdeck.smartthings.light',
         ),
       )
 
@@ -427,7 +427,7 @@ describe('LightAction', () => {
       await lightAction.onKeyUp(
         fakeKeyUpEvent<LightSettingsInterface>(
           { deviceId: '42', behaviour: LightBehavior.LESS },
-          'com.thibautsabot.streamdeck.light',
+          'com.thibautsabot.streamdeck.smartthings.light',
         ),
       )
 
@@ -465,7 +465,7 @@ describe('LightAction', () => {
       await lightAction.onKeyUp(
         fakeKeyUpEvent<LightSettingsInterface>(
           { deviceId: '42', behaviour: LightBehavior.TOGGLE },
-          'com.thibautsabot.streamdeck.light',
+          'com.thibautsabot.streamdeck.smartthings.light',
         ),
       )
 
@@ -603,7 +603,7 @@ describe('LightAction', () => {
       await lightAction.onKeyUp(
         fakeKeyUpEvent<LightSettingsInterface>(
           { deviceId: '42' },
-          'com.thibautsabot.streamdeck.light',
+          'com.thibautsabot.streamdeck.smartthings.light',
         ),
       )
 
