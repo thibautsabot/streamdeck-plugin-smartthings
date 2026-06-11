@@ -99,8 +99,9 @@ export class SmartThingsOAuthClient {
       })
 
       return this.convertToken(token)
-    } catch (error: any) {
-      throw new Error(error.body?.error_description || error.message || 'Token exchange failed')
+    } catch (error: unknown) {
+      const err = error as { body?: { error_description?: string }; message?: string }
+      throw new Error(err.body?.error_description || err.message || 'Token exchange failed')
     }
   }
 

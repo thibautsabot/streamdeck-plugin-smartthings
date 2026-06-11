@@ -1,7 +1,13 @@
 import 'isomorphic-fetch'
 import { BaseDeviceAction } from '../base-device'
 import { Smartthings } from '../../smartthings-plugin'
-import { FakeStreamdeckApi } from '../../utils/fakeApi'
+import {
+  FakeStreamdeckApi,
+  fakeWillAppearEvent,
+  fakeWillDisappearEvent,
+  fakeDidReceiveSettingsEvent,
+  createMockResponse,
+} from '../../utils/fakeApi'
 import { DeviceSettingsInterface } from '../../utils/interface'
 
 // Create a concrete test class since BaseDeviceAction is abstract
@@ -36,11 +42,10 @@ describe('BaseDeviceAction', () => {
     it('should update device state and start polling', async () => {
       const context = 'test-context'
       const settings = { deviceId: 'device-123' }
+      const event = fakeWillAppearEvent(settings)
+      event.context = context
 
-      await testAction.onWillAppear({
-        context,
-        payload: { settings },
-      } as any)
+      await testAction.onWillAppear(event)
 
       expect(testAction.updateDeviceStateCalls).toHaveLength(1)
       expect(testAction.updateDeviceStateCalls[0]).toEqual({ context, settings })
@@ -55,7 +60,7 @@ describe('BaseDeviceAction', () => {
       testAction['startPolling'](context, settings)
       expect(testAction['pollingIntervals'].has(context)).toBe(true)
 
-      testAction.onWillDisappear({ context } as any)
+      testAction.onWillDisappear(fakeWillDisappearEvent(context, settings))
 
       expect(testAction['pollingIntervals'].has(context)).toBe(false)
     })
@@ -66,10 +71,7 @@ describe('BaseDeviceAction', () => {
       const context = 'test-context'
       const settings = { deviceId: 'device-456' }
 
-      await testAction.onDidReceiveSettings({
-        context,
-        payload: { settings },
-      } as any)
+      await testAction.onDidReceiveSettings(fakeDidReceiveSettingsEvent(context, settings))
 
       expect(testAction.updateDeviceStateCalls).toHaveLength(1)
       expect(testAction.updateDeviceStateCalls[0]).toEqual({ context, settings })
@@ -213,10 +215,9 @@ describe('BaseDeviceAction', () => {
 
   describe('fetchStatus', () => {
     it('should fetch device status from SmartThings API', async () => {
-      const mockFetch = jest.spyOn(global, 'fetch').mockResolvedValue({
-        ok: true,
-        json: async () => ({ components: { main: {} } }),
-      } as any)
+      const mockFetch = jest.spyOn(global, 'fetch').mockResolvedValue(
+        createMockResponse({ components: { main: {} } })
+      )
 
       await testAction['fetchStatus']('device-123', 'access-token')
 
@@ -236,10 +237,9 @@ describe('BaseDeviceAction', () => {
 
   describe('sendCommand', () => {
     it('should send command to device', async () => {
-      const mockFetch = jest.spyOn(global, 'fetch').mockResolvedValue({
-        ok: true,
-        json: async () => ({}),
-      } as any)
+      const mockFetch = jest.spyOn(global, 'fetch').mockResolvedValue(
+        createMockResponse({})
+      )
 
       const consoleLog = jest.spyOn(console, 'log').mockImplementation()
 
@@ -267,10 +267,9 @@ describe('BaseDeviceAction', () => {
     })
 
     it('should send command with arguments', async () => {
-      const mockFetch = jest.spyOn(global, 'fetch').mockResolvedValue({
-        ok: true,
-        json: async () => ({}),
-      } as any)
+      const mockFetch = jest.spyOn(global, 'fetch').mockResolvedValue(
+        createMockResponse({})
+      )
 
       await testAction['sendCommand']('device-123', 'access-token', 'switchLevel', 'setLevel', [50])
 

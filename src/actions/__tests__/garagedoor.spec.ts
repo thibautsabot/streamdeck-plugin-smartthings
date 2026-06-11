@@ -1,7 +1,7 @@
 import 'isomorphic-fetch'
 import { createMockGlobalSettings } from '../../test-helpers/oauth-fixtures'
 
-import { FakeStreamdeckApi, fakeKeyUpEvent, fakeWillAppearEvent } from '../../utils/fakeApi'
+import { FakeStreamdeckApi, fakeKeyUpEvent, fakeWillAppearEvent, spyOnPrivateMethod } from '../../utils/fakeApi'
 
 import { GarageDoorAction } from '../garagedoor'
 import { DeviceSettingsInterface, GlobalSettingsInterface } from '../../utils/interface'
@@ -164,7 +164,7 @@ describe('GarageDoorAction', () => {
         }),
       )
 
-      const handleError = jest.spyOn(garageDoorAction as any, 'handleError').mockImplementation()
+      const handleError = spyOnPrivateMethod(garageDoorAction, 'handleError').mockImplementation()
 
       await garageDoorAction.onKeyUp(fakeKeyUpEvent<DeviceSettingsInterface>({ deviceId: '42' }, 'com.thibautsabot.streamdeck.garagedoor'))
 
@@ -353,7 +353,7 @@ describe('GarageDoorAction', () => {
         }),
       )
 
-      const handleError = jest.spyOn(garageDoorAction as any, 'handleError').mockImplementation()
+      const handleError = spyOnPrivateMethod(garageDoorAction, 'handleError').mockImplementation()
 
       await garageDoorAction['updateDeviceState']('test-context', { deviceId: '42' })
 

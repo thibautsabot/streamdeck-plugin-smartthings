@@ -1,7 +1,7 @@
 import 'isomorphic-fetch'
 import { createMockGlobalSettings } from '../../test-helpers/oauth-fixtures'
 
-import { FakeStreamdeckApi, fakeKeyUpEvent } from '../../utils/fakeApi'
+import { FakeStreamdeckApi, fakeKeyUpEvent, spyOnPrivateMethod } from '../../utils/fakeApi'
 
 import { LightAction } from '../light'
 import { LightSettingsInterface, GlobalSettingsInterface } from '../../utils/interface'
@@ -428,7 +428,7 @@ describe('LightAction', () => {
         }),
       )
 
-      const handleError = jest.spyOn(lightAction as any, 'handleError').mockImplementation()
+      const handleError = spyOnPrivateMethod(lightAction, 'handleError').mockImplementation()
 
       await lightAction.onKeyUp(
         fakeKeyUpEvent<LightSettingsInterface>({ deviceId: '42', behaviour: LightBehavior.TOGGLE }, 'com.thibautsabot.streamdeck.light'),
@@ -535,7 +535,7 @@ describe('LightAction', () => {
         }),
       )
 
-      const handleError = jest.spyOn(lightAction as any, 'handleError').mockImplementation()
+      const handleError = spyOnPrivateMethod(lightAction, 'handleError').mockImplementation()
 
       await lightAction['updateDeviceState']('test-context', { deviceId: '42' })
 

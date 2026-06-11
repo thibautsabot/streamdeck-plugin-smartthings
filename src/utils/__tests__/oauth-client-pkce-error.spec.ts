@@ -1,6 +1,11 @@
 import 'isomorphic-fetch'
 import { SmartThingsOAuthClient } from '../oauth-client'
 
+interface PKCEResult {
+  verifier: string
+  challenge: string
+}
+
 // We need to mock oauth-pkce to test the error path
 jest.mock('oauth-pkce', () => {
   return jest.fn()
@@ -15,10 +20,10 @@ describe('SmartThingsOAuthClient PKCE Error', () => {
   })
 
   it('should handle PKCE generation errors', async () => {
-    const getPkce = require('oauth-pkce')
+    const getPkce = require('oauth-pkce') as jest.Mock
 
     // Mock PKCE to return an error
-    getPkce.mockImplementation((length: number, callback: (error: Error | null, result: any) => void) => {
+    getPkce.mockImplementation((length: number, callback: (error: Error | null, result: PKCEResult | null) => void) => {
       callback(new Error('PKCE generation failed'), null)
     })
 
@@ -26,10 +31,10 @@ describe('SmartThingsOAuthClient PKCE Error', () => {
   })
 
   it('should succeed when PKCE works', async () => {
-    const getPkce = require('oauth-pkce')
+    const getPkce = require('oauth-pkce') as jest.Mock
 
     // Mock PKCE to succeed
-    getPkce.mockImplementation((length: number, callback: (error: Error | null, result: any) => void) => {
+    getPkce.mockImplementation((length: number, callback: (error: Error | null, result: PKCEResult | null) => void) => {
       callback(null, {
         verifier: 'test-verifier',
         challenge: 'test-challenge',

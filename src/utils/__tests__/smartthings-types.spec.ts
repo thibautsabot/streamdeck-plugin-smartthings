@@ -150,17 +150,17 @@ describe('DeviceCapabilities', () => {
     })
 
     it('should return null when level value is not a number', () => {
-      const deviceStatus: DeviceStatus = {
+      const deviceStatus = {
         components: {
           main: {
             switchLevel: {
               level: {
-                value: 'not-a-number' as any,
+                value: 'not-a-number',
               },
             },
           },
         },
-      }
+      } as unknown as DeviceStatus
 
       expect(DeviceCapabilities.getSwitchLevel(deviceStatus)).toBeNull()
     })

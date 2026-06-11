@@ -1,7 +1,7 @@
 import 'isomorphic-fetch'
 import { createMockGlobalSettings } from '../../test-helpers/oauth-fixtures'
 
-import { FakeStreamdeckApi, fakeKeyUpEvent } from '../../utils/fakeApi'
+import { FakeStreamdeckApi, fakeKeyUpEvent, spyOnPrivateMethod } from '../../utils/fakeApi'
 
 import { SwitchAction } from '../switch'
 import { DeviceSettingsInterface, GlobalSettingsInterface } from '../../utils/interface'
@@ -166,7 +166,7 @@ describe('SwitchAction', () => {
         }),
       )
 
-      const handleError = jest.spyOn(switchAction as any, 'handleError').mockImplementation()
+      const handleError = spyOnPrivateMethod(switchAction, 'handleError').mockImplementation()
 
       await switchAction.onKeyUp(fakeKeyUpEvent<DeviceSettingsInterface>({ deviceId: '42' }, 'com.thibautsabot.streamdeck.switch'))
 
@@ -271,7 +271,7 @@ describe('SwitchAction', () => {
         }),
       )
 
-      const handleError = jest.spyOn(switchAction as any, 'handleError').mockImplementation()
+      const handleError = spyOnPrivateMethod(switchAction, 'handleError').mockImplementation()
 
       await switchAction['updateDeviceState']('test-context', { deviceId: '42' })
 

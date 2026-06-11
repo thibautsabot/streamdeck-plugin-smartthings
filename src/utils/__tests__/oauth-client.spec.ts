@@ -7,9 +7,14 @@ const mockGetToken = jest.fn()
 const mockCreateToken = jest.fn()
 const mockRefresh = jest.fn()
 
+interface PKCEResult {
+  verifier: string
+  challenge: string
+}
+
 // Mock oauth-pkce
 jest.mock('oauth-pkce', () => {
-  return jest.fn((length: number, callback: (error: Error | null, result: any) => void) => {
+  return jest.fn((length: number, callback: (error: Error | null, result: PKCEResult) => void) => {
     callback(null, {
       verifier: 'mock-verifier-1234567890',
       challenge: 'mock-challenge-abcdef',
@@ -37,7 +42,7 @@ describe('SmartThingsOAuthClient', () => {
     jest.clearAllMocks()
 
     // Setup default mock implementations
-    mockGetUri.mockImplementation((options: any) => {
+    mockGetUri.mockImplementation((options: { state: string; query: { code_challenge: string; code_challenge_method: string } }) => {
       const params = new URLSearchParams({
         client_id: 'test-client-id',
         redirect_uri: 'https://streamdeck-smartthings-oauth.vercel.app/oauth-callback.html',
@@ -102,8 +107,8 @@ describe('SmartThingsOAuthClient', () => {
     })
 
     it('should throw error when token exchange fails', async () => {
-      const error = new Error('Invalid grant')
-      ;(error as any).body = { error_description: 'Authorization code is invalid' }
+      const error: Error & { body?: { error_description: string } } = new Error('Invalid grant')
+      error.body = { error_description: 'Authorization code is invalid' }
       mockGetToken.mockRejectedValue(error)
 
       await expect(client.exchangeCodeForToken('invalid-code', 'verifier-123')).rejects.toThrow(

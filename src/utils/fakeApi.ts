@@ -1,4 +1,11 @@
-import { KeyUpEvent, WillAppearEvent, StateType, TargetType } from 'streamdeck-typescript'
+import {
+  KeyUpEvent,
+  WillAppearEvent,
+  WillDisappearEvent,
+  DidReceiveSettingsEvent,
+  StateType,
+  TargetType,
+} from 'streamdeck-typescript'
 import { PossibleEventsToSend, StreamDeckPluginHandler } from 'streamdeck-typescript'
 
 export class FakeStreamdeckApi extends StreamDeckPluginHandler {
@@ -41,11 +48,11 @@ export class FakeStreamdeckApi extends StreamDeckPluginHandler {
 
   protected onReady(): void {}
 
-  setSettings<Settings = any>(settings: Settings, context: string): void {}
+  setSettings<Settings = unknown>(settings: Settings, context: string): void {}
 
   requestSettings(context: string): void {}
 
-  setGlobalSettings<GlobalSettings = any>(settings: GlobalSettings): void {}
+  setGlobalSettings<GlobalSettings = unknown>(settings: GlobalSettings): void {}
 
   requestGlobalSettings(): void {}
 
@@ -58,6 +65,38 @@ export class FakeStreamdeckApi extends StreamDeckPluginHandler {
   enableDebug(): void {}
 
   addEventListener(event: string, fnc: Function): void {}
+}
+
+export function createMockResponse<T>(json: T, ok: boolean = true, status: number = 200): Response {
+  return {
+    ok,
+    status,
+    json: async () => json,
+    statusText: ok ? 'OK' : 'Error',
+    headers: new Headers(),
+    redirected: false,
+    type: 'basic',
+    url: '',
+    clone: function() { return this },
+    body: null,
+    bodyUsed: false,
+    arrayBuffer: async () => new ArrayBuffer(0),
+    blob: async () => new Blob(),
+    formData: async () => new FormData(),
+    text: async () => JSON.stringify(json),
+  } as Response
+}
+
+/**
+ * Helper to spy on private methods in tests
+ * Usage: spyOnPrivateMethod(instance, 'methodName')
+ */
+export function spyOnPrivateMethod<T, K extends string>(
+  instance: T,
+  methodName: K,
+): jest.SpyInstance {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  return jest.spyOn(instance as any, methodName)
 }
 
 export function fakeKeyUpEvent<T>(settings: T, actionUuid?: string): KeyUpEvent<T> {
@@ -105,6 +144,64 @@ export function fakeWillAppearEvent<T>(settings: T, actionUuid?: string): WillAp
       settings,
       coordinates,
       state,
+      isInMultiAction,
+      controller: 'Encoder',
+    },
+    action,
+    context,
+    device,
+    event,
+  }
+}
+
+export function fakeWillDisappearEvent<T>(
+  context: string = '',
+  settings?: T,
+  actionUuid?: string,
+): WillDisappearEvent<T> {
+  const coordinates = {
+    column: 0,
+    row: 0,
+  }
+  const state = StateType.ON
+  const isInMultiAction = false
+  const action = actionUuid || ''
+  const device = ''
+  const event = 'willDisappear'
+
+  return {
+    payload: {
+      settings: settings || ({} as T),
+      coordinates,
+      state,
+      isInMultiAction,
+      controller: 'Encoder',
+    },
+    action,
+    context,
+    device,
+    event,
+  }
+}
+
+export function fakeDidReceiveSettingsEvent<T>(
+  context: string = '',
+  settings: T,
+  actionUuid?: string,
+): DidReceiveSettingsEvent<T> {
+  const coordinates = {
+    column: 0,
+    row: 0,
+  }
+  const isInMultiAction = false
+  const action = actionUuid || ''
+  const device = ''
+  const event = 'didReceiveSettings'
+
+  return {
+    payload: {
+      settings,
+      coordinates,
       isInMultiAction,
       controller: 'Encoder',
     },

@@ -14,10 +14,17 @@ class TestAction extends BaseAction<TestAction> {
   }
 }
 
+type MockOAuthClient = {
+  isTokenExpired: jest.Mock
+  refreshToken: jest.Mock
+  getAuthorizationUrl: jest.Mock
+  exchangeCodeForToken: jest.Mock
+}
+
 describe('BaseAction Token Management', () => {
   let testAction: TestAction
   let fakePlugin: Smartthings
-  let mockOAuthClient: jest.Mocked<SmartThingsOAuthClient>
+  let mockOAuthClient: MockOAuthClient
 
   beforeEach(() => {
     jest.clearAllMocks()
@@ -29,10 +36,10 @@ describe('BaseAction Token Management', () => {
       refreshToken: jest.fn(),
       getAuthorizationUrl: jest.fn(),
       exchangeCodeForToken: jest.fn(),
-    } as any
+    }
 
     ;(SmartThingsOAuthClient as jest.MockedClass<typeof SmartThingsOAuthClient>).mockImplementation(
-      () => mockOAuthClient
+      () => mockOAuthClient as unknown as SmartThingsOAuthClient
     )
   })
 
