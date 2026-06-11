@@ -8,7 +8,8 @@
     "forceConsistentCasingInFileNames": true,
     "strictPropertyInitialization": false,
     "skipLibCheck": true,
-    "outDir": "./build",
+    "rootDir": "src",
+    "outDir": "build",
     "esModuleInterop": true,
     "moduleResolution": "node",
     "experimentalDecorators": true,
@@ -17,11 +18,11 @@
     "allowJs": true,
     "lib": [
       "dom",
-      "ESNext",
+      "ESNext"
     ],
     "types": [
       "node",
-      "jest",
+      "jest"
     ]
   },
   "include": [
@@ -30,5 +31,5 @@
   "exclude": [
     "node_modules",
     "**/*.spec.ts"
-  ],
+  ]
 }
