@@ -98,15 +98,20 @@ export abstract class BasePropertyInspector<TSettings> extends StreamDeckPropert
       if (clientIdInput) clientIdInput.value = globalSettings.oauthClientId
       if (clientSecretInput) clientSecretInput.value = globalSettings.oauthClientSecret
 
+      // Show loading state
+      this.setDropdownLoading(true)
+
       // Fetch devices/scenes for this button type
       try {
         const accessToken = await this.getAccessToken(globalSettings)
         if (!accessToken) {
           console.error('[PropertyInspector] Failed to get valid access token')
+          this.setDropdownLoading(false)
           return
         }
         const elements = await this.fetchOptions(accessToken)
         this.selectOptions = elements
+        this.setDropdownLoading(false)
         this.populateDropdown()
       } catch (error) {
         const apiError = error as { status?: number }
@@ -134,14 +139,18 @@ export abstract class BasePropertyInspector<TSettings> extends StreamDeckPropert
             try {
               const elements = await this.fetchOptions(refreshedToken)
               this.selectOptions = elements
+              this.setDropdownLoading(false)
               this.populateDropdown()
               return
             } catch (retryError) {
               console.error('[PropertyInspector] Failed after token refresh:', retryError)
             }
           }
+          this.setDropdownLoading(false)
           alert('Your session is no longer valid. Please sign out and sign in again.')
           this.showUnauthenticatedUI()
+        } else {
+          this.setDropdownLoading(false)
         }
       }
     } else {
@@ -222,12 +231,15 @@ export abstract class BasePropertyInspector<TSettings> extends StreamDeckPropert
       this.showAuthenticatedUI()
 
       // Fetch devices/scenes with new token
+      this.setDropdownLoading(true)
       const elements = await this.fetchOptions(tokens.accessToken)
       this.selectOptions = elements
+      this.setDropdownLoading(false)
       this.populateDropdown()
     } catch (error) {
       console.error('[OAuth] Token exchange failed:', error)
       alert(`Authentication failed: ${error}`)
+      this.setDropdownLoading(false)
 
       // Reset UI to allow retry
       const submitButton = document.getElementById('submit_code_button') as HTMLButtonElement
@@ -301,11 +313,16 @@ export abstract class BasePropertyInspector<TSettings> extends StreamDeckPropert
     select.length = 1
 
     this.selectOptions.forEach((element) => addSelectOption({ select, element }))
+
+    // After populating, restore the selected option if we have one
+    if (this.selectedOptionId) {
+      this.selectOptionInDropdown(this.selectedOptionId)
+    }
   }
 
   protected async onSelectChanged(e: Event) {
     const newSelection = (e.target as HTMLSelectElement).value
-    this.selectedOptionId = newSelection
+    this.selectedOptionId = newSelection === 'none' ? '' : newSelection
     this.saveSettings()
   }
 
@@ -314,6 +331,34 @@ export abstract class BasePropertyInspector<TSettings> extends StreamDeckPropert
     const select = document.getElementById('select_value') as HTMLSelectElement
     if (select) {
       select.selectedIndex = activeIndex !== undefined && activeIndex >= 0 ? activeIndex + 1 : 0
+    }
+  }
+
+  protected setDropdownLoading(isLoading: boolean): void {
+    const select = document.getElementById('select_value') as HTMLSelectElement
+    if (!select) return
+
+    if (isLoading) {
+      select.disabled = true
+      // Keep the current selection visible during loading
+      if (select.selectedIndex === 0 && this.selectedOptionId) {
+        // If showing default option but we have a saved selection, keep it
+        return
+      }
+      // Only show "Loading..." if no device is selected
+      if (select.selectedIndex === 0) {
+        const firstOption = select.options[0]
+        if (firstOption) {
+          firstOption.text = 'Loading...'
+        }
+      }
+    } else {
+      select.disabled = false
+      // Restore default option text
+      const firstOption = select.options[0]
+      if (firstOption && firstOption.value === 'none') {
+        firstOption.text = this.getDefaultOptionLabel()
+      }
     }
   }
 

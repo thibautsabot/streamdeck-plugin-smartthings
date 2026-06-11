@@ -30,12 +30,17 @@ export class SwitchPropertyInspector extends BasePropertyInspector<SwitchSetting
 
   @SDOnPiEvent('didReceiveSettings')
   onReceiveSettings({ payload }: DidReceiveSettingsEvent<SwitchSettingsInterface>): void {
-    this.populateDropdown()
-
     const deviceId = payload.settings.deviceId
     if (deviceId) {
       this.selectedOptionId = deviceId
-      this.selectOptionInDropdown(deviceId)
+    }
+
+    // Populate dropdown if options are available
+    if (this.selectOptions) {
+      this.populateDropdown()
+      if (deviceId) {
+        this.selectOptionInDropdown(deviceId)
+      }
     }
   }
 }

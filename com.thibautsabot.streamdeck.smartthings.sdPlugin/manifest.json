@@ -98,7 +98,7 @@
 	"Name": "Smartthings",
 	"Icon": "icons/smartthings",
 	"URL": "https://www.elgato.com/en/gaming/stream-deck",
-	"Version": "3.0.0.0",
+	"Version": "3.0.1.0",
 	"OS": [
 		{
 			"Platform": "mac",

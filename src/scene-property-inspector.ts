@@ -30,12 +30,17 @@ export class ScenePropertyInspector extends BasePropertyInspector<SceneSettingsI
 
   @SDOnPiEvent('didReceiveSettings')
   onReceiveSettings({ payload }: DidReceiveSettingsEvent<SceneSettingsInterface>): void {
-    this.populateDropdown()
-
     const sceneId = payload.settings.sceneId
     if (sceneId) {
       this.selectedOptionId = sceneId
-      this.selectOptionInDropdown(sceneId)
+    }
+
+    // Populate dropdown if options are available
+    if (this.selectOptions) {
+      this.populateDropdown()
+      if (sceneId) {
+        this.selectOptionInDropdown(sceneId)
+      }
     }
   }
 }

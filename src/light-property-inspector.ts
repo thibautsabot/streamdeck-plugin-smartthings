@@ -34,8 +34,8 @@ export class LightPropertyInspector extends BasePropertyInspector<LightSettingsI
 
   protected async onSelectChanged(e: Event): Promise<void> {
     const newSelection = (e.target as HTMLSelectElement).value
-    this.selectedOptionId = newSelection
-    await this.updateBehaviourOptions(newSelection)
+    this.selectedOptionId = newSelection === 'none' ? '' : newSelection
+    await this.updateBehaviourOptions(this.selectedOptionId)
     this.saveSettings()
   }
 
@@ -102,15 +102,11 @@ export class LightPropertyInspector extends BasePropertyInspector<LightSettingsI
 
   @SDOnPiEvent('didReceiveSettings')
   onReceiveSettings({ payload }: DidReceiveSettingsEvent<LightSettingsInterface>): void {
-    this.populateDropdown()
-
     const settings = payload.settings
 
     const deviceId = settings.deviceId
     if (deviceId) {
       this.selectedOptionId = deviceId
-      this.selectOptionInDropdown(deviceId)
-      this.updateBehaviourOptions(deviceId)
     }
 
     if (settings.behaviour) {
@@ -118,6 +114,15 @@ export class LightPropertyInspector extends BasePropertyInspector<LightSettingsI
       const behaviourElement = document.getElementById(settings.behaviour) as HTMLInputElement
       if (behaviourElement) {
         behaviourElement.checked = true
+      }
+    }
+
+    // Populate dropdown if options are available
+    if (this.selectOptions) {
+      this.populateDropdown()
+      if (deviceId) {
+        this.selectOptionInDropdown(deviceId)
+        this.updateBehaviourOptions(deviceId)
       }
     }
   }
