@@ -47,14 +47,17 @@ export interface OAuthTokens {
  */
 export class SmartThingsOAuthClient {
   private client: ClientOAuth2
+  private redirectUri: string
 
   constructor(clientId: string, clientSecret: string) {
+    this.redirectUri = 'https://streamdeck-smartthings-oauth.vercel.app/oauth-callback.html'
+
     this.client = new ClientOAuth2({
       clientId,
       clientSecret,
       accessTokenUri: 'https://api.smartthings.com/oauth/token',
       authorizationUri: 'https://api.smartthings.com/oauth/authorize',
-      redirectUri: 'http://localhost:8888/callback',
+      redirectUri: this.redirectUri,
       scopes: ['r:devices:*', 'x:devices:*', 'r:scenes:*', 'x:scenes:*'],
     })
   }
@@ -62,7 +65,11 @@ export class SmartThingsOAuthClient {
   /**
    * Generate authorization URL with PKCE
    */
-  public async getAuthorizationUrl(): Promise<{ url: string; codeVerifier: string; state: string }> {
+  public async getAuthorizationUrl(): Promise<{
+    url: string
+    codeVerifier: string
+    state: string
+  }> {
     const { codeVerifier, codeChallenge } = await generatePKCEPair()
     const state = this.generateState()
 
@@ -82,17 +89,19 @@ export class SmartThingsOAuthClient {
    * Exchange authorization code for tokens using PKCE
    */
   public async exchangeCodeForToken(code: string, codeVerifier: string): Promise<OAuthTokens> {
-    // Build fake redirect URL for manual code entry
-    const redirectUrl = `http://localhost:8888/callback?code=${code}`
+    try {
+      // Use client-oauth2 to exchange code, pass PKCE verifier via body
+      // Note: We reconstruct the redirect URL with the code parameter
+      const token = await this.client.code.getToken(this.redirectUri + `?code=${code}`, {
+        body: {
+          code_verifier: codeVerifier,
+        },
+      })
 
-    // Use client-oauth2 to exchange code, pass PKCE verifier via body
-    const token = await this.client.code.getToken(redirectUrl, {
-      body: {
-        code_verifier: codeVerifier,
-      },
-    })
-
-    return this.convertToken(token)
+      return this.convertToken(token)
+    } catch (error: any) {
+      throw new Error(error.body?.error_description || error.message || 'Token exchange failed')
+    }
   }
 
   /**
@@ -130,9 +139,7 @@ export class SmartThingsOAuthClient {
   private convertToken(token: ClientOAuth2.Token): OAuthTokens {
     // Calculate expiry time from expiresIn (seconds)
     const expiresInSeconds = token.data.expires_in
-    const expiresAt = expiresInSeconds
-      ? Date.now() + Number(expiresInSeconds) * 1000
-      : 0
+    const expiresAt = expiresInSeconds ? Date.now() + Number(expiresInSeconds) * 1000 : 0
 
     return {
       accessToken: token.accessToken,

@@ -24,10 +24,12 @@ export abstract class BasePropertyInspector<TSettings> extends StreamDeckPropert
     this.injectOAuthUI()
 
     const oauthButton = document.getElementById('oauth_button') as HTMLButtonElement
+    const submitCodeButton = document.getElementById('submit_code_button') as HTMLButtonElement
     const signOutButton = document.getElementById('sign_out_button') as HTMLButtonElement
     const select = document.getElementById('select_value') as HTMLSelectElement
 
     oauthButton?.addEventListener('click', this.onOAuthButtonPressed.bind(this))
+    submitCodeButton?.addEventListener('click', this.onSubmitCodePressed.bind(this))
     signOutButton?.addEventListener('click', this.onSignOutButtonPressed.bind(this))
     select?.addEventListener('change', this.onSelectChanged.bind(this))
 
@@ -62,8 +64,16 @@ export abstract class BasePropertyInspector<TSettings> extends StreamDeckPropert
           <input class="sdpi-item-value" type="password" id="oauth_client_secret" placeholder="Enter your Client Secret">
         </div>
         <div class="sdpi-item">
-          <div class="sdpi-item-label">Authorize</div>
-          <button class="sdpi-item-value" id="oauth_button">Connect to SmartThings</button>
+          <div class="sdpi-item-label">Step 1</div>
+          <button class="sdpi-item-value" id="oauth_button">Open Authorization Page</button>
+        </div>
+        <div class="sdpi-item" id="code_input_section" style="display: none;">
+          <div class="sdpi-item-label">Step 2</div>
+          <input class="sdpi-item-value" type="text" id="oauth_code" placeholder="Paste authorization code here">
+        </div>
+        <div class="sdpi-item" id="submit_code_section" style="display: none;">
+          <div class="sdpi-item-label">&nbsp;</div>
+          <button class="sdpi-item-value" id="submit_code_button">Complete Authorization</button>
         </div>
       </div>
     `
@@ -73,7 +83,7 @@ export abstract class BasePropertyInspector<TSettings> extends StreamDeckPropert
   }
 
   @SDOnPiEvent('globalSettingsAvailable')
-  propertyInspectorDidAppear(): void {
+  async propertyInspectorDidAppear(): Promise<void> {
     this.requestSettings()
     const globalSettings = this.settingsManager.getGlobalSettings<GlobalSettingsInterface>()
 
@@ -86,6 +96,15 @@ export abstract class BasePropertyInspector<TSettings> extends StreamDeckPropert
       const clientSecretInput = document.getElementById('oauth_client_secret') as HTMLInputElement
       if (clientIdInput) clientIdInput.value = globalSettings.oauthClientId
       if (clientSecretInput) clientSecretInput.value = globalSettings.oauthClientSecret
+
+      // Fetch devices/scenes for this button type
+      try {
+        const elements = await this.fetchOptions(globalSettings.oauthTokens.accessToken)
+        this.selectOptions = elements
+        this.populateDropdown()
+      } catch (error) {
+        console.error('[PropertyInspector] Failed to fetch options:', error)
+      }
     } else {
       // User is not authenticated - show OAuth form, hide status banner
       this.showUnauthenticatedUI()
@@ -103,63 +122,50 @@ export abstract class BasePropertyInspector<TSettings> extends StreamDeckPropert
       return
     }
 
-    this.isAuthenticating = true
-    this.updateOAuthButtonState()
-
     try {
-      // Initialize OAuth client
       this.oauthClient = new SmartThingsOAuthClient(clientId, clientSecret)
 
-      // Step 1: Get authorization URL and open it
       const { url: authUrl, codeVerifier, state } = await this.oauthClient.getAuthorizationUrl()
       this.oauthState = { codeVerifier, state }
 
-      // Open in browser
       window.open(authUrl, '_blank')
 
-      // Step 2: Show instructions and wait for user to paste the authorization code
-      const instructions =
-        'After authorizing in your browser:\n\n' +
-        '1. You will see an error page (localhost:8888 cannot be reached)\n' +
-        '2. Look at the URL bar - it contains your authorization code\n' +
-        '3. Copy the ENTIRE URL from the address bar\n' +
-        '4. Paste it below\n\n' +
-        'The URL looks like:\n' +
-        'http://localhost:8888/callback?code=ABC123&state=XYZ'
+      const codeInputSection = document.getElementById('code_input_section')
+      const submitCodeSection = document.getElementById('submit_code_section')
 
-      const redirectUrl = prompt(instructions)
-      if (!redirectUrl || !this.oauthState) {
-        this.oauthClient = undefined
-        this.oauthState = undefined
-        return
-      }
+      if (codeInputSection) codeInputSection.style.display = ''
+      if (submitCodeSection) submitCodeSection.style.display = ''
+    } catch (error) {
+      console.error('[OAuth] Failed to get authorization URL:', error)
+      alert(`Failed to start OAuth flow: ${error}`)
+    }
+  }
 
-      // Parse the redirect URL to extract code and state
-      let url: URL
-      try {
-        const urlToParse = redirectUrl.trim().startsWith('http')
-          ? redirectUrl.trim()
-          : `http://localhost:8888${redirectUrl.trim()}`
-        url = new URL(urlToParse)
-      } catch {
-        throw new Error('Invalid URL. Please paste the entire URL from your browser address bar.')
-      }
+  protected async onSubmitCodePressed() {
+    if (this.isAuthenticating) return
 
-      const authCode = url.searchParams.get('code')
-      const receivedState = url.searchParams.get('state')
+    const authCodeInput = document.getElementById('oauth_code') as HTMLInputElement
+    const authCode = authCodeInput?.value?.trim()
 
-      if (!authCode || !receivedState) {
-        throw new Error(
-          'URL is missing code or state parameter. Please paste the complete redirect URL.',
-        )
-      }
+    if (!authCode) {
+      alert('Please paste the authorization code')
+      return
+    }
 
-      // Validate state (CSRF protection)
-      if (receivedState !== this.oauthState.state) {
-        throw new Error('Invalid state parameter. Possible CSRF attack.')
-      }
+    if (!this.oauthClient || !this.oauthState) {
+      alert('OAuth session expired. Please click "Open Authorization Page" again.')
+      return
+    }
 
-      // Step 3: Exchange code for tokens using PKCE verifier
+    this.isAuthenticating = true
+    const submitButton = document.getElementById('submit_code_button') as HTMLButtonElement
+    if (submitButton) submitButton.disabled = true
+
+    try {
+      const clientId = (<HTMLInputElement>document.getElementById('oauth_client_id'))?.value
+      const clientSecret = (<HTMLInputElement>document.getElementById('oauth_client_secret'))?.value
+
+      // Exchange code for tokens using PKCE verifier
       const tokens = await this.oauthClient.exchangeCodeForToken(
         authCode,
         this.oauthState.codeVerifier,
@@ -180,12 +186,14 @@ export abstract class BasePropertyInspector<TSettings> extends StreamDeckPropert
       this.selectOptions = elements
       this.populateDropdown()
     } catch (error) {
-      console.error('[OAuth] Authorization failed:', error)
-      alert(`OAuth authentication failed: ${error}`)
-      this.showUnauthenticatedUI()
+      console.error('[OAuth] Token exchange failed:', error)
+      alert(`Authentication failed: ${error}`)
+
+      // Reset UI to allow retry
+      const submitButton = document.getElementById('submit_code_button') as HTMLButtonElement
+      if (submitButton) submitButton.disabled = false
     } finally {
       this.isAuthenticating = false
-      this.updateOAuthButtonState()
     }
   }
 
