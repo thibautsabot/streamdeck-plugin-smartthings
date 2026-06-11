@@ -250,6 +250,26 @@ npm run test:coverage
 - Mocked API responses for deterministic testing
 - Test utilities in `__tests__/test-utils.ts`
 
+### Code Quality
+
+The project uses automated code quality tools:
+
+```bash
+# Format code with Prettier
+npm run format
+
+# Lint with ESLint
+npm run lint
+
+# Lint and auto-fix issues
+npm run lint:fix
+```
+
+**Pre-commit hooks:**
+- Automatically runs Prettier and ESLint on staged files
+- Ensures all committed code is formatted and lint-free
+- Powered by Husky and lint-staged
+
 ### Hosting Your Own OAuth Callback
 
 The plugin currently uses `https://streamdeck-smartthings-oauth.vercel.app/oauth-callback.html` for the OAuth callback. To host your own:
