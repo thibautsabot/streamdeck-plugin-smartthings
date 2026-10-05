@@ -176,7 +176,8 @@ export abstract class BasePropertyInspector<TSettings> extends StreamDeckPropert
       const { url: authUrl, codeVerifier, state } = await this.oauthClient.getAuthorizationUrl()
       this.oauthState = { codeVerifier, state }
 
-      window.open(authUrl, '_blank')
+      // Open in system browser: embedded PI webview breaks Google/social sign-in (popups, UA block)
+      this.openUrl(authUrl)
 
       // Show the code input and submit button sections
       const codeInputSection = document.getElementById('code_input_section')

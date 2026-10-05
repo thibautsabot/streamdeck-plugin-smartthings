@@ -1,13 +1,13 @@
 {
   "name": "streamdeck-plugin-smartthings",
-  "version": "3.0.1",
+  "version": "3.0.2",
   "description": "Streamdeck plugin for Smartthings",
   "repository": "https://github.com/thibautsabot/streamdeck-plugin-smartthings",
   "engines": {
     "node": ">=26.3.0"
   },
   "scripts": {
-    "browserify": "browserify build/smartthings-plugin.js > com.thibautsabot.streamdeck.smartthings.sdPlugin/public/dist/smartthings-plugin-bundle.js && browserify build/scene-property-inspector.js > com.thibautsabot.streamdeck.smartthings.sdPlugin/public/dist/scene-property-inspector-bundle.js && browserify build/light-property-inspector.js > com.thibautsabot.streamdeck.smartthings.sdPlugin/public/dist/light-property-inspector-bundle.js && browserify build/switch-property-inspector.js > com.thibautsabot.streamdeck.smartthings.sdPlugin/public/dist/switch-property-inspector-bundle.js && browserify build/garagedoor-property-inspector.js > com.thibautsabot.streamdeck.smartthings.sdPlugin/public/dist/garagedoor-property-inspector-bundle.js",
+    "browserify": "mkdir -p com.thibautsabot.streamdeck.smartthings.sdPlugin/public/dist && browserify build/smartthings-plugin.js > com.thibautsabot.streamdeck.smartthings.sdPlugin/public/dist/smartthings-plugin-bundle.js && browserify build/scene-property-inspector.js > com.thibautsabot.streamdeck.smartthings.sdPlugin/public/dist/scene-property-inspector-bundle.js && browserify build/light-property-inspector.js > com.thibautsabot.streamdeck.smartthings.sdPlugin/public/dist/light-property-inspector-bundle.js && browserify build/switch-property-inspector.js > com.thibautsabot.streamdeck.smartthings.sdPlugin/public/dist/switch-property-inspector-bundle.js && browserify build/garagedoor-property-inspector.js > com.thibautsabot.streamdeck.smartthings.sdPlugin/public/dist/garagedoor-property-inspector-bundle.js",
     "build": "npm run tsc && npm run browserify",
     "lint": "eslint \"src/**/*.ts\"",
     "lint:fix": "eslint \"src/**/*.ts\" --fix",
