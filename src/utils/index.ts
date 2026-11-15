@@ -3,11 +3,11 @@ import { GlobalSettingsInterface } from './interface'
 export function isGlobalSettingsSet(
   settings: GlobalSettingsInterface | unknown,
 ): settings is GlobalSettingsInterface {
-  const typed = settings as GlobalSettingsInterface
+  const typed = settings as GlobalSettingsInterface | undefined | null
   return (
-    typed.oauthTokens !== undefined &&
-    typed.oauthClientId !== undefined &&
-    typed.oauthClientSecret !== undefined
+    typed?.oauthTokens !== undefined &&
+    typed?.oauthClientId !== undefined &&
+    typed?.oauthClientSecret !== undefined
   )
 }
 

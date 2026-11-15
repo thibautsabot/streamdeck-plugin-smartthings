@@ -1,6 +1,6 @@
 {
   "name": "streamdeck-plugin-smartthings",
-  "version": "3.0.2",
+  "version": "3.1.0",
   "description": "Streamdeck plugin for Smartthings",
   "repository": "https://github.com/thibautsabot/streamdeck-plugin-smartthings",
   "engines": {

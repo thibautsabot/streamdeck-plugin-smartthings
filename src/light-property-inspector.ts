@@ -66,14 +66,14 @@ export class LightPropertyInspector extends BasePropertyInspector<LightSettingsI
     const globalSettings = this.settingsManager.getGlobalSettings<GlobalSettingsInterface>()
     if (!isGlobalSettingsSet(globalSettings)) return
 
-    const accessToken = globalSettings.oauthTokens.accessToken
-
     try {
-      const deviceStatus = await fetchApi<DeviceStatus>({
-        endpoint: `/devices/${deviceId}/status`,
-        method: 'GET',
-        accessToken,
-      })
+      const deviceStatus = await this.withToken((accessToken) =>
+        fetchApi<DeviceStatus>({
+          endpoint: `/devices/${deviceId}/status`,
+          method: 'GET',
+          accessToken,
+        }),
+      )
 
       const hasSwitchLevel = deviceStatus.components?.main?.switchLevel?.level?.value !== undefined
 

@@ -16,7 +16,7 @@ export class SwitchAction extends BaseDeviceAction<SwitchAction> {
     if (!settings.deviceId) return
 
     const accessToken = await this.getAccessToken()
-    if (!accessToken) return
+    if (!accessToken) return this.handleMissingToken(context)
 
     try {
       const deviceStatus = await this.fetchStatus(settings.deviceId, accessToken)
@@ -45,7 +45,7 @@ export class SwitchAction extends BaseDeviceAction<SwitchAction> {
 
     const accessToken = await this.getAccessToken()
 
-    if (!accessToken) return
+    if (!accessToken) return this.handleMissingToken(context)
 
     try {
       const deviceStatus = await this.fetchStatus(payload.settings.deviceId, accessToken)

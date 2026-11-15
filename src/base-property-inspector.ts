@@ -6,7 +6,8 @@ import {
 import { isGlobalSettingsSet, addSelectOption, SelectElement } from './utils/index'
 import { GlobalSettingsInterface } from './utils/interface'
 import { SmartThingsOAuthClient } from './utils/oauth-client'
-import { getValidAccessToken, refreshAccessToken } from './utils/token-manager'
+import { PluginTokenClient, TokenRequestError } from './utils/pi-token-client'
+import { ApiError } from './utils/index'
 
 export abstract class BasePropertyInspector<TSettings> extends StreamDeckPropertyInspectorHandler {
   protected selectOptions?: SelectElement[]
@@ -14,6 +15,8 @@ export abstract class BasePropertyInspector<TSettings> extends StreamDeckPropert
   protected oauthClient?: SmartThingsOAuthClient
   protected oauthState?: { codeVerifier: string; state: string }
   protected isAuthenticating = false
+  // Tokens are only ever refreshed by the plugin: the panel asks it through messages
+  protected tokenClient = new PluginTokenClient((message) => this.sendToPlugin(message))
 
   constructor() {
     super()
@@ -55,7 +58,7 @@ export abstract class BasePropertyInspector<TSettings> extends StreamDeckPropert
       </div>
 
       <!-- OAuth Setup Section (shown when not authenticated) -->
-      <div id="oauth_section">
+      <div id="oauth_section" style="display: none;">
         <div class="sdpi-item">
           <div class="sdpi-item-label">Client ID</div>
           <input class="sdpi-item-value" type="text" id="oauth_client_id" placeholder="Enter your SmartThings Client ID">
@@ -83,79 +86,77 @@ export abstract class BasePropertyInspector<TSettings> extends StreamDeckPropert
     mainSettings.insertAdjacentHTML('afterbegin', oauthHTML)
   }
 
+  @SDOnPiEvent('sendToPropertyInspector')
+  onPluginMessage(event: { payload?: unknown }): void {
+    this.tokenClient.handleMessage(
+      event?.payload as Parameters<PluginTokenClient['handleMessage']>[0],
+    )
+  }
+
   @SDOnPiEvent('globalSettingsAvailable')
   async propertyInspectorDidAppear(): Promise<void> {
     this.requestSettings()
     const globalSettings = this.settingsManager.getGlobalSettings<GlobalSettingsInterface>()
 
-    if (isGlobalSettingsSet(globalSettings)) {
-      // User is authenticated - show status banner, hide OAuth form
-      this.showAuthenticatedUI()
-
-      // Pre-fill credentials (hidden) for re-authentication if needed
-      const clientIdInput = document.getElementById('oauth_client_id') as HTMLInputElement
-      const clientSecretInput = document.getElementById('oauth_client_secret') as HTMLInputElement
-      if (clientIdInput) clientIdInput.value = globalSettings.oauthClientId
-      if (clientSecretInput) clientSecretInput.value = globalSettings.oauthClientSecret
-
-      // Show loading state
-      this.setDropdownLoading(true)
-
-      // Fetch devices/scenes for this button type
-      try {
-        const accessToken = await this.getAccessToken(globalSettings)
-        if (!accessToken) {
-          console.error('[PropertyInspector] Failed to get valid access token')
-          this.setDropdownLoading(false)
-          return
-        }
-        const elements = await this.fetchOptions(accessToken)
-        this.selectOptions = elements
-        this.setDropdownLoading(false)
-        this.populateDropdown()
-      } catch (error) {
-        const apiError = error as { status?: number }
-        console.error('[PropertyInspector] Failed to fetch options:', apiError)
-
-        // If we get a 401, the token might be invalid even though it appears valid locally
-        // Try to refresh it
-        if (apiError.status === 401) {
-          const oauthClient = new SmartThingsOAuthClient(
-            globalSettings.oauthClientId,
-            globalSettings.oauthClientSecret,
-          )
-          const refreshedToken = await refreshAccessToken(
-            globalSettings,
-            oauthClient,
-            (newTokens) => {
-              this.settingsManager.setGlobalSettings<GlobalSettingsInterface>({
-                ...globalSettings,
-                oauthTokens: newTokens,
-              })
-            },
-          )
-
-          if (refreshedToken) {
-            try {
-              const elements = await this.fetchOptions(refreshedToken)
-              this.selectOptions = elements
-              this.setDropdownLoading(false)
-              this.populateDropdown()
-              return
-            } catch (retryError) {
-              console.error('[PropertyInspector] Failed after token refresh:', retryError)
-            }
-          }
-          this.setDropdownLoading(false)
-          alert('Your session is no longer valid. Please sign out and sign in again.')
-          this.showUnauthenticatedUI()
-        } else {
-          this.setDropdownLoading(false)
-        }
-      }
-    } else {
-      // User is not authenticated - show OAuth form, hide status banner
+    if (!isGlobalSettingsSet(globalSettings)) {
+      // Settings really are empty: show the sign-in form
       this.showUnauthenticatedUI()
+      return
+    }
+
+    // User is authenticated - show status banner, hide OAuth form
+    this.showAuthenticatedUI()
+
+    // Pre-fill credentials (hidden) for re-authentication if needed
+    const clientIdInput = document.getElementById('oauth_client_id') as HTMLInputElement
+    const clientSecretInput = document.getElementById('oauth_client_secret') as HTMLInputElement
+    if (clientIdInput) clientIdInput.value = globalSettings.oauthClientId
+    if (clientSecretInput) clientSecretInput.value = globalSettings.oauthClientSecret
+
+    // Show loading state
+    this.setDropdownLoading(true)
+
+    try {
+      const elements = await this.withToken((accessToken) => this.fetchOptions(accessToken))
+      this.selectOptions = elements
+      this.setDropdownLoading(false)
+      this.populateDropdown()
+    } catch (error) {
+      console.error('[PropertyInspector] Failed to fetch options:', error)
+      this.setDropdownLoading(false)
+
+      const revoked =
+        (error instanceof TokenRequestError &&
+          (error.reason === 'auth_revoked' || error.reason === 'not_configured')) ||
+        (error as ApiError)?.status === 401
+
+      // Only ask to sign in again when the session is really gone, not on a temporary failure
+      if (revoked) {
+        alert('Your session is no longer valid. Please sign in again.')
+        this.showUnauthenticatedUI()
+      }
+    }
+  }
+
+  /**
+   * Get a valid access token from the plugin (it refreshes it if needed).
+   * @param rejectedAccessToken token the API answered 401 for, forces a refresh
+   */
+  protected requestToken(rejectedAccessToken?: string): Promise<string> {
+    return this.tokenClient.request(rejectedAccessToken)
+  }
+
+  /**
+   * Run an API call with a token from the plugin. A 401 triggers one forced refresh and one retry.
+   */
+  protected async withToken<R>(call: (accessToken: string) => Promise<R>): Promise<R> {
+    const accessToken = await this.requestToken()
+    try {
+      return await call(accessToken)
+    } catch (error) {
+      if ((error as ApiError)?.status !== 401) throw error
+      const newToken = await this.requestToken(accessToken)
+      return await call(newToken)
     }
   }
 
@@ -284,19 +285,6 @@ export abstract class BasePropertyInspector<TSettings> extends StreamDeckPropert
 
     if (authBanner) authBanner.style.display = 'none'
     if (oauthSection) oauthSection.style.display = 'block'
-  }
-
-  /**
-   * Get a valid access token, refreshing if necessary
-   * Automatically updates global settings if token was refreshed
-   */
-  protected async getAccessToken(globalSettings: GlobalSettingsInterface): Promise<string | null> {
-    return getValidAccessToken(globalSettings, (newTokens) => {
-      this.settingsManager.setGlobalSettings<GlobalSettingsInterface>({
-        ...globalSettings,
-        oauthTokens: newTokens,
-      })
-    })
   }
 
   protected updateOAuthButtonState() {

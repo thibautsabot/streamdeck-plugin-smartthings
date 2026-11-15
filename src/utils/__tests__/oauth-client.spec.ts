@@ -162,7 +162,9 @@ describe('SmartThingsOAuthClient', () => {
 
       const result = await client.exchangeCodeForToken('auth-code-123', 'verifier-123')
 
-      expect(result.expiresAt).toBe(0)
+      // Falls back to 24h so the token is still refreshed later
+      expect(result.expiresAt).toBeGreaterThan(Date.now() + 23 * 60 * 60 * 1000)
+      expect(result.expiresAt).toBeLessThanOrEqual(Date.now() + 24 * 60 * 60 * 1000)
     })
 
     it('should handle token without refreshToken', async () => {

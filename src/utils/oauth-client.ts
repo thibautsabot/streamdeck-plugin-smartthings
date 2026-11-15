@@ -6,6 +6,8 @@
 import ClientOAuth2 from 'client-oauth2'
 import getPkce from 'oauth-pkce'
 
+const DEFAULT_EXPIRES_IN_SECONDS = 24 * 60 * 60
+
 /**
  * PKCE pair for OAuth flow
  */
@@ -138,9 +140,10 @@ export class SmartThingsOAuthClient {
    * Convert client-oauth2 token to our format
    */
   private convertToken(token: ClientOAuth2.Token): OAuthTokens {
-    // Calculate expiry time from expiresIn (seconds)
-    const expiresInSeconds = token.data.expires_in
-    const expiresAt = expiresInSeconds ? Date.now() + Number(expiresInSeconds) * 1000 : 0
+    // Calculate expiry time from expiresIn (seconds).
+    // Fall back to 24h when missing, otherwise expiresAt=0 would mean "never refresh".
+    const expiresInSeconds = Number(token.data.expires_in) || DEFAULT_EXPIRES_IN_SECONDS
+    const expiresAt = Date.now() + expiresInSeconds * 1000
 
     return {
       accessToken: token.accessToken,

@@ -110,11 +110,13 @@ export abstract class BaseDeviceAction<T extends BaseDeviceAction<T>> extends Ba
    * For custom endpoints or special cases, use fetchApi() directly.
    */
   protected async fetchStatus(deviceId: string, accessToken: string): Promise<DeviceStatus> {
-    return await fetchApi<DeviceStatus>({
-      endpoint: `/devices/${deviceId}/status`,
-      method: 'GET',
-      accessToken,
-    })
+    return await this.callWithRetry(accessToken, (token) =>
+      fetchApi<DeviceStatus>({
+        endpoint: `/devices/${deviceId}/status`,
+        method: 'GET',
+        accessToken: token,
+      }),
+    )
   }
 
   /**
@@ -133,18 +135,20 @@ export abstract class BaseDeviceAction<T extends BaseDeviceAction<T>> extends Ba
         args ? JSON.stringify(args) : ''
       }`,
     )
-    await fetchApi({
-      endpoint: `/devices/${deviceId}/commands`,
-      method: 'POST',
-      accessToken,
-      body: JSON.stringify([
-        {
-          capability,
-          command,
-          ...(args && { arguments: args }),
-        },
-      ]),
-    })
+    await this.callWithRetry(accessToken, (token) =>
+      fetchApi({
+        endpoint: `/devices/${deviceId}/commands`,
+        method: 'POST',
+        accessToken: token,
+        body: JSON.stringify([
+          {
+            capability,
+            command,
+            ...(args && { arguments: args }),
+          },
+        ]),
+      }),
+    )
   }
 
   /**

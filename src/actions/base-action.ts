@@ -2,7 +2,11 @@ import { GlobalSettingsInterface } from '../utils/interface'
 import { StreamDeckAction } from 'streamdeck-typescript'
 import { isGlobalSettingsSet, ApiError } from '../utils/index'
 import { Smartthings } from '../smartthings-plugin'
-import { getValidAccessToken } from '../utils/token-manager'
+import {
+  getPluginAccessToken,
+  refreshPluginAccessToken,
+  isPluginAuthRevoked,
+} from '../utils/plugin-token'
 
 /**
  * Base class for all actions (Scene and Device) with shared error handling and validation
@@ -28,15 +32,35 @@ export abstract class BaseAction<T extends BaseAction<T>> extends StreamDeckActi
    * Automatically updates global settings if token was refreshed
    */
   protected async getAccessToken(): Promise<string | null> {
-    const globalSettings = this.getGlobalSettings()
-    if (!globalSettings) return null
+    return getPluginAccessToken(this.plugin)
+  }
 
-    return getValidAccessToken(globalSettings, (newTokens) => {
-      this.plugin.settingsManager.setGlobalSettings<GlobalSettingsInterface>({
-        ...globalSettings,
-        oauthTokens: newTokens,
-      })
-    })
+  /**
+   * Run an API call. On a 401 the token is refreshed once and the call retried with the new one.
+   */
+  protected async callWithRetry<R>(
+    accessToken: string,
+    call: (accessToken: string) => Promise<R>,
+  ): Promise<R> {
+    try {
+      return await call(accessToken)
+    } catch (error) {
+      if ((error as ApiError).status !== 401) throw error
+
+      console.warn(`[${this.constructor.name}] 401 received, refreshing token and retrying once`)
+      const newToken = await refreshPluginAccessToken(this.plugin, accessToken)
+      if (!newToken) throw error
+      return await call(newToken)
+    }
+  }
+
+  /**
+   * No usable token: tell the user to sign in again when SmartThings revoked the session.
+   */
+  protected async handleMissingToken(context: string): Promise<void> {
+    if (isPluginAuthRevoked(this.plugin)) {
+      await this.plugin.setTitle('⚠️ SIGN IN', context)
+    }
   }
 
   /**

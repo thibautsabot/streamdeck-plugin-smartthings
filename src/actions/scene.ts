@@ -28,6 +28,7 @@ export class SceneAction extends BaseAction<SceneAction> {
     if (!accessToken) {
       console.warn('[Scene] No access token configured')
       await this.plugin.showAlert(context)
+      await this.handleMissingToken(context)
       return
     }
 
@@ -41,11 +42,13 @@ export class SceneAction extends BaseAction<SceneAction> {
     const sceneId = payload.settings.sceneId
 
     try {
-      await fetchApi<Status>({
-        endpoint: `/scenes/${sceneId}/execute`,
-        accessToken,
-        method: 'POST',
-      })
+      await this.callWithRetry(accessToken, (token) =>
+        fetchApi<Status>({
+          endpoint: `/scenes/${sceneId}/execute`,
+          accessToken: token,
+          method: 'POST',
+        }),
+      )
 
       // Show success feedback
       await this.plugin.showOk(context)

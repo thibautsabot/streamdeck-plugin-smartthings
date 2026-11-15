@@ -1,6 +1,6 @@
 import 'isomorphic-fetch'
 
-import { addSelectOption, fetchApi } from '../index'
+import { addSelectOption, fetchApi, isGlobalSettingsSet } from '../index'
 
 import { queryByAttribute } from '@testing-library/dom'
 import { http, HttpResponse } from 'msw'
@@ -66,6 +66,20 @@ describe('Test utils', () => {
       })
 
       expect(queryByAttribute('value', select, 'myNewId')).toBeFalsy()
+    })
+  })
+
+  describe('isGlobalSettingsSet', () => {
+    it('does not throw on undefined or null settings (after sign out)', () => {
+      expect(isGlobalSettingsSet(undefined)).toBe(false)
+      expect(isGlobalSettingsSet(null)).toBe(false)
+    })
+
+    it('is false for empty settings and true for complete ones', () => {
+      expect(isGlobalSettingsSet({})).toBe(false)
+      expect(
+        isGlobalSettingsSet({ oauthTokens: {}, oauthClientId: 'id', oauthClientSecret: 'secret' }),
+      ).toBe(true)
     })
   })
 })

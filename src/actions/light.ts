@@ -22,7 +22,7 @@ export class LightAction extends BaseDeviceAction<LightAction> {
     if (!settings.deviceId) return
 
     const accessToken = await this.getAccessToken()
-    if (!accessToken) return
+    if (!accessToken) return this.handleMissingToken(context)
 
     try {
       const deviceStatus = await this.fetchStatus(settings.deviceId, accessToken)
@@ -50,7 +50,7 @@ export class LightAction extends BaseDeviceAction<LightAction> {
     if (action !== 'com.thibautsabot.streamdeck.smartthings.light') return
 
     const accessToken = await this.getAccessToken()
-    if (!accessToken) return
+    if (!accessToken) return this.handleMissingToken(context)
 
     const behaviour = payload.settings.behaviour ?? LightBehavior.TOGGLE
 

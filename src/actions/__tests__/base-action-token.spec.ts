@@ -134,7 +134,7 @@ describe('BaseAction Token Management', () => {
 
       expect(result).toBeNull()
       expect(consoleError).toHaveBeenCalledWith(
-        '[TokenManager] Token refresh failed:',
+        '[TokenManager] Token refresh failed (Invalid refresh token):',
         expect.any(Error),
       )
 
