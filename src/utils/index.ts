@@ -24,14 +24,24 @@ interface FetchAPI {
 }
 
 export async function fetchApi<T>({ body, endpoint, method, accessToken }: FetchAPI): Promise<T> {
-  const response = await fetch(`https://api.smartthings.com/v1${endpoint}`, {
-    method,
-    headers: {
-      Authorization: `Bearer ${accessToken}`,
-    },
-    body,
-  })
+  let response: Response
+  try {
+    response = await fetch(`https://api.smartthings.com/v1${endpoint}`, {
+      method,
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+      },
+      body,
+    })
+  } catch (networkError) {
+    // offline, DNS, TLS... no HTTP status to report
+    console.error(`[API] ${method} ${endpoint} network error:`, networkError)
+    throw networkError
+  }
   if (!response.ok) {
+    console.error(
+      `[API] ${method} ${endpoint} failed: HTTP ${response.status} ${response.statusText}`,
+    )
     const error = new Error(`HTTP ${response.status}: ${response.statusText}`) as ApiError
     error.status = response.status
     error.statusText = response.statusText

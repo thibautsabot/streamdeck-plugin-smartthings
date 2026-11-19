@@ -8,6 +8,8 @@ import { GlobalSettingsInterface } from './utils/interface'
 import { SmartThingsOAuthClient } from './utils/oauth-client'
 import { PluginTokenClient, TokenRequestError } from './utils/pi-token-client'
 import { ApiError } from './utils/index'
+import { installCrashLogging, installLogForwarding, PLUGIN_VERSION } from './utils/logger'
+import { SettingsWatcher } from './utils/settings-watcher'
 
 export abstract class BasePropertyInspector<TSettings> extends StreamDeckPropertyInspectorHandler {
   protected selectOptions?: SelectElement[]
@@ -15,11 +17,17 @@ export abstract class BasePropertyInspector<TSettings> extends StreamDeckPropert
   protected oauthClient?: SmartThingsOAuthClient
   protected oauthState?: { codeVerifier: string; state: string }
   protected isAuthenticating = false
+  protected settingsWatcher = new SettingsWatcher()
   // Tokens are only ever refreshed by the plugin: the panel asks it through messages
   protected tokenClient = new PluginTokenClient((message) => this.sendToPlugin(message))
 
   constructor() {
     super()
+
+    // Stream Deck only keeps what goes through logMessage, so mirror console there
+    installLogForwarding((message) => this.logMessage(message), 'pi')
+    installCrashLogging(window)
+    console.log(`Property inspector starting, version ${PLUGIN_VERSION}`)
   }
 
   @SDOnPiEvent('documentLoaded')
@@ -97,9 +105,11 @@ export abstract class BasePropertyInspector<TSettings> extends StreamDeckPropert
   async propertyInspectorDidAppear(): Promise<void> {
     this.requestSettings()
     const globalSettings = this.settingsManager.getGlobalSettings<GlobalSettingsInterface>()
+    this.settingsWatcher.record(globalSettings, `panel ${this.actionInfo?.action}`)
 
     if (!isGlobalSettingsSet(globalSettings)) {
       // Settings really are empty: show the sign-in form
+      console.warn('Panel shows the sign-in form: global settings are empty or incomplete')
       this.showUnauthenticatedUI()
       return
     }
@@ -132,6 +142,9 @@ export abstract class BasePropertyInspector<TSettings> extends StreamDeckPropert
 
       // Only ask to sign in again when the session is really gone, not on a temporary failure
       if (revoked) {
+        console.warn(
+          `Panel asks to sign in again: ${error instanceof TokenRequestError ? error.reason : 'API 401'}`,
+        )
         alert('Your session is no longer valid. Please sign in again.')
         this.showUnauthenticatedUI()
       }
@@ -172,6 +185,7 @@ export abstract class BasePropertyInspector<TSettings> extends StreamDeckPropert
     }
 
     try {
+      console.log('[OAuth] Starting authorization, opening the browser')
       this.oauthClient = new SmartThingsOAuthClient(clientId, clientSecret)
 
       const { url: authUrl, codeVerifier, state } = await this.oauthClient.getAuthorizationUrl()
@@ -208,6 +222,7 @@ export abstract class BasePropertyInspector<TSettings> extends StreamDeckPropert
       return
     }
 
+    console.log('[OAuth] Exchanging the authorization code for tokens')
     this.isAuthenticating = true
     const submitButton = document.getElementById('submit_code_button') as HTMLButtonElement
     if (submitButton) submitButton.disabled = true
@@ -222,12 +237,15 @@ export abstract class BasePropertyInspector<TSettings> extends StreamDeckPropert
         this.oauthState.codeVerifier,
       )
 
+      console.log('Sign-in completed, saving credentials')
       // Save OAuth credentials
       this.settingsManager.setGlobalSettings<GlobalSettingsInterface>({
         oauthTokens: tokens,
         oauthClientId: clientId,
         oauthClientSecret: clientSecret,
       })
+      // The answer is logged by the settings watcher: it shows whether the save stuck
+      this.requestGlobalSettings()
 
       // Show authenticated UI
       this.showAuthenticatedUI()
@@ -256,6 +274,10 @@ export abstract class BasePropertyInspector<TSettings> extends StreamDeckPropert
       return
     }
 
+    console.warn('User clicked Sign Out: clearing global settings')
+    // Warn the plugin first so it does not report this as lost settings
+    this.settingsWatcher.expectClear()
+    this.sendToPlugin({ event: 'expectSignOut' })
     // Clear OAuth credentials by setting to undefined
     // StreamDeck will handle this as clearing the settings
     this.settingsManager.setGlobalSettings(undefined)

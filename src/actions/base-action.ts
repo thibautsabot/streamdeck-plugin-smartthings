@@ -49,7 +49,10 @@ export abstract class BaseAction<T extends BaseAction<T>> extends StreamDeckActi
 
       console.warn(`[${this.constructor.name}] 401 received, refreshing token and retrying once`)
       const newToken = await refreshPluginAccessToken(this.plugin, accessToken)
-      if (!newToken) throw error
+      if (!newToken) {
+        console.error(`[${this.constructor.name}] Refresh after 401 failed, giving up`)
+        throw error
+      }
       return await call(newToken)
     }
   }
@@ -58,7 +61,13 @@ export abstract class BaseAction<T extends BaseAction<T>> extends StreamDeckActi
    * No usable token: tell the user to sign in again when SmartThings revoked the session.
    */
   protected async handleMissingToken(context: string): Promise<void> {
-    if (isPluginAuthRevoked(this.plugin)) {
+    const revoked = isPluginAuthRevoked(this.plugin)
+    console.warn(
+      `[${this.constructor.name}] No usable access token (${
+        revoked ? 'session revoked' : 'not configured or temporary refresh failure'
+      })`,
+    )
+    if (revoked) {
       await this.plugin.setTitle('⚠️ SIGN IN', context)
     }
   }

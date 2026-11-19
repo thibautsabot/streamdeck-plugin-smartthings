@@ -33,10 +33,12 @@ function createPlugin(initial: Partial<GlobalSettingsInterface> | null) {
       }),
     },
     sendToPropertyInspector: jest.fn(),
+    requestGlobalSettings: jest.fn(),
   }
   return plugin as unknown as PluginLike & {
     settingsManager: { setGlobalSettings: jest.Mock }
     sendToPropertyInspector: jest.Mock
+    requestGlobalSettings: jest.Mock
   }
 }
 
@@ -73,6 +75,18 @@ describe('plugin-token', () => {
       expect(plugin.settingsManager.setGlobalSettings).toHaveBeenCalledWith(
         expect.objectContaining({ oauthClientId: 'mock-client-id', oauthTokens: newTokens }),
       )
+    })
+
+    it('asks Stream Deck to confirm the save, so the log shows whether it stuck', async () => {
+      const plugin = createPlugin(
+        createMockGlobalSettings({ oauthTokens: createExpiredOAuthTokens() }),
+      )
+      client.isTokenExpired.mockReturnValue(true)
+      client.refreshToken.mockResolvedValue(newTokens)
+
+      await getPluginAccessToken(plugin)
+
+      expect(plugin.requestGlobalSettings).toHaveBeenCalledTimes(1)
     })
 
     it('does not save if settings were cleared during the refresh (sign out)', async () => {

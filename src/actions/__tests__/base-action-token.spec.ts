@@ -106,8 +106,12 @@ describe('BaseAction Token Management', () => {
         ...mockSettings,
         oauthTokens: newTokens,
       })
-      expect(consoleLog).toHaveBeenCalledWith('[TokenManager] Refreshing expired token...')
-      expect(consoleLog).toHaveBeenCalledWith('[TokenManager] Token refreshed successfully')
+      expect(consoleLog).toHaveBeenCalledWith(
+        expect.stringContaining('[TokenManager] Refreshing token'),
+      )
+      expect(consoleLog).toHaveBeenCalledWith(
+        expect.stringContaining('[TokenManager] Token refreshed successfully'),
+      )
 
       consoleLog.mockRestore()
     })

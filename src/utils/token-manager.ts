@@ -154,19 +154,30 @@ async function doRefresh(
   const refreshToken = latest.oauthTokens.refreshToken
 
   try {
-    console.log('[TokenManager] Refreshing expired token...')
+    const expiresIn = ((latest.oauthTokens.expiresAt - Date.now()) / 60000).toFixed(0)
+    console.log(
+      `[TokenManager] Refreshing token (access token expires in ${expiresIn} min${
+        rejectedAccessToken ? ', rejected by API with 401' : ''
+      })`,
+    )
     const newTokens = await oauthClient.refreshToken(refreshToken)
 
     // Save refreshed tokens via callback
     await saveTokens(newTokens)
 
     rejectedRefreshToken = null
-    console.log('[TokenManager] Token refreshed successfully')
+    const newExpiresIn = ((newTokens.expiresAt - Date.now()) / 3600000).toFixed(1)
+    console.log(
+      `[TokenManager] Token refreshed successfully (new token valid for ${newExpiresIn}h)`,
+    )
     return newTokens.accessToken
   } catch (error) {
     console.error(`[TokenManager] Token refresh failed (${describeError(error)}):`, error)
     if (isPermanentError(error)) {
       rejectedRefreshToken = refreshToken
+      console.error(
+        '[TokenManager] Refresh token rejected permanently: the user has to sign in again',
+      )
     }
     return null
   }

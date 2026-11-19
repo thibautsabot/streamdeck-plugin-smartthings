@@ -29,6 +29,8 @@ export interface SettingsHolder {
     getGlobalSettings<T>(): T | object
     setGlobalSettings<T>(settings: T): void
   }
+  /** Asks Stream Deck for the stored settings again (used to verify a save stuck) */
+  requestGlobalSettings?: () => void
 }
 
 export interface PluginLike extends SettingsHolder {
@@ -38,7 +40,7 @@ export interface PluginLike extends SettingsHolder {
 export interface SendToPluginEventLike {
   action: string
   context: string
-  payload?: { event?: string } & Partial<TokenRequestMessage>
+  payload?: { event?: string; requestId?: string; rejectedAccessToken?: string }
 }
 
 function readSettings(plugin: SettingsHolder): GlobalSettingsInterface | null {
@@ -55,6 +57,9 @@ function createSaver(plugin: SettingsHolder) {
       ...latest,
       oauthTokens: newTokens,
     })
+    // The answer is logged by the settings watcher: it shows whether the new tokens were kept
+    console.log('Saved refreshed tokens, asking Stream Deck to confirm')
+    plugin.requestGlobalSettings?.()
   }
 }
 
@@ -102,6 +107,11 @@ export async function handleTokenRequest(
   if (!payload || payload.event !== 'getToken') return
 
   const response: TokenResponseMessage = { event: 'token', requestId: payload.requestId ?? '' }
+  console.log(
+    `[PluginToken] Token requested by a settings panel${
+      payload.rejectedAccessToken ? ' (after a 401)' : ''
+    }`,
+  )
 
   if (!readSettings(plugin)) {
     response.error = 'not_configured'
@@ -117,5 +127,6 @@ export async function handleTokenRequest(
     }
   }
 
+  console.log(`[PluginToken] Replying to the settings panel: ${response.error ?? 'token sent'}`)
   plugin.sendToPropertyInspector(response, event.action, event.context)
 }
