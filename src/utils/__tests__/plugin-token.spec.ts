@@ -6,6 +6,7 @@ import {
   handleTokenRequest,
   PluginLike,
 } from '../plugin-token'
+import { CredentialStore } from '../credential-store'
 import { GlobalSettingsInterface } from '../interface'
 import {
   createMockGlobalSettings,
@@ -33,12 +34,12 @@ function createPlugin(initial: Partial<GlobalSettingsInterface> | null) {
       }),
     },
     sendToPropertyInspector: jest.fn(),
-    requestGlobalSettings: jest.fn(),
+    credentials: new CredentialStore(),
   }
   return plugin as unknown as PluginLike & {
     settingsManager: { setGlobalSettings: jest.Mock }
     sendToPropertyInspector: jest.Mock
-    requestGlobalSettings: jest.Mock
+    credentials: CredentialStore
   }
 }
 
@@ -77,7 +78,7 @@ describe('plugin-token', () => {
       )
     })
 
-    it('asks Stream Deck to confirm the save, so the log shows whether it stuck', async () => {
+    it("keeps the plugin's own copy of the refreshed tokens", async () => {
       const plugin = createPlugin(
         createMockGlobalSettings({ oauthTokens: createExpiredOAuthTokens() }),
       )
@@ -86,7 +87,7 @@ describe('plugin-token', () => {
 
       await getPluginAccessToken(plugin)
 
-      expect(plugin.requestGlobalSettings).toHaveBeenCalledTimes(1)
+      expect(plugin.credentials.get()?.oauthTokens).toEqual(newTokens)
     })
 
     it('does not save if settings were cleared during the refresh (sign out)', async () => {
