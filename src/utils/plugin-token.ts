@@ -6,6 +6,7 @@
  */
 
 import { isGlobalSettingsSet } from './index'
+import { CredentialStore } from './credential-store'
 import { GlobalSettingsInterface } from './interface'
 import { OAuthTokens } from './oauth-client'
 import { forceRefreshAccessToken, getValidAccessToken, isAuthRevoked } from './token-manager'
@@ -24,13 +25,28 @@ export interface TokenResponseMessage {
   error?: 'not_configured' | 'refresh_failed' | 'auth_revoked'
 }
 
+export interface AuthStatusRequestMessage {
+  event: 'getAuthStatus'
+  requestId: string
+}
+
+export interface AuthStatusResponseMessage {
+  event: 'authStatus'
+  requestId: string
+  /** True when the plugin holds credentials, even ones SmartThings may have revoked */
+  signedIn: boolean
+  /** Sent so the panel can pre-fill the sign-in form without reading Stream Deck's settings */
+  clientId?: string
+  clientSecret?: string
+}
+
 export interface SettingsHolder {
   settingsManager: {
     getGlobalSettings<T>(): T | object
     setGlobalSettings<T>(settings: T): void
   }
-  /** Asks Stream Deck for the stored settings again (used to verify a save stuck) */
-  requestGlobalSettings?: () => void
+  /** The plugin's own copy of the credentials, kept apart from Stream Deck's settings */
+  credentials?: CredentialStore
 }
 
 export interface PluginLike extends SettingsHolder {
@@ -53,13 +69,11 @@ function createSaver(plugin: SettingsHolder) {
     // Merge into the latest settings, not the copy captured before the refresh started
     const latest = readSettings(plugin)
     if (!latest) return
-    plugin.settingsManager.setGlobalSettings<GlobalSettingsInterface>({
-      ...latest,
-      oauthTokens: newTokens,
-    })
-    // The answer is logged by the settings watcher: it shows whether the new tokens were kept
-    console.log('Saved refreshed tokens, asking Stream Deck to confirm')
-    plugin.requestGlobalSettings?.()
+    const updated: GlobalSettingsInterface = { ...latest, oauthTokens: newTokens }
+    // Keep our own copy first: the refresh token just used is dead, this one is the only valid one
+    plugin.credentials?.remember(updated)
+    plugin.settingsManager.setGlobalSettings<GlobalSettingsInterface>(updated)
+    console.log('Saved refreshed tokens')
   }
 }
 
@@ -128,5 +142,38 @@ export async function handleTokenRequest(
   }
 
   console.log(`[PluginToken] Replying to the settings panel: ${response.error ?? 'token sent'}`)
+  plugin.sendToPropertyInspector(response, event.action, event.context)
+}
+
+/**
+ * Answer a `getAuthStatus` message: is there a session, according to the plugin?
+ * The panel asks the plugin instead of reading Stream Deck's settings, which can be empty or
+ * outdated while the plugin still holds valid credentials.
+ */
+export function handleAuthStatusRequest(plugin: PluginLike, event: SendToPluginEventLike): void {
+  const payload = event?.payload
+  if (!payload || payload.event !== 'getAuthStatus') return
+
+  const fromSettings = readSettings(plugin)
+  const credentials = fromSettings ?? plugin.credentials?.get() ?? null
+  const response: AuthStatusResponseMessage = {
+    event: 'authStatus',
+    requestId: payload.requestId ?? '',
+    // A session SmartThings revoked still counts: the panel then reports it when it asks for a token
+    signedIn: credentials !== null,
+  }
+  if (credentials) {
+    response.clientId = credentials.oauthClientId
+    response.clientSecret = credentials.oauthClientSecret
+  }
+
+  const source = fromSettings
+    ? "Stream Deck's settings"
+    : credentials
+      ? "the plugin's own copy (Stream Deck's settings are empty)"
+      : 'nowhere'
+  console.log(
+    `[PluginToken] Auth status requested by a settings panel: signedIn=${response.signedIn}, credentials from ${source}`,
+  )
   plugin.sendToPropertyInspector(response, event.action, event.context)
 }

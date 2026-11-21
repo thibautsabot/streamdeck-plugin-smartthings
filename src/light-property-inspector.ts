@@ -1,6 +1,6 @@
 import { DidReceiveSettingsEvent, SDOnPiEvent } from 'streamdeck-typescript'
-import { SelectElement, fetchApi, isGlobalSettingsSet } from './utils/index'
-import { LightSettingsInterface, GlobalSettingsInterface } from './utils/interface'
+import { SelectElement, fetchApi } from './utils/index'
+import { LightSettingsInterface } from './utils/interface'
 import { DeviceList, DeviceStatus } from '@smartthings/core-sdk'
 import { LightBehavior } from './utils/smartthings-types'
 import { BasePropertyInspector } from './base-property-inspector'
@@ -62,9 +62,6 @@ export class LightPropertyInspector extends BasePropertyInspector<LightSettingsI
       if (lessOption) lessOption.style.display = 'none'
       return
     }
-
-    const globalSettings = this.settingsManager.getGlobalSettings<GlobalSettingsInterface>()
-    if (!isGlobalSettingsSet(globalSettings)) return
 
     try {
       const deviceStatus = await this.withToken((accessToken) =>

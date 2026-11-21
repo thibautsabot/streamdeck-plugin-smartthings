@@ -106,10 +106,30 @@ export abstract class BasePropertyInspector<TSettings> extends StreamDeckPropert
     this.requestSettings()
     const globalSettings = this.settingsManager.getGlobalSettings<GlobalSettingsInterface>()
     this.settingsWatcher.record(globalSettings, `panel ${this.actionInfo?.action}`)
+    const ownSettings = isGlobalSettingsSet(globalSettings) ? globalSettings : null
 
-    if (!isGlobalSettingsSet(globalSettings)) {
-      // Settings really are empty: show the sign-in form
-      console.warn('Panel shows the sign-in form: global settings are empty or incomplete')
+    // The plugin is the one that holds and refreshes the tokens: ask it, Stream Deck's copy
+    // of the settings can be empty or outdated while the plugin still has a working session
+    const status = await this.tokenClient.requestAuthStatus()
+    if (!status) {
+      console.warn(
+        `The plugin did not answer the sign-in check, relying on the panel's own settings ` +
+          `(signedIn=${ownSettings !== null})`,
+      )
+    } else if (status.signedIn !== (ownSettings !== null)) {
+      console.warn(
+        `The panel's settings say signedIn=${ownSettings !== null} but the plugin says ` +
+          `signedIn=${status.signedIn}: trusting the plugin`,
+      )
+    }
+
+    const signedIn = status ? status.signedIn : ownSettings !== null
+    if (!signedIn) {
+      console.warn(
+        `Panel shows the sign-in form: ${
+          status ? 'the plugin has no credentials' : 'global settings are empty or incomplete'
+        }`,
+      )
       this.showUnauthenticatedUI()
       return
     }
@@ -120,8 +140,10 @@ export abstract class BasePropertyInspector<TSettings> extends StreamDeckPropert
     // Pre-fill credentials (hidden) for re-authentication if needed
     const clientIdInput = document.getElementById('oauth_client_id') as HTMLInputElement
     const clientSecretInput = document.getElementById('oauth_client_secret') as HTMLInputElement
-    if (clientIdInput) clientIdInput.value = globalSettings.oauthClientId
-    if (clientSecretInput) clientSecretInput.value = globalSettings.oauthClientSecret
+    const clientId = status?.clientId ?? ownSettings?.oauthClientId
+    const clientSecret = status?.clientSecret ?? ownSettings?.oauthClientSecret
+    if (clientIdInput && clientId) clientIdInput.value = clientId
+    if (clientSecretInput && clientSecret) clientSecretInput.value = clientSecret
 
     // Show loading state
     this.setDropdownLoading(true)
@@ -238,14 +260,13 @@ export abstract class BasePropertyInspector<TSettings> extends StreamDeckPropert
       )
 
       console.log('Sign-in completed, saving credentials')
-      // Save OAuth credentials
+      // The plugin receives these from Stream Deck and keeps its own copy. Do not read the
+      // settings back here: that answer can be older than what was just saved.
       this.settingsManager.setGlobalSettings<GlobalSettingsInterface>({
         oauthTokens: tokens,
         oauthClientId: clientId,
         oauthClientSecret: clientSecret,
       })
-      // The answer is logged by the settings watcher: it shows whether the save stuck
-      this.requestGlobalSettings()
 
       // Show authenticated UI
       this.showAuthenticatedUI()
@@ -274,13 +295,10 @@ export abstract class BasePropertyInspector<TSettings> extends StreamDeckPropert
       return
     }
 
-    console.warn('User clicked Sign Out: clearing global settings')
-    // Warn the plugin first so it does not report this as lost settings
+    console.warn('User clicked Sign Out: asking the plugin to clear the credentials')
+    // The plugin owns the credentials: it clears them (and Stream Deck's copy) itself
     this.settingsWatcher.expectClear()
-    this.sendToPlugin({ event: 'expectSignOut' })
-    // Clear OAuth credentials by setting to undefined
-    // StreamDeck will handle this as clearing the settings
-    this.settingsManager.setGlobalSettings(undefined)
+    this.sendToPlugin({ event: 'signOut' })
 
     // Show unauthenticated UI
     this.showUnauthenticatedUI()

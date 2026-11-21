@@ -3,9 +3,11 @@ import {
   getPluginAccessToken,
   refreshPluginAccessToken,
   isPluginAuthRevoked,
+  handleAuthStatusRequest,
   handleTokenRequest,
   PluginLike,
 } from '../plugin-token'
+import { CredentialStore } from '../credential-store'
 import { GlobalSettingsInterface } from '../interface'
 import {
   createMockGlobalSettings,
@@ -33,12 +35,12 @@ function createPlugin(initial: Partial<GlobalSettingsInterface> | null) {
       }),
     },
     sendToPropertyInspector: jest.fn(),
-    requestGlobalSettings: jest.fn(),
+    credentials: new CredentialStore(),
   }
   return plugin as unknown as PluginLike & {
     settingsManager: { setGlobalSettings: jest.Mock }
     sendToPropertyInspector: jest.Mock
-    requestGlobalSettings: jest.Mock
+    credentials: CredentialStore
   }
 }
 
@@ -77,7 +79,7 @@ describe('plugin-token', () => {
       )
     })
 
-    it('asks Stream Deck to confirm the save, so the log shows whether it stuck', async () => {
+    it("keeps the plugin's own copy of the refreshed tokens", async () => {
       const plugin = createPlugin(
         createMockGlobalSettings({ oauthTokens: createExpiredOAuthTokens() }),
       )
@@ -86,7 +88,7 @@ describe('plugin-token', () => {
 
       await getPluginAccessToken(plugin)
 
-      expect(plugin.requestGlobalSettings).toHaveBeenCalledTimes(1)
+      expect(plugin.credentials.get()?.oauthTokens).toEqual(newTokens)
     })
 
     it('does not save if settings were cleared during the refresh (sign out)', async () => {
@@ -236,6 +238,54 @@ describe('plugin-token', () => {
 
       expect(plugin.sendToPropertyInspector).toHaveBeenCalledWith(
         expect.objectContaining({ requestId: '' }),
+        'act',
+        'ctx',
+      )
+    })
+  })
+
+  describe('handleAuthStatusRequest', () => {
+    const event = (payload: unknown) => ({ action: 'act', context: 'ctx', payload }) as never
+
+    it('says signed in, with the client id, when Stream Deck has the settings', () => {
+      const plugin = createPlugin(createMockGlobalSettings())
+
+      handleAuthStatusRequest(plugin, event({ event: 'getAuthStatus', requestId: 'a1' }))
+
+      expect(plugin.sendToPropertyInspector).toHaveBeenCalledWith(
+        {
+          event: 'authStatus',
+          requestId: 'a1',
+          signedIn: true,
+          clientId: 'mock-client-id',
+          clientSecret: 'mock-client-secret',
+        },
+        'act',
+        'ctx',
+      )
+    })
+
+    it("answers from the plugin's own copy when Stream Deck's settings are empty", () => {
+      const plugin = createPlugin(null)
+      plugin.credentials.remember(createMockGlobalSettings())
+
+      handleAuthStatusRequest(plugin, event({ event: 'getAuthStatus', requestId: 'a2' }))
+
+      expect(plugin.sendToPropertyInspector).toHaveBeenCalledWith(
+        expect.objectContaining({ requestId: 'a2', signedIn: true, clientId: 'mock-client-id' }),
+        'act',
+        'ctx',
+      )
+      expect(console.log).toHaveBeenCalledWith(expect.stringContaining("plugin's own copy"))
+    })
+
+    it('says signed out when neither has credentials', () => {
+      const plugin = createPlugin(null)
+
+      handleAuthStatusRequest(plugin, event({ event: 'getAuthStatus', requestId: 'a3' }))
+
+      expect(plugin.sendToPropertyInspector).toHaveBeenCalledWith(
+        { event: 'authStatus', requestId: 'a3', signedIn: false },
         'act',
         'ctx',
       )

@@ -1,14 +1,14 @@
 import { PluginTokenClient, TokenRequestError } from '../pi-token-client'
-import { TokenRequestMessage } from '../plugin-token'
+import { AuthStatusRequestMessage, TokenRequestMessage } from '../plugin-token'
 
 describe('PluginTokenClient', () => {
-  let sent: TokenRequestMessage[]
+  let sent: Array<TokenRequestMessage | AuthStatusRequestMessage>
   let client: PluginTokenClient
 
   beforeEach(() => {
     jest.useFakeTimers()
     sent = []
-    client = new PluginTokenClient((message) => sent.push(message), 1000)
+    client = new PluginTokenClient((message) => sent.push(message), 1000, 500)
   })
 
   afterEach(() => jest.useRealTimers())
@@ -26,7 +26,7 @@ describe('PluginTokenClient', () => {
   it('sends the rejected access token to force a refresh', () => {
     client.request('old-token').catch(() => undefined)
 
-    expect(sent[0].rejectedAccessToken).toBe('old-token')
+    expect((sent[0] as TokenRequestMessage).rejectedAccessToken).toBe('old-token')
     jest.advanceTimersByTime(1000)
   })
 
@@ -85,5 +85,33 @@ describe('PluginTokenClient', () => {
     jest.advanceTimersByTime(10000)
 
     await expect(promise).rejects.toMatchObject({ reason: 'timeout' })
+  })
+
+  describe('requestAuthStatus', () => {
+    it('resolves with what the plugin says', async () => {
+      const promise = client.requestAuthStatus()
+
+      expect(sent[0].event).toBe('getAuthStatus')
+      client.handleMessage({
+        event: 'authStatus',
+        requestId: sent[0].requestId,
+        signedIn: true,
+        clientId: 'id',
+        clientSecret: 'secret',
+      })
+
+      await expect(promise).resolves.toEqual({
+        signedIn: true,
+        clientId: 'id',
+        clientSecret: 'secret',
+      })
+    })
+
+    it('resolves with null when the plugin does not answer in time', async () => {
+      const promise = client.requestAuthStatus()
+      jest.advanceTimersByTime(500)
+
+      await expect(promise).resolves.toBeNull()
+    })
   })
 })

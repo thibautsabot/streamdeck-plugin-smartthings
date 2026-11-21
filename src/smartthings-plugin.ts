@@ -3,12 +3,24 @@ import { LightAction } from './actions/light'
 import { SwitchAction } from './actions/switch'
 import { GarageDoorAction } from './actions/garagedoor'
 import { SDOnActionEvent, StreamDeckPluginHandler } from 'streamdeck-typescript'
-import { handleTokenRequest, SendToPluginEventLike } from './utils/plugin-token'
-import { installCrashLogging, installLogForwarding, PLUGIN_VERSION } from './utils/logger'
+import {
+  handleAuthStatusRequest,
+  handleTokenRequest,
+  SendToPluginEventLike,
+} from './utils/plugin-token'
+import {
+  describeGlobalSettings,
+  installCrashLogging,
+  installLogForwarding,
+  PLUGIN_VERSION,
+} from './utils/logger'
 import { SettingsWatcher } from './utils/settings-watcher'
+import { CredentialStore } from './utils/credential-store'
 
 export class Smartthings extends StreamDeckPluginHandler {
   private settingsWatcher = new SettingsWatcher()
+  /** The plugin's own copy of the credentials, in memory only, see CredentialStore */
+  public credentials = new CredentialStore()
 
   constructor() {
     super()
@@ -25,25 +37,47 @@ export class Smartthings extends StreamDeckPluginHandler {
   }
 
   /**
-   * The property inspector asks the plugin for tokens so that only one process ever refreshes them.
+   * The property inspector asks the plugin for tokens so that only one process ever refreshes them,
+   * and asks it whether a session exists instead of trusting Stream Deck's copy of the settings.
    */
   @SDOnActionEvent('sendToPlugin')
   public async onSendToPlugin(event: SendToPluginEventLike): Promise<void> {
-    if (event?.payload?.event === 'expectSignOut') {
-      // Tell a deliberate Sign Out apart from settings Stream Deck lost on its own
+    if (event?.payload?.event === 'signOut') {
+      // The plugin clears everything itself: if the panel did it, the plugin could see the empty
+      // settings before the sign-out message and restore the session the user just ended
+      console.warn('User clicked Sign Out: clearing the credentials')
       this.settingsWatcher.expectClear()
+      this.credentials.forget()
+      this.settingsManager.setGlobalSettings(undefined)
+      return
+    }
+    if (event?.payload?.event === 'getAuthStatus') {
+      handleAuthStatusRequest(this, event)
       return
     }
     await handleTokenRequest(this, event)
   }
 
   /**
-   * Stream Deck owns the saved credentials: log what it gives us every time they are
-   * delivered. This tells "settings were wiped" apart from "token refresh failed".
+   * Stream Deck owns the saved credentials, but it can hand back empty or older ones: the SDK
+   * stores whatever arrives (before this handler runs), so the plugin compares it with its own
+   * copy and puts its copy back when what arrived is worse.
    */
   @SDOnActionEvent('didReceiveGlobalSettings')
   public onDidReceiveGlobalSettings(event: { payload?: { settings?: unknown } }): void {
-    this.settingsWatcher.record(event?.payload?.settings, 'plugin')
+    const incoming = event?.payload?.settings
+    this.settingsWatcher.record(incoming, 'plugin')
+
+    const decision = this.credentials.reconcile(incoming)
+    if (decision.action === 'restore') {
+      console.warn(
+        `${decision.reason}: restoring the plugin's own copy. ` +
+          `Received: ${describeGlobalSettings(incoming)}. ` +
+          `Restored: ${describeGlobalSettings(decision.credentials)}`,
+      )
+      // Updates the SDK's copy and writes it back to Stream Deck
+      this.settingsManager.setGlobalSettings(decision.credentials)
+    }
   }
 }
 
