@@ -6,6 +6,7 @@
  */
 
 import { isGlobalSettingsSet } from './index'
+import { CredentialStore } from './credential-store'
 import { GlobalSettingsInterface } from './interface'
 import { OAuthTokens } from './oauth-client'
 import { forceRefreshAccessToken, getValidAccessToken, isAuthRevoked } from './token-manager'
@@ -29,8 +30,8 @@ export interface SettingsHolder {
     getGlobalSettings<T>(): T | object
     setGlobalSettings<T>(settings: T): void
   }
-  /** Asks Stream Deck for the stored settings again (used to verify a save stuck) */
-  requestGlobalSettings?: () => void
+  /** The plugin's own copy of the credentials, kept apart from Stream Deck's settings */
+  credentials?: CredentialStore
 }
 
 export interface PluginLike extends SettingsHolder {
@@ -53,13 +54,11 @@ function createSaver(plugin: SettingsHolder) {
     // Merge into the latest settings, not the copy captured before the refresh started
     const latest = readSettings(plugin)
     if (!latest) return
-    plugin.settingsManager.setGlobalSettings<GlobalSettingsInterface>({
-      ...latest,
-      oauthTokens: newTokens,
-    })
-    // The answer is logged by the settings watcher: it shows whether the new tokens were kept
-    console.log('Saved refreshed tokens, asking Stream Deck to confirm')
-    plugin.requestGlobalSettings?.()
+    const updated: GlobalSettingsInterface = { ...latest, oauthTokens: newTokens }
+    // Keep our own copy first: the refresh token just used is dead, this one is the only valid one
+    plugin.credentials?.remember(updated)
+    plugin.settingsManager.setGlobalSettings<GlobalSettingsInterface>(updated)
+    console.log('Saved refreshed tokens')
   }
 }
 
