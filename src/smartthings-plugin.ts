@@ -10,8 +10,8 @@ import { CredentialStore } from './utils/credential-store'
 
 export class Smartthings extends StreamDeckPluginHandler {
   private settingsWatcher = new SettingsWatcher()
-  /** The plugin's own copy of the credentials, in memory only, see CredentialStore */
-  public credentials = new CredentialStore()
+  /** The plugin's own copy of the credentials, see CredentialStore */
+  public credentials: CredentialStore
 
   constructor() {
     super()
@@ -19,7 +19,14 @@ export class Smartthings extends StreamDeckPluginHandler {
     // Stream Deck only keeps what goes through logMessage, so mirror console there
     installLogForwarding((message) => this.logMessage(message), 'plugin')
     installCrashLogging(window)
+    // Created after the log forwarding so that storage errors reach the Stream Deck log
+    this.credentials = new CredentialStore()
     console.log(`Plugin starting, version ${PLUGIN_VERSION}`)
+    console.log(
+      this.credentials.get()
+        ? 'Found a credentials backup from a previous run'
+        : 'No credentials backup from a previous run',
+    )
 
     new SceneAction(this, 'com.thibautsabot.streamdeck.smartthings.scene')
     new LightAction(this, 'com.thibautsabot.streamdeck.smartthings.light')

@@ -17,6 +17,7 @@ describe('Smartthings plugin credentials', () => {
 
   beforeEach(() => {
     jest.useFakeTimers()
+    localStorage.clear()
     jest.spyOn(console, 'log').mockImplementation()
     jest.spyOn(console, 'warn').mockImplementation()
     plugin = new Smartthings()
@@ -55,6 +56,22 @@ describe('Smartthings plugin credentials', () => {
 
     expect(plugin.settingsManager.getGlobalSettings()).toEqual(newest)
     expect(sentToStreamDeck).toHaveBeenCalledWith(newest)
+  })
+
+  it('puts the backup from a previous run back when Stream Deck starts with nothing', () => {
+    plugin.credentials.remember(newest)
+    // Plugin restart: new process, same localStorage
+    plugin = new Smartthings()
+    sentToStreamDeck = jest.spyOn(plugin, 'setGlobalSettings').mockImplementation()
+    const logged = jest.spyOn(console, 'warn').mockImplementation()
+
+    streamDeckDelivers({})
+
+    expect(plugin.settingsManager.getGlobalSettings()).toEqual(newest)
+    expect(sentToStreamDeck).toHaveBeenCalledWith(newest)
+    expect(logged).toHaveBeenCalledWith(
+      "Stream Deck sent no credentials: restoring the plugin's own copy",
+    )
   })
 
   it('does not restore the credentials after a Sign Out', async () => {
