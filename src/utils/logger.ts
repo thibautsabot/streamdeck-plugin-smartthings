@@ -6,7 +6,7 @@
  * with secrets removed, so a user can attach one log file when reporting a bug.
  */
 
-export const PLUGIN_VERSION = '3.2.0'
+export const PLUGIN_VERSION = '3.3.0'
 
 const MAX_MESSAGE_LENGTH = 1500
 const MAX_BODY_LENGTH = 300
